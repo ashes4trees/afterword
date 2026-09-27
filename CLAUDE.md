@@ -38,6 +38,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 - Labels: `type:*`, `area:*`, `size:S|M|L`, `constraint`, `blocked`. [scripts/seed-github.sh](scripts/seed-github.sh) created them. Don't re-run the issue phase, because it doesn't deduplicate.
 - Branching: one short-lived branch and PR per issue (`<type>/<issue>-<slug>`). Merge (squash) once CI passes. CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs typecheck, lint, migrations against a Postgres 18 service container, tests with coverage, and the build.
 - Reference the issue in commits and PRs (`Closes #n`).
+- Visual fixes to screens that are already built go on the UI polish checklist ticket (#48) rather than getting their own tickets.
 - When an open question in spec §9 gets resolved, strike it through there and record the date, as was done for Q2.
 
 ## Commands
