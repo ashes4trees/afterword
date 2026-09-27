@@ -1,0 +1,48 @@
+# Data conventions
+
+Rules every table and migration follows. They come from spec §2 (invariants 3, 5,
+and 6) and §5. If you break one, you'll have to retrofit it later across live data.
+
+## Tenant key
+
+Every table except `authors` and `channels` has an `author_id` column. It is non-null
+and has a foreign key to `authors.id` with `on delete cascade`. Use the `authorId()`
+helper in `src/lib/server/db/schema.ts` rather than declaring the column by hand.
+
+`src/lib/server/db/schema.test.ts` fails if a table is missing the column or its
+foreign key. To exempt another global reference table, add it to `EXEMPT` in that
+test. Treat that as a design decision and record it in CLAUDE.md.
+
+Cascade means deleting an author removes all of their data, which is how account
+deletion will work.
+
+## Money
+
+- Store money as integer **minor units** (cents, pence) in a column named `*_minor`.
+  Never use floats, and never use `numeric` for amounts.
+- Every money column sits next to an explicit `currency` column holding an ISO 4217 code.
+- Never convert between currencies. Store the currency you received and display it as is.
+
+## Metrics
+
+Every metric row carries `channel_slug` and `marketplace`, even while an author
+only uses one of each. Adding those dimensions later means guessing at historical rows.
+
+## Identifiers and time
+
+- Primary keys are `uuid` with a default of `uuidv7()`, which is native in PostgreSQL 18.
+  These IDs sort by creation time.
+- Timestamps are `timestamp with time zone`. Calendar dates, such as report periods and
+  `commits_until`, are `date`.
+
+## Decisions are append-only
+
+Never update or delete rows in `decisions`. Write a new row and point the old row's
+`superseded_by` at it. Current state is derived from the log.
+
+## Migrations
+
+- Edit `schema.ts`, then run `npm run db:generate -- --name <what_changed>`. Review the
+  generated SQL and commit it.
+- Apply with `npm run db:migrate`.
+- Never edit a migration that has already been applied anywhere. Write a new one.

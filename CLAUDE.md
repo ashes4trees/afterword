@@ -19,6 +19,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 - `src/lib/server/engine/` is pure: no imports from `db/`, `agent/`, or any HTTP client. This is guarded by a lint or boundary test.
 - Every table except `channels` has `author_id` with a foreign key.
+- Declare a tenant table's key with `authorId()` from `schema.ts`. `schema.test.ts` fails if a table is missing it.
 - Money is stored as integer minor units plus a currency code, and is never converted. Metrics carry channel and marketplace.
 - Thresholds live in author preferences or rule packs, never as constants in code. Preference defaults are resolved at read time.
 - Decisions are append-only: supersede them, don't mutate them.
@@ -44,6 +45,8 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 - `npm run lint`: Prettier check, then ESLint. The engine purity rule lives in [eslint.config.js](eslint.config.js).
 - `npm run format`: Prettier write. Markdown is excluded on purpose (see `.prettierignore`).
 - `npm run build`: production build via adapter-node
+- `npm test`: Vitest, run once
+- `npm run db:generate -- --name <change>`, then `npm run db:migrate`: schema changes. Drizzle migrations live in `src/lib/server/db/migrations`. Rules are in [docs/data-conventions.md](docs/data-conventions.md).
 
 ## Local environment
 
@@ -55,10 +58,11 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-09-27: Primary keys are `uuid` with a default of `uuidv7()`. `author_id` cascades on delete, so account deletion is a single `delete from authors`. Emails are unique case-insensitively. Vitest was added in #2 for the tenant-key test; #6 still owns the test configuration and CI.
 - 2026-09-27: PostgreSQL 18 instead of 16, for the longer support window (to Nov 2030) and native `uuidv7()`. The production server must run the same major version so `pg_dump` backups restore cleanly.
 - 2026-09-27: adapter-node for the single-VPS deploy (#7). Markdown is excluded from Prettier so hand-written docs keep their formatting.
 - 2026-09-27: Second import channel for M2 is Kobo Writing Life (spec §9 Q2).
 
 ## Status
 
-- M0 in progress. #1 (scaffold) is done.
+- M0 in progress. #1 (scaffold) and #2 (Postgres and Drizzle, migration 0000 applied locally) are done.
