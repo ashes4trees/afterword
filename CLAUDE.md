@@ -19,6 +19,8 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 - `src/lib/server/engine/` is pure: no imports from `db/`, `agent/`, or any HTTP client. This is guarded by a lint or boundary test.
 - Every table except `channels` has `author_id` with a foreign key.
+- Repo functions take an `Executor` (a database handle or a transaction, from `db/types.ts`) as their first argument and never import `db/client.ts`, so #39 can pass in a request-scoped transaction.
+- Tests that need a database are named `*.integration.test.ts`. They read `DATABASE_URL` from `.env`, clean up their own rows, and skip when it's unset.
 - Declare a tenant table's key with `authorId()` from `schema.ts`. `schema.test.ts` fails if a table is missing it.
 - Money is stored as integer minor units plus a currency code, and is never converted. Metrics carry channel and marketplace.
 - Thresholds live in author preferences or rule packs, never as constants in code. Preference defaults are resolved at read time.
@@ -58,6 +60,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-09-27: Preferences (#3) are stored sparse and resolved per key at read time, in [src/lib/shared/preferences.ts](src/lib/shared/preferences.ts). Marketplaces are ISO 3166-1 country codes, not Amazon domains. `default_channels` defaults to empty. `target_acos` may go above 1, for authors who accept losses for KU read-through. **Provisional:** `cadence_ratio` is read as the promotional share of posts (default 0.2). The spec never defines it, so revisit at M4.
 - 2026-09-27: Tenant isolation will also be enforced with Postgres row-level security (#39), built before the first tenant tables (#8) so the repo layer is designed around it. Account deletion is tracked in #40.
 - 2026-09-27: Primary keys are `uuid` with a default of `uuidv7()`. `author_id` cascades on delete, so account deletion is a single `delete from authors`. Emails are unique case-insensitively. Vitest was added in #2 for the tenant-key test; #6 still owns the test configuration and CI.
 - 2026-09-27: PostgreSQL 18 instead of 16, for the longer support window (to Nov 2030) and native `uuidv7()`. The production server must run the same major version so `pg_dump` backups restore cleanly.
@@ -66,4 +69,4 @@ Record decisions that aren't in the spec here, newest first, with a date.
 
 ## Status
 
-- M0 in progress. #1 (scaffold) and #2 (Postgres and Drizzle, migration 0000 applied locally) are done.
+- M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), and #3 (preferences) are done. Next: #4, then #39 before #8.
