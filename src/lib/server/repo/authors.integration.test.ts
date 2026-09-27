@@ -4,7 +4,7 @@ import postgres from 'postgres';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import * as schema from '$lib/server/db/schema';
 import { DEFAULT_PREFERENCES } from '$lib/shared/preferences';
-import { getPreferences, updatePreferences } from './authors';
+import { findOrCreateAuthorByEmail, getPreferences, updatePreferences } from './authors';
 
 try {
 	process.loadEnvFile();
@@ -79,5 +79,34 @@ describe.skipIf(!url)('authors repo: preferences', () => {
 
 	it('throws for an unknown author', async () => {
 		await expect(getPreferences(db, crypto.randomUUID())).rejects.toThrow(/not found/);
+	});
+});
+
+describe.skipIf(!url)('authors repo: findOrCreateAuthorByEmail', () => {
+	let client: postgres.Sql;
+	let db: ReturnType<typeof drizzle<typeof schema>>;
+	const email = `Test-${crypto.randomUUID()}@Example.test`;
+
+	beforeAll(() => {
+		client = postgres(url!, { onnotice: () => {} });
+		db = drizzle(client, { schema });
+	});
+
+	afterAll(async () => {
+		await db.delete(schema.authors).where(eq(schema.authors.email, email));
+		await client?.end();
+	});
+
+	it('creates the author once and returns the same row after that', async () => {
+		const first = await findOrCreateAuthorByEmail(db, email, 'First');
+		const again = await findOrCreateAuthorByEmail(db, email, 'Second');
+		expect(again).toEqual(first);
+		expect(first.displayName).toBe('First');
+	});
+
+	it('matches email case-insensitively', async () => {
+		const first = await findOrCreateAuthorByEmail(db, email, 'First');
+		const lower = await findOrCreateAuthorByEmail(db, email.toLowerCase(), 'Other');
+		expect(lower.id).toBe(first.id);
 	});
 });

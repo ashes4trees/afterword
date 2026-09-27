@@ -26,7 +26,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 - Thresholds live in author preferences or rule packs, never as constants in code. Preference defaults are resolved at read time.
 - Decisions are append-only: supersede them, don't mutate them.
 - Routes are thin and call `services/` only.
-- The author comes from `event.locals`, never from a global. The auth seam lives in one file.
+- The author comes from `event.locals.author`, never from a global. The only auth seam is `authenticate()` in [src/lib/server/auth.ts](src/lib/server/auth.ts). Use `requireAuthor(locals)` in loads and actions.
 - CI must never need an Anthropic API key.
 
 ## Workflow
@@ -60,6 +60,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-09-27: The dev bypass (#4) finds or creates the author named by `DEV_AUTHOR_EMAIL` on each request. It isn't disabled in production, so #7 must put Caddy basic auth in front of the app until real auth exists. Unused arguments prefixed with `_` are allowed by lint.
 - 2026-09-27: Onboarding never asks which channels an author uses, because many will use the app to decide that. Channels for a new title are suggested instead: an explicit `default_channels`, then the latest title under the same pen name, then the latest title overall, then nothing. The author always confirms (#41).
 - 2026-09-27: Preferences (#3) are stored sparse and resolved per key at read time, in [src/lib/shared/preferences.ts](src/lib/shared/preferences.ts). Marketplaces are ISO 3166-1 country codes, not Amazon domains. `default_channels` defaults to empty. `target_acos` may go above 1, for authors who accept losses for KU read-through. **Provisional:** `cadence_ratio` is read as the promotional share of posts (default 0.2). The spec never defines it, so revisit at M4.
 - 2026-09-27: Tenant isolation will also be enforced with Postgres row-level security (#39), built before the first tenant tables (#8) so the repo layer is designed around it. Account deletion is tracked in #40.
@@ -70,4 +71,4 @@ Record decisions that aren't in the spec here, newest first, with a date.
 
 ## Status
 
-- M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), and #3 (preferences) are done. Next: #4, then #39 before #8.
+- M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), and #4 (dev auth bypass) are done. Next: #6, #39, #5.

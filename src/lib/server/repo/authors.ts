@@ -7,6 +7,23 @@ import {
 	type Preferences
 } from '$lib/shared/preferences';
 
+export type SessionAuthor = { id: string; email: string; displayName: string };
+
+/** Idempotent: email matching is case-insensitive, and an existing author is never modified. */
+export async function findOrCreateAuthorByEmail(
+	db: Executor,
+	email: string,
+	displayName: string
+): Promise<SessionAuthor> {
+	await db.insert(authors).values({ email, displayName }).onConflictDoNothing();
+	const [row] = await db
+		.select({ id: authors.id, email: authors.email, displayName: authors.displayName })
+		.from(authors)
+		.where(sql`lower(${authors.email}) = lower(${email})`);
+	if (!row) throw new Error(`author ${email} could not be created`);
+	return row;
+}
+
 function resolved(authorId: string, stored: unknown): Preferences {
 	const { preferences, invalid } = resolvePreferences(stored);
 	if (invalid.length > 0) {
