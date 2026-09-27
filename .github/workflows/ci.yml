@@ -34,7 +34,10 @@ jobs:
           --health-retries 10
 
     env:
-      DATABASE_URL: postgres://afterword:afterword@localhost:5432/afterword
+      # Owner runs setup and migrations; the app role is what tests connect as, so
+      # row-level security applies to them (#39).
+      DATABASE_OWNER_URL: postgres://afterword:afterword@localhost:5432/afterword
+      DATABASE_URL: postgres://afterword_app:ci-only@localhost:5432/afterword
 
     steps:
       - uses: actions/checkout@v5
@@ -47,6 +50,8 @@ jobs:
         run: npm run check
       - name: Lint
         run: npm run lint
+      - name: Create app role
+        run: npm run db:setup
       - name: Migrate
         run: npm run db:migrate
       - name: Test

@@ -21,7 +21,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 - Every table except `channels` has `author_id` with a foreign key.
 - Repo functions take an `Executor` (a database handle or a transaction, from `db/types.ts`) as their first argument and never import `db/client.ts`, so #39 can pass in a request-scoped transaction.
 - Tests that need a database are named `*.integration.test.ts`. They use `connect()` and `databaseUrl` from [src/lib/server/testing/db.ts](src/lib/server/testing/db.ts) and clean up their own rows. Locally they skip when `DATABASE_URL` is unset; in CI a missing URL is an error.
-- Declare a tenant table's key with `authorId()` from `schema.ts`. `schema.test.ts` fails if a table is missing it.
+- Declare a tenant table with `authorId()` and `(t) => [tenantPolicy()]` from `schema.ts`. `schema.test.ts` fails if either is missing. Query tenant tables only inside `withAuthor()` ([src/lib/server/db/tenant.ts](src/lib/server/db/tenant.ts)).
 - Money is stored as integer minor units plus a currency code, and is never converted. Metrics carry channel and marketplace.
 - Thresholds live in author preferences or rule packs, never as constants in code. Preference defaults are resolved at read time.
 - Decisions are append-only: supersede them, don't mutate them.
@@ -48,18 +48,20 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 - `npm run format`: Prettier write. Markdown is excluded on purpose (see `.prettierignore`).
 - `npm run build`: production build via adapter-node
 - `npm test`: Vitest, run once. `npm run test:coverage` reports coverage for `engine/` and `import/` only.
+- `npm run db:setup`: creates the restricted `afterword_app` role and its grants. Run it once per database, before migrating. It's idempotent.
 - `npm run db:generate -- --name <change>`, then `npm run db:migrate`: schema changes. Drizzle migrations live in `src/lib/server/db/migrations`. Rules are in [docs/data-conventions.md](docs/data-conventions.md).
 
 ## Local environment
 
 - Node 22 via nvm (`v22.23.3`); npm (pnpm isn't installed).
-- PostgreSQL 18.6 via Postgres.app on port 5432, database `afterword`. Client binaries are in `/Applications/Postgres.app/Contents/Versions/18/bin`. The old 14 server is stopped.
+- PostgreSQL 18.6 via Postgres.app on port 5432, database `afterword`. Your Mac user is the owner and a superuser (`DATABASE_OWNER_URL`); the app connects as `afterword_app` (`DATABASE_URL`). Client binaries are in `/Applications/Postgres.app/Contents/Versions/18/bin`. The old 14 server is stopped.
 - Docker isn't installed.
 
 ## Decisions log
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-09-27: Row-level security (#39): the app role and its grants come from `scripts/db-setup.ts`, not a migration, because roles belong to the whole server. `authors` is exempt from RLS. The policy predicate uses `nullif(..., '')` because a transaction-local setting reads as `''` after the transaction ends.
 - 2026-09-27: The dev bypass (#4) finds or creates the author named by `DEV_AUTHOR_EMAIL` on each request. It isn't disabled in production, so #7 must put Caddy basic auth in front of the app until real auth exists. Unused arguments prefixed with `_` are allowed by lint.
 - 2026-09-27: Onboarding never asks which channels an author uses, because many will use the app to decide that. Channels for a new title are suggested instead: an explicit `default_channels`, then the latest title under the same pen name, then the latest title overall, then nothing. The author always confirms (#41).
 - 2026-09-27: Preferences (#3) are stored sparse and resolved per key at read time, in [src/lib/shared/preferences.ts](src/lib/shared/preferences.ts). Marketplaces are ISO 3166-1 country codes, not Amazon domains. `default_channels` defaults to empty. `target_acos` may go above 1, for authors who accept losses for KU read-through. **Provisional:** `cadence_ratio` is read as the promotional share of posts (default 0.2). The spec never defines it, so revisit at M4.
@@ -71,4 +73,4 @@ Record decisions that aren't in the spec here, newest first, with a date.
 
 ## Status
 
-- M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), and #6 (CI) are done. Next: #39, then #5.
+- M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), and #39 (RLS) are done. Next: #5, then stop for manual testing. #7 needs the owner's hosting account.

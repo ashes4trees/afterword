@@ -2,12 +2,12 @@ import { eq } from 'drizzle-orm';
 import type postgres from 'postgres';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import * as schema from '$lib/server/db/schema';
-import { connect, databaseUrl, type TestDb } from '$lib/server/testing/db';
+import { connect, hasDatabase, type TestDb } from '$lib/server/testing/db';
 import { DEFAULT_PREFERENCES } from '$lib/shared/preferences';
 import { findOrCreateAuthorByEmail, getPreferences, updatePreferences } from './authors';
 
 // Runs against a real database and cleans up after itself. See testing/db.ts.
-describe.skipIf(!databaseUrl)('authors repo: preferences', () => {
+describe.skipIf(!hasDatabase)('authors repo: preferences', () => {
 	let client: postgres.Sql;
 	let db: TestDb;
 	let authorId: string;
@@ -73,7 +73,7 @@ describe.skipIf(!databaseUrl)('authors repo: preferences', () => {
 	});
 });
 
-describe.skipIf(!databaseUrl)('authors repo: findOrCreateAuthorByEmail', () => {
+describe.skipIf(!hasDatabase)('authors repo: findOrCreateAuthorByEmail', () => {
 	let client: postgres.Sql;
 	let db: TestDb;
 	const email = `Test-${crypto.randomUUID()}@Example.test`;

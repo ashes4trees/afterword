@@ -16,6 +16,24 @@ test. Treat that as a design decision and record it in CLAUDE.md.
 Cascade means deleting an author removes all of their data, which is how account
 deletion will work.
 
+## Row-level security
+
+Every tenant table also carries the `tenant_isolation` policy. Add it with
+`(t) => [tenantPolicy()]` in the table's extra config. The same schema test fails if
+it's missing.
+
+- The app connects as a restricted role (`DATABASE_URL`) that isn't a superuser,
+  doesn't own the tables, and can't bypass RLS. Migrations and `npm run db:setup` run
+  as the owner (`DATABASE_OWNER_URL`). Never point the app at the owner.
+- Run tenant queries only inside `withAuthor(db, authorId, (tx) => ...)` from
+  `src/lib/server/db/tenant.ts`, and pass `tx` to repo functions. Outside it, tenant
+  tables return nothing, and writes fail.
+- Keep writing `where author_id = ...` in queries anyway. RLS is the backstop, not
+  the filter.
+- `authors` is exempt. Sign-in has to find an author before any author is known.
+- `src/lib/server/db/tenant.integration.test.ts` proves the pattern against a real
+  database.
+
 ## Money
 
 - Store money as integer **minor units** (cents, pence) in a column named `*_minor`.
