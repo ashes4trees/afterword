@@ -109,12 +109,12 @@ That last item is the guard on invariant 1. Add it now while the tree is empty; 
 
 Spec: sections 3, 4"
 
-mk "Set up PostgreSQL 16 and Drizzle with migration 001" \
+mk "Set up PostgreSQL 18 and Drizzle with migration 001" \
   "M0 Foundation" "type:chore,area:data,size:M" \
 "Database, ORM, and the tenancy convention that everything else inherits.
 
 **Acceptance**
-- Local Postgres 16 and a documented connection setup in .env.example
+- Local Postgres 18 and a documented connection setup in .env.example
 - Drizzle configured with a checked-in migration directory
 - Migration 001 creates the authors table
 - A written convention in docs: every table except channels carries author_id with a foreign key, money is stored as integer minor units plus a currency column, and metrics carry channel and marketplace
@@ -176,7 +176,7 @@ mk "Provision VPS with Caddy, Postgres, and nightly backups" \
 
 **Acceptance**
 - Small VPS running the app behind Caddy with automatic TLS
-- Postgres on the same host
+- Postgres 18 on the same host, matching the local major version so backups restore cleanly
 - Nightly pg_dump to off-box object storage, with a documented restore that has actually been tested once
 - Deploy documented as a short script or a single command
 

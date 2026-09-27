@@ -48,13 +48,14 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 ## Local environment
 
 - Node 22 via nvm (`v22.23.3`); npm (pnpm isn't installed).
-- Postgres.app is installed, but the running server is **14.0**. The spec targets 16, so add a PG16 version in Postgres.app before doing #2.
+- PostgreSQL 18.6 via Postgres.app on port 5432, database `afterword`. Client binaries are in `/Applications/Postgres.app/Contents/Versions/18/bin`. The old 14 server is stopped.
 - Docker isn't installed.
 
 ## Decisions log
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-09-27: PostgreSQL 18 instead of 16, for the longer support window (to Nov 2030) and native `uuidv7()`. The production server must run the same major version so `pg_dump` backups restore cleanly.
 - 2026-09-27: adapter-node for the single-VPS deploy (#7). Markdown is excluded from Prettier so hand-written docs keep their formatting.
 - 2026-09-27: Second import channel for M2 is Kobo Writing Life (spec §9 Q2).
 

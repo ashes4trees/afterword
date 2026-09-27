@@ -70,7 +70,7 @@ serve authors who are not its author.
 | Concern | Choice | Why |
 |---|---|---|
 | Framework | SvelteKit 2 (Svelte 5), TypeScript `strict` | One language end to end, single deployable, small bundles for phones |
-| Database | PostgreSQL 16 | jsonb for preferences and rule inputs, real date handling |
+| Database | PostgreSQL 18, same major version locally and in production | jsonb for preferences and rule inputs, real date handling, native `uuidv7()`, supported to Nov 2030 |
 | Data access | Drizzle ORM | SQL-first, legible migrations, light for a solo maintainer |
 | Validation | Zod | One schema serves form validation, API boundary, and agent tool schemas |
 | Styling | Tailwind v4 | Zero-config, fast solo iteration |
