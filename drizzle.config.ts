@@ -10,7 +10,8 @@ export default defineConfig({
 	schema: './src/lib/server/db/schema.ts',
 	out: './src/lib/server/db/migrations',
 	dialect: 'postgresql',
-	dbCredentials: { url: process.env.DATABASE_URL ?? '' },
+	// Migrations run as the owner; the app's own role can't create tables.
+	dbCredentials: { url: process.env.DATABASE_OWNER_URL ?? '' },
 	strict: true,
 	verbose: true
 });
