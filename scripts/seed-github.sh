@@ -85,7 +85,8 @@ fi
 # ---------------------------------------------------------------- issues
 
 mk() {
-  gh issue create --repo "$REPO" --title "$1" --milestone "$2" --label "$3" --body "$4" >/dev/null \
+  # An empty milestone ("") creates the issue without one.
+  gh issue create --repo "$REPO" --title "$1" ${2:+--milestone "$2"} --label "$3" --body "$4" >/dev/null \
     && echo "  + $1"
 }
 
@@ -390,13 +391,17 @@ mk "Reminder lead times and a Coming up list" \
 Spec: sections 2 (invariants 1 and 4), 5"
 
 mk "UI polish pass" \
-  "M1 Organized truth" "type:chore,area:ui,size:S" \
-"A place to collect visual fixes to screens that are already built, so they aren't lost between feature tickets. Add a checklist item whenever something looks off in manual testing. Do this before the M1 exit test, so the real release run happens on a UI that's comfortable to use.
+  "" "type:chore,area:ui,size:S" \
+"A running list of UI-only fixes and changes: visual tweaks to screens that are already built, so they aren't lost between feature tickets.
 
-**Acceptance**
-- [ ] Sidebar: the group labels (Money, Rhythm) and the nav links are hard to tell apart. Give them a clearer difference in size, weight, color, or spacing, using the existing tokens or adjusting them
-- [ ] Anything else found in testing is added above before this closes
-- Any token changes go in src/lib/styles/tokens.css and are checked in light mode, dark mode, and at 400px
+**Parked.** Add items here whenever something looks off, but don't work on this until the owner is ready to test and make design decisions. It has no milestone on purpose.
+
+**Checklist**
+- [ ] Sidebar: the group labels (Money, Rhythm) and the nav links are hard to tell apart. Give them a clearer difference in size, weight, color, or spacing
+
+**When it's picked up**
+- Token changes go in src/lib/styles/tokens.css and are checked in light mode, dark mode, and at 400px
+- Design options may be explored in Claude Design first, then brought back into the tokens and components
 
 Spec: section 3"
 
