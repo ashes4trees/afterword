@@ -1,23 +1,15 @@
 import { eq } from 'drizzle-orm';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import type postgres from 'postgres';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import * as schema from '$lib/server/db/schema';
+import { connect, databaseUrl, type TestDb } from '$lib/server/testing/db';
 import { DEFAULT_PREFERENCES } from '$lib/shared/preferences';
 import { findOrCreateAuthorByEmail, getPreferences, updatePreferences } from './authors';
 
-try {
-	process.loadEnvFile();
-} catch {
-	// No .env file; rely on the real environment.
-}
-const url = process.env.DATABASE_URL;
-
-// Runs against a real database and cleans up after itself. Skipped when
-// DATABASE_URL is unset; CI provides one from #39.
-describe.skipIf(!url)('authors repo: preferences', () => {
+// Runs against a real database and cleans up after itself. See testing/db.ts.
+describe.skipIf(!databaseUrl)('authors repo: preferences', () => {
 	let client: postgres.Sql;
-	let db: ReturnType<typeof drizzle<typeof schema>>;
+	let db: TestDb;
 	let authorId: string;
 
 	const stored = async () => {
@@ -29,8 +21,7 @@ describe.skipIf(!url)('authors repo: preferences', () => {
 	};
 
 	beforeAll(async () => {
-		client = postgres(url!, { onnotice: () => {} });
-		db = drizzle(client, { schema });
+		({ client, db } = connect());
 		const [author] = await db
 			.insert(schema.authors)
 			.values({ email: `test-${crypto.randomUUID()}@example.test`, displayName: 'Test' })
@@ -82,14 +73,13 @@ describe.skipIf(!url)('authors repo: preferences', () => {
 	});
 });
 
-describe.skipIf(!url)('authors repo: findOrCreateAuthorByEmail', () => {
+describe.skipIf(!databaseUrl)('authors repo: findOrCreateAuthorByEmail', () => {
 	let client: postgres.Sql;
-	let db: ReturnType<typeof drizzle<typeof schema>>;
+	let db: TestDb;
 	const email = `Test-${crypto.randomUUID()}@Example.test`;
 
 	beforeAll(() => {
-		client = postgres(url!, { onnotice: () => {} });
-		db = drizzle(client, { schema });
+		({ client, db } = connect());
 	});
 
 	afterAll(async () => {
