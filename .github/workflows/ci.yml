@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# No step may need an Anthropic API key: CI never spends money (#6). Tests cover the
+# engine, parsers, and database; model narration is layered on top and is optional.
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: afterword
+          POSTGRES_PASSWORD: afterword
+          POSTGRES_DB: afterword
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U afterword"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://afterword:afterword@localhost:5432/afterword
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run check
+      - name: Lint
+        run: npm run lint
+      - name: Migrate
+        run: npm run db:migrate
+      - name: Test
+        run: npm run test:coverage
+      - name: Build
+        run: npm run build
