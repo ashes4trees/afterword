@@ -119,12 +119,13 @@ channel and marketplace. `author_id` on everything except `channels`.
 - **`authors`** — `id`, `email`, `display_name`, `ai_mode` (`off` | `byok` | `managed`),
   `preferences` jsonb (Zod-validated: `target_acos`, `min_ad_eval_days`,
   `min_ad_eval_spend_minor`, `currency`, `marketplaces[]`, `default_channels[]`,
-  `cadence_ratio`), `created_at`
+  `cadence_ratio`, `reminders` — lead days, with optional per-kind overrides), `created_at`
 - **`pen_names`** — `id`, `author_id`, `name`
 - **`series`** — `id`, `author_id`, `pen_name_id`, `title`, `planned_count`
 - **`titles`** — `id`, `author_id`, `pen_name_id`, `series_id`, `series_position`,
   `working_title`, `genre`, `subgenre`, `tropes[]`, `heat_level`, `page_count`,
-  `word_count`, `stage` (`metadata` | `uploaded` | `preorder` | `launch` |
+  `word_count`, `release_date` (planned or actual; the launch timeline counts from it),
+  `stage` (`metadata` | `uploaded` | `preorder` | `launch` |
   `post_launch` | `backlist`)
 
   Product metadata only. Per **C2**, no field holds manuscript text.
@@ -219,6 +220,20 @@ Every pack carries `as_of` and `sources`. Stale advice about an Ingram discount 
 Select term costs an author real money, and "it's free" is not a defence. Surface the
 date in the UI on every step.
 
+Packs can also be **title-scoped**, with no channel. The launch timeline
+(`content/playbooks/launch/`) is one: ARC recruitment, cover reveal, newsletter push,
+review follow-ups. Its steps are dated relative to the book's release date, and the
+milestones among them feed reminders:
+
+```yaml
+  - id: cover-reveal
+    label: Cover reveal
+    due: { anchor: release_date, offset_days: -60 }
+    milestone: true
+```
+
+It tracks the purpose and timing of each step, never the content of a post (**C1**, **C4**).
+
 ### 6.2 Rule packs — `content/rules/*.yaml`
 
 ```yaml
@@ -291,12 +306,14 @@ Zod-validated author preferences, single-account dev bypass, deploy to one box.
 
 ### M1 — Organized truth (no model required)
 Titles, series, pen names. The channel listing matrix. Playbook pack loader plus two
-real packs (KDP, Ingram). Task generation from playbook steps. Full data export.
+real packs (KDP, Ingram). Task generation from playbook steps. A release-relative launch
+timeline pack. Reminder lead times (one engine for every dated item) with a Coming up
+list. Full data export.
 **Exit criterion:** the owner runs a real release through it end to end.
 
 ### M2 — Engine
 Rule pack loader. KU-vs-wide-vs-direct model. Report import for KDP and Kobo Writing Life. Campaign review verdicts with deterministic `explain` narration. Decision log
-with `commits_until` reminders by email.
+with `commits_until` dates. Email delivery for reminders, as a daily digest.
 **Exit criterion:** the app recommends killing a campaign, correctly, with no model call.
 
 ### M3 — Narration
