@@ -212,8 +212,11 @@ mk "Migration: pen names, series, and titles" \
 - Tables for pen_names, series, titles per spec section 5
 - stage enum: metadata, uploaded, preorder, launch, post_launch, backlist
 - Multi pen name and multi series supported from the first migration, not bolted on
+- \`release_date\` on titles (date, nullable): the planned or actual publication date. The launch timeline (#45) counts from it
 
-Spec: section 5"
+Spec: section 5
+
+Depends on #39: tenant tables are created with row-level security from the start."
 
 mk "Titles CRUD with product metadata only" \
   "M1 Organized truth" "type:feat,area:ui,size:M,constraint" \
@@ -277,6 +280,8 @@ mk "Playbook pack schema, loader, and boot validation" \
 - Loader validates every pack at boot and fails loudly on a malformed or undated pack
 - as_of and sources are required, not optional
 - as_of surfaces in the UI wherever a step is shown
+- Packs can be title-scoped, with no channel, for the launch timeline (#45)
+- A step can have an optional \`due\`, made of an anchor field (release_date for now) and \`offset_days\`, plus a \`milestone\` flag for steps worth a reminder (#46)
 
 A pack without a date and a source is worse than no pack. Stale advice about an Ingram discount or a Select term costs an author real money.
 
@@ -315,6 +320,7 @@ mk "Generate tasks from playbook steps" \
 - Preconditions respected: a step whose precondition is unmet is not yet actionable
 - Pure function in server/engine, no database access, unit tested
 - Re-running does not duplicate tasks or resurrect completed ones
+- For steps with a \`due\` anchor, due_on is the anchor date plus the offset. When the anchor changes, open tasks move with it, unless the author set the date by hand
 
 Spec: sections 2 (invariant 1), 5, 6.1"
 
@@ -352,6 +358,36 @@ Onboarding deliberately does not ask which channels an author uses. Many will us
 Depends on #9 and #10.
 
 Spec: section 5"
+
+mk "Launch timeline: release-relative playbook pack" \
+  "M1 Organized truth" "type:feat,area:content,size:M" \
+"Pre-release and launch marketing on a timeline counted from the release date: when to recruit ARC readers, reveal the cover, push newsletter signups, open preorders, and ask for reviews. It tracks the purpose and timing of each step, never the content of any post (C1, C4).
+
+**Acceptance**
+- A title-scoped launch pack in content/playbooks/launch/, not tied to a store, in the pack format from #13, with as_of and sources
+- Steps dated relative to the book's release date, for example: recruit ARC readers at -90 days, cover reveal at -60, preorder live at -45, newsletter signup push at -30, ARC copies out at -21, launch day at 0, review follow-ups at +7 and +30. Research and source the real steps and offsets rather than copying this list
+- Steps worth a reminder are marked as milestones (see the reminders ticket)
+- Each book has a timeline view listing every step with its date, whether it's done, and how far away it is. Readable at 400px
+- The author can skip a step for one book, or set its date by hand. A hand-set date stays put when the release date moves; every other step shifts with it
+- A book with no release date shows its steps undated, with a prompt to set one
+
+Depends on #8, #13, and #16.
+
+Spec: sections 5, 6.1"
+
+mk "Reminder lead times and a Coming up list" \
+  "M1 Organized truth" "type:feat,area:engine,size:M" \
+"One reminder system for everything in the app that has a date, with lead times the author chooses, such as \"remind me a week before and again three days before.\"
+
+**Acceptance**
+- A \`reminders\` preference in the #3 schema: \`lead_days\` (default [7, 3]) plus optional per-kind overrides, for example more notice for exclusivity terms than for launch milestones. Defaults resolve at read time like every other preference
+- A pure engine function: given dated items from any source, the preference, and today's date, it returns the reminders due today. No database or network access. Unit tested, including a lead time that has already passed when an item is created
+- A source is a small interface (kind, subject, date, label), so new sources plug in without changing the engine. The first source is milestone steps from the launch timeline (#45). Decision commitment dates (#26) and cadence (M4) plug in later
+- Home shows a \"Coming up\" list built from the same function
+- Settings lets the author edit lead times, with each kind described in plain words
+- No email here: #27 delivers these reminders
+
+Spec: sections 2 (invariants 1 and 4), 5"
 
 mk "Account deletion with export offered first" \
   "M1 Organized truth" "type:feat,area:data,size:S" \
@@ -491,15 +527,16 @@ mk "Migration and UI: append-only decision log" \
 
 Spec: sections 2 (invariant 5), 5"
 
-mk "Email reminders for decision commitment dates" \
+mk "Email delivery for reminders" \
   "M2 Engine" "type:feat,area:infra,size:M" \
-"Email beats push for your Select term ends in nine days.
+"Email beats push for \"your Select term ends in nine days.\"
 
 **Acceptance**
-- Scheduled job finds decisions whose commits_until is approaching and sends a reminder
+- A scheduled job sends the reminders that the engine from #46 says are due, including decision commits_until dates from #26
 - Resend on its free tier
 - One digest per author per run, never one email per item
-- Unsubscribe and frequency preference respected
+- A sent log, so the same reminder is never sent twice even if the job reruns
+- Unsubscribe is respected, and lead times come from the author's reminder preference (#46)
 - No model call involved
 
 Spec: sections 3, 5"
