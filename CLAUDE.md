@@ -60,6 +60,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-09-27: Onboarding never asks which channels an author uses, because many will use the app to decide that. Channels for a new title are suggested instead: an explicit `default_channels`, then the latest title under the same pen name, then the latest title overall, then nothing. The author always confirms (#41).
 - 2026-09-27: Preferences (#3) are stored sparse and resolved per key at read time, in [src/lib/shared/preferences.ts](src/lib/shared/preferences.ts). Marketplaces are ISO 3166-1 country codes, not Amazon domains. `default_channels` defaults to empty. `target_acos` may go above 1, for authors who accept losses for KU read-through. **Provisional:** `cadence_ratio` is read as the promotional share of posts (default 0.2). The spec never defines it, so revisit at M4.
 - 2026-09-27: Tenant isolation will also be enforced with Postgres row-level security (#39), built before the first tenant tables (#8) so the repo layer is designed around it. Account deletion is tracked in #40.
 - 2026-09-27: Primary keys are `uuid` with a default of `uuidv7()`. `author_id` cascades on delete, so account deletion is a single `delete from authors`. Emails are unique case-insensitively. Vitest was added in #2 for the tenant-key test; #6 still owns the test configuration and CI.

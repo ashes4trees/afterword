@@ -331,6 +331,27 @@ This ships in M1, not later. A free tool that holds someone's launch plan owes t
 
 Spec: section 8"
 
+mk "Suggest channels for a new title from the author's history" \
+  "M1 Organized truth" "type:feat,area:ui,size:S" \
+"When an author adds a title, pre-select the channels it will get listings for, based on what they have done before. The author always confirms. Nothing is created silently.
+
+Onboarding deliberately does not ask which channels an author uses. Many will use this app to make that decision, so asking up front would presume the answer.
+
+**Acceptance**
+- Adding a title shows a channel checklist, and confirming it creates one not_started listing per checked channel
+- Pre-selection, first match wins:
+  1. The author's default_channels preference, if they have set it explicitly
+  2. The channels of their most recent title under the same pen name that has listings
+  3. The channels of their most recent title with listings, under any pen name
+  4. Nothing checked
+- The UI says where the suggestion came from, for example \"Same as Book 4\" or \"Your default channels\"
+- The suggestion logic is a pure function with unit tests covering each precedence step
+- No onboarding step asks for channels
+
+Depends on #9 and #10.
+
+Spec: section 5"
+
 mk "Account deletion with export offered first" \
   "M1 Organized truth" "type:feat,area:data,size:S" \
 "An author who leaves can delete everything. The database side already exists: every author_id cascades on delete from authors (#2).
