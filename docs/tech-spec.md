@@ -295,8 +295,7 @@ real packs (KDP, Ingram). Task generation from playbook steps. Full data export.
 **Exit criterion:** the owner runs a real release through it end to end.
 
 ### M2 — Engine
-Rule pack loader. KU-vs-wide-vs-direct model. Report import for KDP and one other
-channel. Campaign review verdicts with deterministic `explain` narration. Decision log
+Rule pack loader. KU-vs-wide-vs-direct model. Report import for KDP and Kobo Writing Life. Campaign review verdicts with deterministic `explain` narration. Decision log
 with `commits_until` reminders by email.
 **Exit criterion:** the app recommends killing a campaign, correctly, with no model call.
 
@@ -320,8 +319,10 @@ playbooks.
 
 1. Does the KU-vs-wide model need per-marketplace KENP rates, or is a single blended
    rate honest enough for v1?
-2. Which second channel for import in M2 — Kobo Writing Life or Draft2Digital? D2D
-   aggregates more, Kobo is the more common "wide" first step.
+2. ~~Which second channel for import in M2 — Kobo Writing Life or Draft2Digital?~~
+   **Resolved 2026-09-27: Kobo Writing Life.** It is the most common first step going
+   wide, so it is the parser most authors will need first. Draft2Digital aggregates more
+   channels per file and is the natural third.
 3. Cadence slots as recurrence rules or explicit generated dates? Rules are tidier;
    dates are far easier to edit on a phone.
 4. Playbooks in the repo indefinitely, or database-backed at M4 so authors can submit
