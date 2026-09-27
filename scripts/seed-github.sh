@@ -389,6 +389,17 @@ mk "Reminder lead times and a Coming up list" \
 
 Spec: sections 2 (invariants 1 and 4), 5"
 
+mk "UI polish pass" \
+  "M1 Organized truth" "type:chore,area:ui,size:S" \
+"A place to collect visual fixes to screens that are already built, so they aren't lost between feature tickets. Add a checklist item whenever something looks off in manual testing. Do this before the M1 exit test, so the real release run happens on a UI that's comfortable to use.
+
+**Acceptance**
+- [ ] Sidebar: the group labels (Money, Rhythm) and the nav links are hard to tell apart. Give them a clearer difference in size, weight, color, or spacing, using the existing tokens or adjusting them
+- [ ] Anything else found in testing is added above before this closes
+- Any token changes go in src/lib/styles/tokens.css and are checked in light mode, dark mode, and at 400px
+
+Spec: section 3"
+
 mk "Account deletion with export offered first" \
   "M1 Organized truth" "type:feat,area:data,size:S" \
 "An author who leaves can delete everything. The database side already exists: every author_id cascades on delete from authors (#2).
