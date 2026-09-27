@@ -184,6 +184,23 @@ Avoid per-request serverless pricing and managed database tiers that jump from f
 
 Spec: section 3"
 
+mk "Enforce tenant isolation with Postgres row-level security" \
+  "M0 Foundation" "type:feat,area:data,size:M" \
+"Defense in depth for invariant 3. Today, isolation depends on every query filtering by author_id. With row-level security, Postgres refuses to return another author's rows even when a query forgets the filter.
+
+Do this before #8, so the repo layer is built around it from the start. Retrofitting it onto existing queries is the expensive part.
+
+**Acceptance**
+- Two database roles: an owner role that runs migrations, and a restricted app role the app connects as. The app role is not a table owner and cannot bypass RLS. Both are documented in .env.example
+- A repo-layer helper that runs a request's queries in a transaction after \`set_config('app.author_id', <id>, true)\`, taking the author from locals (#4). Nothing outside the helper opens tenant queries
+- Policies declared in schema.ts with Drizzle's RLS support, restricting rows to \`author_id = current_setting('app.author_id')::uuid\`
+- The tenant-key test from #2 extended so that a tenant table without RLS enabled and a policy fails
+- An integration test against a real database proving two things: a query with no author_id filter returns only the current author's rows, and the app role with no author set sees nothing
+- CI (#6) runs that integration test against a Postgres 18 service container
+- docs/data-conventions.md updated
+
+Spec: sections 2 (invariant 3), 5"
+
 # ===================== M1 Organized truth =====================
 
 mk "Migration: pen names, series, and titles" \
@@ -313,6 +330,19 @@ mk "Full data export as JSON and CSV" \
 This ships in M1, not later. A free tool that holds someone's launch plan owes them the door.
 
 Spec: section 8"
+
+mk "Account deletion with export offered first" \
+  "M1 Organized truth" "type:feat,area:data,size:S" \
+"An author who leaves can delete everything. The database side already exists: every author_id cascades on delete from authors (#2).
+
+**Acceptance**
+- A settings action that deletes the author after typed confirmation, such as retyping their email
+- Offers the full data export (#17) before confirming
+- A test that, after deletion, no row in any tenant table references that author
+- Copy that says plainly that deleted data stays in nightly backups until they rotate out, and states the retention period from #7
+- Once #29 lands, the test also asserts that the author's persisted AI key is gone
+
+Spec: sections 2 (invariant 3), 5"
 
 # ===================== M2 Engine =====================
 
