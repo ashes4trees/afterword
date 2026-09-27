@@ -20,7 +20,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 - `src/lib/server/engine/` is pure: no imports from `db/`, `agent/`, or any HTTP client. This is guarded by a lint or boundary test.
 - Every table except `channels` has `author_id` with a foreign key.
 - Repo functions take an `Executor` (a database handle or a transaction, from `db/types.ts`) as their first argument and never import `db/client.ts`, so #39 can pass in a request-scoped transaction.
-- Tests that need a database are named `*.integration.test.ts`. They read `DATABASE_URL` from `.env`, clean up their own rows, and skip when it's unset.
+- Tests that need a database are named `*.integration.test.ts`. They use `connect()` and `databaseUrl` from [src/lib/server/testing/db.ts](src/lib/server/testing/db.ts) and clean up their own rows. Locally they skip when `DATABASE_URL` is unset; in CI a missing URL is an error.
 - Declare a tenant table's key with `authorId()` from `schema.ts`. `schema.test.ts` fails if a table is missing it.
 - Money is stored as integer minor units plus a currency code, and is never converted. Metrics carry channel and marketplace.
 - Thresholds live in author preferences or rule packs, never as constants in code. Preference defaults are resolved at read time.
@@ -36,7 +36,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
   - `gh issue view <n>`
 - Each issue has an **Acceptance** list. Treat it as the definition of done.
 - Labels: `type:*`, `area:*`, `size:S|M|L`, `constraint`, `blocked`. [scripts/seed-github.sh](scripts/seed-github.sh) created them. Don't re-run the issue phase, because it doesn't deduplicate.
-- Branching: commit directly to `main` until CI exists (#6). After that, use one short-lived branch and PR per issue, so CI gates main.
+- Branching: one short-lived branch and PR per issue (`<type>/<issue>-<slug>`). Merge (squash) once CI passes. CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs typecheck, lint, migrations against a Postgres 18 service container, tests with coverage, and the build.
 - Reference the issue in commits and PRs (`Closes #n`).
 - When an open question in spec §9 gets resolved, strike it through there and record the date, as was done for Q2.
 
@@ -47,7 +47,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 - `npm run lint`: Prettier check, then ESLint. The engine purity rule lives in [eslint.config.js](eslint.config.js).
 - `npm run format`: Prettier write. Markdown is excluded on purpose (see `.prettierignore`).
 - `npm run build`: production build via adapter-node
-- `npm test`: Vitest, run once
+- `npm test`: Vitest, run once. `npm run test:coverage` reports coverage for `engine/` and `import/` only.
 - `npm run db:generate -- --name <change>`, then `npm run db:migrate`: schema changes. Drizzle migrations live in `src/lib/server/db/migrations`. Rules are in [docs/data-conventions.md](docs/data-conventions.md).
 
 ## Local environment
@@ -71,4 +71,4 @@ Record decisions that aren't in the spec here, newest first, with a date.
 
 ## Status
 
-- M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), and #4 (dev auth bypass) are done. Next: #6, #39, #5.
+- M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), and #6 (CI) are done. Next: #39, then #5.
