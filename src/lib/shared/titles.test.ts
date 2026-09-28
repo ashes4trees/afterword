@@ -15,7 +15,9 @@ describe('TitleInputSchema', () => {
 			genre: null,
 			subgenre: null,
 			tropes: [],
-			heatLevel: null,
+			contentSex: null,
+			contentViolence: null,
+			contentLanguage: null,
 			pageCount: null,
 			wordCount: null,
 			releaseDate: null,
@@ -32,7 +34,8 @@ describe('TitleInputSchema', () => {
 		const result = parse({
 			seriesTitle: 'Saga',
 			seriesPosition: '2.5',
-			heatLevel: '0',
+			contentSex: '0',
+			contentViolence: '5',
 			pageCount: '320',
 			releaseDate: '2027-03-14',
 			tropes: ' found family, Enemies to lovers ,, found Family '
@@ -41,7 +44,9 @@ describe('TitleInputSchema', () => {
 		if (!result.success) return;
 		expect(result.data).toMatchObject({
 			seriesPosition: 2.5,
-			heatLevel: 0,
+			contentSex: 0,
+			contentViolence: 5,
+			contentLanguage: null,
 			pageCount: 320,
 			releaseDate: '2027-03-14',
 			tropes: ['found Family', 'Enemies to lovers']
@@ -57,7 +62,8 @@ describe('TitleInputSchema', () => {
 			'seriesPosition'
 		],
 		['a fractional page count', { pageCount: '12.5' }, 'pageCount'],
-		['a heat level of 6', { heatLevel: '6' }, 'heatLevel'],
+		['a sex rating of 6', { contentSex: '6' }, 'contentSex'],
+		['a fractional language rating', { contentLanguage: '2.5' }, 'contentLanguage'],
 		['an impossible date', { releaseDate: '2027-02-30' }, 'releaseDate'],
 		['a genre over 60 characters', { genre: 'x'.repeat(61) }, 'genre'],
 		['21 tropes', { tropes: Array.from({ length: 21 }, (_, i) => `t${i}`).join(',') }, 'tropes'],

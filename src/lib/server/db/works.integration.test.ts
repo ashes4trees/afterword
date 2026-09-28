@@ -125,7 +125,8 @@ describe.skipIf(!hasDatabase)('works schema: pen names, series, titles', () => {
 
 	it.each([
 		['a series position without a series', { seriesPosition: 1 }, CHECK],
-		['a heat level above 5', { heatLevel: 6 }, CHECK],
+		['a violence rating above 5', { contentViolence: 6 }, CHECK],
+		['a negative language rating', { contentLanguage: -1 }, CHECK],
 		['a zero page count', { pageCount: 0 }, CHECK],
 		['more than 20 tropes', { tropes: Array.from({ length: 21 }, (_, i) => `trope ${i}`) }, CHECK],
 		['a working title over 200 characters', { workingTitle: 'x'.repeat(201) }, TOO_LONG],
