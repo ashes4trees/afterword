@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+	boolean,
 	check,
 	date,
 	foreignKey,
@@ -192,5 +193,90 @@ export const titles = pgTable(
 		check('titles_page_count_positive', sql`${t.pageCount} > 0`),
 		check('titles_word_count_positive', sql`${t.wordCount} > 0`),
 		check('titles_tropes_max', sql`cardinality(${t.tropes}) <= 20`)
+	]
+);
+
+// ---------------------------------------------------------------- channels (#10)
+
+/**
+ * Global reference data: the stores and distributors. The one table without author_id.
+ * Rows come from migrations. Row-level security lets any role read them, and gives
+ * no write policy, so the app can never change them. The owner bypasses RLS to seed.
+ * Keep in step with CHANNEL_SLUGS in $lib/shared/channels.
+ */
+export const channels = pgTable(
+	'channels',
+	{
+		slug: varchar('slug', { length: 40 }).primaryKey(),
+		displayName: varchar('display_name', { length: 80 }).notNull(),
+		/** Shape: ChannelCapabilities in $lib/shared/channels. */
+		capabilities: jsonb('capabilities').notNull().default({})
+	},
+	() => [pgPolicy('channels_read', { as: 'permissive', for: 'select', using: sql`true` })]
+);
+
+export const listingStatus = pgEnum('listing_status', [
+	'not_started',
+	'metadata_draft',
+	'submitted',
+	'in_review',
+	'live',
+	'unpublished'
+]);
+
+/**
+ * One book on one channel, optionally in one marketplace. Each has its own status and
+ * obligations: book 3 can be in preorder on KDP, live on Kobo, and unsubmitted to Ingram.
+ * A null marketplace is the listing's default; uniqueness treats it as a value, so a
+ * book can't get two default listings on the same channel.
+ */
+export const channelListings = pgTable(
+	'channel_listings',
+	{
+		id: uuid('id')
+			.primaryKey()
+			.default(sql`uuidv7()`),
+		authorId: authorId(),
+		titleId: uuid('title_id').notNull(),
+		channelSlug: varchar('channel_slug', { length: 40 })
+			.notNull()
+			.references(() => channels.slug),
+		/** ISO 3166-1 alpha-2, matching the marketplaces preference. */
+		marketplace: varchar('marketplace', { length: 2 }),
+		status: listingStatus('status').notNull().default('not_started'),
+		/** ASIN, ISBN, or the channel's own id. */
+		externalId: varchar('external_id', { length: 64 }),
+		priceMinor: integer('price_minor'),
+		currency: varchar('currency', { length: 3 }),
+		enrolledInSelect: boolean('enrolled_in_select').notNull().default(false),
+		exclusivityStart: date('exclusivity_start'),
+		exclusivityEnd: date('exclusivity_end'),
+		wholesaleDiscountPct: smallint('wholesale_discount_pct'),
+		returnable: boolean('returnable'),
+		...timestamps
+	},
+	(t) => [
+		tenantPolicy(),
+		// Deleting a book removes its listings.
+		foreignKey({
+			name: 'channel_listings_title_fk',
+			columns: [t.authorId, t.titleId],
+			foreignColumns: [titles.authorId, titles.id]
+		}).onDelete('cascade'),
+		unique('channel_listings_title_channel_marketplace_key')
+			.on(t.titleId, t.channelSlug, t.marketplace)
+			.nullsNotDistinct(),
+		check('channel_listings_marketplace_code', sql`${t.marketplace} ~ '^[A-Z]{2}$'`),
+		check('channel_listings_currency_code', sql`${t.currency} ~ '^[A-Z]{3}$'`),
+		check(
+			'channel_listings_price_has_currency',
+			sql`(${t.priceMinor} is null) = (${t.currency} is null)`
+		),
+		check('channel_listings_price_nonnegative', sql`${t.priceMinor} >= 0`),
+		check('channel_listings_exclusivity_order', sql`${t.exclusivityEnd} >= ${t.exclusivityStart}`),
+		check(
+			'channel_listings_wholesale_discount_range',
+			sql`${t.wholesaleDiscountPct} between 0 and 100`
+		)
 	]
 );
