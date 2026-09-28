@@ -15,6 +15,20 @@
 			"when": 1790557479023,
 			"tag": "0001_works",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1790558658023,
+			"tag": "0002_channels_listings",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1790558679904,
+			"tag": "0003_seed_channels",
+			"breakpoints": true
 		}
 	]
 }

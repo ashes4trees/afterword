@@ -148,6 +148,11 @@ channel and marketplace. `author_id` on everything except `channels`.
   be in preorder on KDP, live on Kobo, and unsubmitted to Ingram. Nearly all the
   "I've lost track" pain lives in this table.
 
+  One row per title, channel, and marketplace. A null marketplace is the listing's
+  default for that channel, and at most one default exists per title and channel.
+  Deleting a title deletes its listings. `channels` is seeded by migration from
+  `src/lib/shared/channels.ts`; the app role can read it but has no write policy.
+
 ### Decisions and evidence
 
 - **`decisions`** — append-only. `id`, `author_id`, `subject_type`, `subject_id`,
