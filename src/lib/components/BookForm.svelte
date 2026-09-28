@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import {
-		HEAT_LABELS,
+		CONTENT_RATINGS,
 		STAGE_LABELS,
 		TITLE_STAGES,
 		type TitleFormValues
@@ -188,18 +188,33 @@
 			{@render hint('Separate with commas. Up to 20.')}
 			{@render error('tropes')}
 		</label>
-
-		<label>
-			<span class="text-sm font-medium">Heat level</span>
-			<select name="heatLevel" value={values.heatLevel} class={input}>
-				<option value="">Doesn't apply</option>
-				{#each HEAT_LABELS as label, level (level)}
-					<option value={String(level)}>{level} · {label}</option>
-				{/each}
-			</select>
-			{@render error('heatLevel')}
-		</label>
 	</fieldset>
+
+	<details
+		open={CONTENT_RATINGS.some((r) => values[r.field] !== '')}
+		class="rounded-lg border border-border bg-surface px-4 py-3"
+	>
+		<summary class="cursor-pointer font-display text-heading">
+			Content intensity <span class="font-sans text-sm text-fg-muted">(optional)</span>
+		</summary>
+		<p class="mt-2 text-sm text-fg-muted">
+			Rate only what matters for your genre. Leave the rest as not rated.
+		</p>
+		<div class="mt-4 grid gap-4 sm:grid-cols-3">
+			{#each CONTENT_RATINGS as r (r.field)}
+				<label>
+					<span class="text-sm font-medium">{r.label}</span>
+					<select name={r.field} value={values[r.field]} class={input}>
+						<option value="">Not rated</option>
+						{#each r.levels as label, level (level)}
+							<option value={String(level)}>{level} · {label}</option>
+						{/each}
+					</select>
+					{@render error(r.field)}
+				</label>
+			{/each}
+		</div>
+	</details>
 
 	<fieldset class="grid gap-4 sm:grid-cols-2">
 		<legend class="mb-2 font-display text-heading">Size</legend>

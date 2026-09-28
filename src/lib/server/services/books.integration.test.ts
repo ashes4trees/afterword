@@ -108,14 +108,14 @@ describe.skipIf(!hasDatabase)('books service', () => {
 			input({
 				workingTitle: 'Standalone',
 				tropes: 'heist, slow burn',
-				heatLevel: '2',
+				contentViolence: '2',
 				releaseDate: '2027-01-05'
 			})
 		);
 		const values = toFormValues((await getBook(app.db, me, id))!);
 		expect(values).toMatchObject({
 			tropes: 'heist, slow burn',
-			heatLevel: '2',
+			contentViolence: '2',
 			releaseDate: '2027-01-05',
 			penName: ''
 		});

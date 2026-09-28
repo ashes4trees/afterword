@@ -22,8 +22,27 @@ export const STAGE_LABELS: Record<TitleStage, string> = {
 	backlist: 'Backlist'
 };
 
-/** Index is the stored heat_level. Null means heat doesn't apply to the book. */
-export const HEAT_LABELS = ['None', 'Sweet', 'Mild', 'Warm', 'Steamy', 'Explicit'] as const;
+/**
+ * Optional content intensity, for any genre (#53). Each level's label is indexed by
+ * its stored value, 0 to 5. Null means the author hasn't rated it.
+ */
+export const CONTENT_RATINGS = [
+	{
+		field: 'contentSex',
+		label: 'Sex',
+		levels: ['None', 'Kissing only', 'Closed door', 'Some on the page', 'Open door', 'Explicit']
+	},
+	{
+		field: 'contentViolence',
+		label: 'Violence',
+		levels: ['None', 'Mild or off the page', 'Some peril', 'On the page', 'Graphic', 'Extreme gore']
+	},
+	{
+		field: 'contentLanguage',
+		label: 'Language',
+		levels: ['None', 'Mild', 'Occasional', 'Moderate', 'Frequent strong', 'Pervasive strong']
+	}
+] as const;
 
 const blankToNull = (v: unknown) => (typeof v === 'string' && v.trim() === '' ? null : v);
 const optional = <T extends z.ZodType>(schema: T) => z.preprocess(blankToNull, schema.nullable());
@@ -35,6 +54,9 @@ const count = (label: string, max: number) =>
 		.int(`${label} must be a whole number`)
 		.positive(`${label} must be more than 0`)
 		.max(max, `${label} looks too large`);
+
+/** One content intensity rating: 0 to 5, or null when not rated. */
+const rating = optional(z.coerce.number().int().min(0).max(5));
 
 export const TitleInputSchema = z
 	.object({
@@ -63,7 +85,9 @@ export const TitleInputSchema = z
 				.max(20, 'Up to 20 tropes')
 				.transform((ts) => [...new Map(ts.map((t) => [t.toLowerCase(), t])).values()])
 		),
-		heatLevel: optional(z.coerce.number().int().min(0).max(5)),
+		contentSex: rating,
+		contentViolence: rating,
+		contentLanguage: rating,
 		pageCount: optional(count('Page count', 10_000)),
 		wordCount: optional(count('Word count', 2_000_000)),
 		releaseDate: optional(z.iso.date('Use a full date')),
@@ -89,7 +113,9 @@ export function titleFormValues(form: FormData): TitleFormValues {
 		genre: get('genre'),
 		subgenre: get('subgenre'),
 		tropes: get('tropes'),
-		heatLevel: get('heatLevel'),
+		contentSex: get('contentSex'),
+		contentViolence: get('contentViolence'),
+		contentLanguage: get('contentLanguage'),
 		pageCount: get('pageCount'),
 		wordCount: get('wordCount'),
 		releaseDate: get('releaseDate'),
@@ -105,7 +131,9 @@ export const EMPTY_TITLE_FORM: TitleFormValues = {
 	genre: '',
 	subgenre: '',
 	tropes: '',
-	heatLevel: '',
+	contentSex: '',
+	contentViolence: '',
+	contentLanguage: '',
 	pageCount: '',
 	wordCount: '',
 	releaseDate: '',
