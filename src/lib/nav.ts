@@ -1,29 +1,30 @@
-import type { RouteId } from '$app/types';
+import { resolve } from '$app/paths';
 
-export type NavItem = { href: RouteId; label: string };
+/** `href` is already resolved (base path included), so it can go straight into a link. */
+export type NavItem = { href: string; label: string; exact?: boolean };
 export type NavGroup = { label?: string; items: NavItem[] };
 
 export const NAV_GROUPS: NavGroup[] = [
 	{
 		items: [
-			{ href: '/', label: 'Home' },
-			{ href: '/books', label: 'Books' },
-			{ href: '/listings', label: 'Listings' },
-			{ href: '/tasks', label: 'Tasks' }
+			{ href: resolve('/'), label: 'Home', exact: true },
+			{ href: resolve('/books'), label: 'Books' },
+			{ href: resolve('/listings'), label: 'Listings' },
+			{ href: resolve('/tasks'), label: 'Tasks' }
 		]
 	},
 	{
 		label: 'Money',
 		items: [
-			{ href: '/ads', label: 'Ads' },
-			{ href: '/reports', label: 'Reports' },
-			{ href: '/decisions', label: 'Decisions' }
+			{ href: resolve('/ads'), label: 'Ads' },
+			{ href: resolve('/reports'), label: 'Reports' },
+			{ href: resolve('/decisions'), label: 'Decisions' }
 		]
 	},
-	{ label: 'Rhythm', items: [{ href: '/cadence', label: 'Cadence' }] }
+	{ label: 'Rhythm', items: [{ href: resolve('/cadence'), label: 'Cadence' }] }
 ];
 
-export const SETTINGS: NavItem = { href: '/settings', label: 'Settings' };
+export const SETTINGS: NavItem = { href: resolve('/settings'), label: 'Settings' };
 
 /** `href` is the resolved path, so this stays correct under a base path. */
 export function isCurrent(href: string, pathname: string, exact = false): boolean {

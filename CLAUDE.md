@@ -28,6 +28,8 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 - Routes are thin and call `services/` only.
 - The author comes from `event.locals.author`, never from a global. The only auth seam is `authenticate()` in [src/lib/server/auth.ts](src/lib/server/auth.ts). Use `requireAuthor(locals)` in loads and actions.
 - CI must never need an Anthropic API key.
+- SvelteKit's cross-site form check only runs in production builds, not in `npm run dev`. adapter-node needs `ORIGIN` set for it.
+- When testing by hand with curl, run the script under `bash`. The default shell is zsh, which doesn't split an unquoted `$VAR` holding several flags.
 
 ## Workflow
 
@@ -62,6 +64,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-09-27: Books UI (#9). Pen names and series are entered by name, with suggestions from existing ones, and found or created on save. There's no separate screen to manage them yet. Tropes are comma-separated. Heat levels are labelled None, Sweet, Mild, Warm, Steamy, Explicit (0–5). Services take the database handle as their first argument so they can be tested against a real database; routes pass `db` from `db/client.ts`.
 - 2026-09-27: Pen names are optional labels on books and series (#8). The account's display name is whatever the author logs in as, and onboarding never asks about pen names. Keeping a book's pen name consistent with its series' is validated in the service layer (#9), not the database.
 - 2026-09-27: The works schema (#8) uses bounded `varchar` for every text field (a C2 backstop), decimal series positions such as 2.5, `heat_level` as 0–5 or null, and at most 20 tropes. A pen name or series with books can't be deleted until the books are moved.
 - 2026-09-27: Launch marketing is a release-relative, title-scoped playbook (#45). Reminders are one engine for every dated item, with author-chosen lead times (default 7 and 3 days before) and per-kind overrides (#46), both in M1 because a real release needs them. #27 is now email delivery for those reminders. Books gained `release_date` (#8).
@@ -78,4 +81,4 @@ Record decisions that aren't in the spec here, newest first, with a date.
 
 ## Status
 
-- M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), #5 (layout), and #8 (works schema) are done. M0 has only #7 (VPS) left, and it needs the owner's hosting account. Next: #9, then #10.
+- M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), #5 (layout), #8 (works schema), and #9 (books) are done. M0 has only #7 (VPS) left, and it needs the owner's hosting account. Next: #10 (channels and listings).

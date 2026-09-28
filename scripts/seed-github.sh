@@ -180,6 +180,7 @@ mk "Provision VPS with Caddy, Postgres, and nightly backups" \
 - Postgres 18 on the same host, matching the local major version so backups restore cleanly
 - Nightly pg_dump to off-box object storage, with a documented restore that has actually been tested once
 - Deploy documented as a short script or a single command
+- ORIGIN set to the public URL in the app's environment. adapter-node needs it for SvelteKit's cross-site form check, which only runs in production builds
 - Caddy basic auth in front of the whole app. Until real auth exists, the single-account bypass from #4 means anyone who reaches the app is the owner
 
 Avoid per-request serverless pricing and managed database tiers that jump from free to fifty dollars. Target is 10 to 25 dollars a month all in.
