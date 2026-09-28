@@ -22,15 +22,15 @@
 />
 
 {#snippet link(item: NavItem)}
+	<!-- eslint-disable svelte/no-navigation-without-resolve -- nav.ts resolves every href -->
 	<a
-		href={resolve(item.href)}
-		aria-current={isCurrent(resolve(item.href), page.url.pathname, item.href === '/')
-			? 'page'
-			: undefined}
+		href={item.href}
+		aria-current={isCurrent(item.href, page.url.pathname, item.exact) ? 'page' : undefined}
 		class="block rounded-md px-3 py-2 text-fg-muted hover:bg-surface-2 hover:text-fg aria-[current=page]:bg-surface-2 aria-[current=page]:font-medium aria-[current=page]:text-fg"
 	>
 		{item.label}
 	</a>
+	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 {/snippet}
 
 <a
