@@ -123,7 +123,8 @@ channel and marketplace. `author_id` on everything except `channels`.
 - **`pen_names`** — `id`, `author_id`, `name`
 - **`series`** — `id`, `author_id`, `pen_name_id?`, `title`, `planned_count`
 - **`titles`** — `id`, `author_id`, `pen_name_id?`, `series_id?`, `series_position`,
-  `working_title`, `genre`, `subgenre`, `tropes[]`, `heat_level`, `page_count`,
+  `working_title`, `genre`, `subgenre`, `tropes[]`, `content_sex`, `content_violence`,
+  `content_language` (optional 0–5 intensity ratings for any genre), `page_count`,
   `word_count`, `release_date` (planned or actual; the launch timeline counts from it),
   `stage` (`metadata` | `uploaded` | `preorder` | `launch` |
   `post_launch` | `backlist`)

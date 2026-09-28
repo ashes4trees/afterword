@@ -158,8 +158,10 @@ export const titles = pgTable(
 			.array()
 			.notNull()
 			.default(sql`'{}'`),
-		/** 0 (none) to 5 (most explicit); null when heat doesn't apply to the genre. */
-		heatLevel: smallint('heat_level'),
+		/** Content intensity, each 0 (none) to 5 (explicit), or null when not rated (#53). */
+		contentSex: smallint('content_sex'),
+		contentViolence: smallint('content_violence'),
+		contentLanguage: smallint('content_language'),
 		pageCount: integer('page_count'),
 		wordCount: integer('word_count'),
 		/** Planned or actual publication date; the launch timeline counts from it (#45). */
@@ -189,7 +191,9 @@ export const titles = pgTable(
 			sql`${t.seriesPosition} is null or ${t.seriesId} is not null`
 		),
 		check('titles_series_position_positive', sql`${t.seriesPosition} > 0`),
-		check('titles_heat_level_range', sql`${t.heatLevel} between 0 and 5`),
+		check('titles_content_sex_range', sql`${t.contentSex} between 0 and 5`),
+		check('titles_content_violence_range', sql`${t.contentViolence} between 0 and 5`),
+		check('titles_content_language_range', sql`${t.contentLanguage} between 0 and 5`),
 		check('titles_page_count_positive', sql`${t.pageCount} > 0`),
 		check('titles_word_count_positive', sql`${t.wordCount} > 0`),
 		check('titles_tropes_max', sql`cardinality(${t.tropes}) <= 20`)
