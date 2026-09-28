@@ -68,3 +68,23 @@ describe('tenant key convention', () => {
 		}
 	);
 });
+
+describe('C2: no field can hold manuscript text', () => {
+	// Works tables describe the product, never the prose. Every text column is short
+	// and bounded; nothing unbounded (text, jsonb) is allowed on them.
+	const WORKS = ['pen_names', 'series', 'titles'];
+	const MAX_TEXT = 200;
+
+	it.each(WORKS.map((name) => [name, tables.find((t) => t.name === name)!] as const))(
+		'%s has only short, bounded text columns',
+		(_name, table) => {
+			for (const column of table.columns) {
+				const type = column.getSQLType();
+				expect(type, `${column.name} is unbounded`).not.toMatch(/^(text|jsonb?)(\[\])?$/);
+				const length = /^varchar\((\d+)\)/.exec(type)?.[1];
+				if (length)
+					expect(Number(length), `${column.name} is too long`).toBeLessThanOrEqual(MAX_TEXT);
+			}
+		}
+	);
+});
