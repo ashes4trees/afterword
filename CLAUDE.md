@@ -62,6 +62,8 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-09-27: Pen names are optional labels on books and series (#8). The account's display name is whatever the author logs in as, and onboarding never asks about pen names. Keeping a book's pen name consistent with its series' is validated in the service layer (#9), not the database.
+- 2026-09-27: The works schema (#8) uses bounded `varchar` for every text field (a C2 backstop), decimal series positions such as 2.5, `heat_level` as 0–5 or null, and at most 20 tropes. A pen name or series with books can't be deleted until the books are moved.
 - 2026-09-27: Launch marketing is a release-relative, title-scoped playbook (#45). Reminders are one engine for every dated item, with author-chosen lead times (default 7 and 3 days before) and per-kind overrides (#46), both in M1 because a real release needs them. #27 is now email delivery for those reminders. Books gained `release_date` (#8).
 - 2026-09-27: UI shell (#5). Tokens live in [src/lib/styles/tokens.css](src/lib/styles/tokens.css) as a Tailwind v4 `@theme` (`bg-surface`, `text-fg-muted`, `px-gutter`, `font-display`, `text-title`). Dark mode follows the OS only; there's no manual toggle yet. The UI says "Books" where the schema says `titles`. Navigation lives in [src/lib/nav.ts](src/lib/nav.ts), and links go through `resolve()` because the Svelte lint rule requires it. Every section page is a `PageHeader` plus an `EmptyState` that explains what the section is for.
 - 2026-09-27: Row-level security (#39): the app role and its grants come from `scripts/db-setup.ts`, not a migration, because roles belong to the whole server. `authors` is exempt from RLS. The policy predicate uses `nullif(..., '')` because a transaction-local setting reads as `''` after the transaction ends.
@@ -76,4 +78,4 @@ Record decisions that aren't in the spec here, newest first, with a date.
 
 ## Status
 
-- M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), and #5 (layout) are done. M0 has only #7 (VPS) left, and it needs the owner's hosting account. Next up is M1, starting with #8.
+- M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), #5 (layout), and #8 (works schema) are done. M0 has only #7 (VPS) left, and it needs the owner's hosting account. Next: #9, then #10.

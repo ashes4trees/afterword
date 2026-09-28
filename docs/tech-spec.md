@@ -121,14 +121,18 @@ channel and marketplace. `author_id` on everything except `channels`.
   `min_ad_eval_spend_minor`, `currency`, `marketplaces[]`, `default_channels[]`,
   `cadence_ratio`, `reminders` — lead days, with optional per-kind overrides), `created_at`
 - **`pen_names`** — `id`, `author_id`, `name`
-- **`series`** — `id`, `author_id`, `pen_name_id`, `title`, `planned_count`
-- **`titles`** — `id`, `author_id`, `pen_name_id`, `series_id`, `series_position`,
+- **`series`** — `id`, `author_id`, `pen_name_id?`, `title`, `planned_count`
+- **`titles`** — `id`, `author_id`, `pen_name_id?`, `series_id?`, `series_position`,
   `working_title`, `genre`, `subgenre`, `tropes[]`, `heat_level`, `page_count`,
   `word_count`, `release_date` (planned or actual; the launch timeline counts from it),
   `stage` (`metadata` | `uploaded` | `preorder` | `launch` |
   `post_launch` | `backlist`)
 
   Product metadata only. Per **C2**, no field holds manuscript text.
+
+  Pen names are optional labels for authors who publish under several names. The
+  account's `display_name` is simply what the author logs in as, whether that's their
+  real name or a pen name. Onboarding never asks about pen names.
 
 ### The cross product that solves "I lost track"
 

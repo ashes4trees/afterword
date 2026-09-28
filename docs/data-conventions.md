@@ -16,6 +16,18 @@ test. Treat that as a design decision and record it in CLAUDE.md.
 Cascade means deleting an author removes all of their data, which is how account
 deletion will work.
 
+## References between tenant tables
+
+Postgres checks foreign keys without row-level security, so a plain `pen_name_id`
+reference could point at another author's pen name. References between tenant tables
+therefore include `author_id` on both sides: `(author_id, pen_name_id)` references
+`pen_names(author_id, id)`, and every referenced table has `unique (author_id, id)`.
+The schema test fails any reference that skips `author_id`.
+
+A composite key is skipped entirely when any of its columns is null. So never fold an
+optional column into a reference that must always be checked. Give each optional
+reference its own foreign key.
+
 ## Row-level security
 
 Every tenant table also carries the `tenant_isolation` policy. Add it with
