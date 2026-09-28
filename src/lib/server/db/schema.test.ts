@@ -37,6 +37,23 @@ describe('tenant key convention', () => {
 	);
 
 	it.skipIf(tenantTables.length === 0).each(tenantTables.map((t) => [t.name, t] as const))(
+		'%s references other tenant tables only through author_id',
+		(_name, table) => {
+			// Foreign key checks ignore row-level security, so a reference that skips
+			// author_id could point at another author's row.
+			for (const fk of table.foreignKeys.map((f) => f.reference())) {
+				const target = getTableConfig(fk.foreignTable).name;
+				if (EXEMPT.has(target)) continue;
+				const pairs = fk.columns.map((c, i) => [c.name, fk.foreignColumns[i]!.name]);
+				expect(pairs, `reference to ${target} must include author_id`).toContainEqual([
+					'author_id',
+					'author_id'
+				]);
+			}
+		}
+	);
+
+	it.skipIf(tenantTables.length === 0).each(tenantTables.map((t) => [t.name, t] as const))(
 		'%s has the tenant_isolation row-level security policy',
 		(_name, table) => {
 			const policy = table.policies.find((p) => p.name === 'tenant_isolation');
