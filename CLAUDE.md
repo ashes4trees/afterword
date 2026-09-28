@@ -83,5 +83,6 @@ Record decisions that aren't in the spec here, newest first, with a date.
 - 2026-09-27: Second import channel for M2 is Kobo Writing Life (spec §9 Q2).
 
 ## Status
+- Manual test checklists live in [docs/manual-tests.md](docs/manual-tests.md). Add a section whenever a screen is ready to test by hand.
 
 - M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), #5 (layout), #8 (works schema), #9 (books), #10 (channels and listings), and #53 (content intensity) are done. M0 has only #7 (VPS) left, and it needs the owner's hosting account. Next: #11 (listing matrix).
