@@ -213,6 +213,7 @@ mk "Migration: pen names, series, and titles" \
 - Tables for pen_names, series, titles per spec section 5
 - stage enum: metadata, uploaded, preorder, launch, post_launch, backlist
 - Multi pen name and multi series supported from the first migration, not bolted on
+- Pen names are optional labels on books and series, never required. The account's display name is separate: it's whatever name the author logs in as
 - \`release_date\` on titles (date, nullable): the planned or actual publication date. The launch timeline (#45) counts from it
 
 Spec: section 5
@@ -228,6 +229,8 @@ mk "Titles CRUD with product metadata only" \
 - No field anywhere accepts prose: no blurb body, no excerpt, no synopsis, no notes field large enough to invite pasting a chapter
 - A test asserting the titles schema contains no free-text column beyond working_title and short enumerated values
 - Copy in the UI that says plainly: we ask about your book, not for your book
+- Pen name is an optional field on a book. When a book joins a series that has a pen name, default to that pen name, and warn if the two differ
+- Onboarding never asks about pen names. It explains that the account name can be the author's real name or any pen name, and that books can be labelled with pen names later if that's useful
 
 Ask about the product, not the prose. This is what makes positioning help possible without a manuscript ever entering the system.
 
@@ -349,7 +352,7 @@ Onboarding deliberately does not ask which channels an author uses. Many will us
 - Adding a title shows a channel checklist, and confirming it creates one not_started listing per checked channel
 - Pre-selection, first match wins:
   1. The author's default_channels preference, if they have set it explicitly
-  2. The channels of their most recent title under the same pen name that has listings
+  2. If the new title has a pen name: the channels of their most recent title under that pen name that has listings
   3. The channels of their most recent title with listings, under any pen name
   4. Nothing checked
 - The UI says where the suggestion came from, for example \"Same as Book 4\" or \"Your default channels\"
