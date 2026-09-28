@@ -64,6 +64,8 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-09-27: Listings (#10) are one row per title, channel, and marketplace. A null marketplace is the channel default, unique with `NULLS NOT DISTINCT`. `returnable` stays a boolean as in the spec, even though IngramSpark offers "deliver" or "destroy" for returns; revisit when #12 builds the Ingram settings. Channel capabilities (`formats`, `exclusivity`, `wholesaleDiscount`, `returns`, `aggregator`) live in `src/lib/shared/channels.ts`.
+- 2026-09-27: Heat level is romance-only, so it will be replaced by optional content intensity ratings (sex, violence, language, each 0–5) for every genre (#53, after #10). Genre-aware fields from a content pack are deferred until positioning needs a controlled genre list.
 - 2026-09-27: Books UI (#9). Pen names and series are entered by name, with suggestions from existing ones, and found or created on save. There's no separate screen to manage them yet. Tropes are comma-separated. Heat levels are labelled None, Sweet, Mild, Warm, Steamy, Explicit (0–5). Services take the database handle as their first argument so they can be tested against a real database; routes pass `db` from `db/client.ts`.
 - 2026-09-27: Pen names are optional labels on books and series (#8). The account's display name is whatever the author logs in as, and onboarding never asks about pen names. Keeping a book's pen name consistent with its series' is validated in the service layer (#9), not the database.
 - 2026-09-27: The works schema (#8) uses bounded `varchar` for every text field (a C2 backstop), decimal series positions such as 2.5, `heat_level` as 0–5 or null, and at most 20 tropes. A pen name or series with books can't be deleted until the books are moved.
@@ -81,4 +83,4 @@ Record decisions that aren't in the spec here, newest first, with a date.
 
 ## Status
 
-- M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), #5 (layout), #8 (works schema), and #9 (books) are done. M0 has only #7 (VPS) left, and it needs the owner's hosting account. Next: #10 (channels and listings).
+- M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), #5 (layout), #8 (works schema), #9 (books), and #10 (channels and listings) are done. M0 has only #7 (VPS) left, and it needs the owner's hosting account. Next: #53 (content intensity), then #11 (listing matrix).

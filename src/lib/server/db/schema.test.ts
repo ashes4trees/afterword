@@ -88,3 +88,29 @@ describe('C2: no field can hold manuscript text', () => {
 		}
 	);
 });
+
+describe('channels reference table', () => {
+	const channels = tables.find((t) => t.name === 'channels')!;
+
+	it('can be read but has no write policy, so the app cannot change it', () => {
+		expect(channels.policies.map((p) => [p.name, p.for])).toEqual([['channels_read', 'select']]);
+	});
+});
+
+describe('money convention', () => {
+	// Money is integer minor units next to an explicit currency (spec §2, invariant 6).
+	const moneyColumns = tables.flatMap((t) =>
+		t.columns
+			.filter((c) => c.name.endsWith('_minor'))
+			.map((c) => [`${t.name}.${c.name}`, t, c] as const)
+	);
+
+	it('finds the money columns', () => {
+		expect(moneyColumns.length).toBeGreaterThan(0);
+	});
+
+	it.each(moneyColumns)('%s is an integer next to a currency column', (_name, table, column) => {
+		expect(column.getSQLType()).toMatch(/^(integer|bigint)$/);
+		expect(table.columns.map((c) => c.name)).toContain('currency');
+	});
+});

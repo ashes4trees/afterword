@@ -46,11 +46,19 @@ it's missing.
 - `src/lib/server/db/tenant.integration.test.ts` proves the pattern against a real
   database.
 
+## Reference tables
+
+Global reference data, such as `channels`, has no `author_id`. It's seeded by
+migration from a constant in `src/lib/shared/` and gets a select-only RLS policy, so the
+app role can read it but never write it, whatever that role is called. An integration
+test checks that the seeded rows match the constant. Changing the constant means adding
+a new migration.
+
 ## Money
 
 - Store money as integer **minor units** (cents, pence) in a column named `*_minor`.
   Never use floats, and never use `numeric` for amounts.
-- Every money column sits next to an explicit `currency` column holding an ISO 4217 code.
+- Every money column sits next to an explicit `currency` column holding an ISO 4217 code. A schema test enforces both the integer type and the neighbouring `currency` column.
 - Never convert between currencies. Store the currency you received and display it as is.
 
 ## Metrics

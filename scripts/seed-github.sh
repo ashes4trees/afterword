@@ -409,6 +409,21 @@ mk "UI polish pass" \
 
 Spec: section 3"
 
+mk "Content intensity instead of heat level" \
+  "M1 Organized truth" "type:feat,area:data,size:S" \
+"Heat level is a romance convention. For most other genres it's noise, and positioning is already carried by subgenre (cozy vs. extreme horror, cozy vs. hardboiled mystery). Replace it with an optional content intensity rating that applies to any genre, the way clean-fiction and parents' guides do.
+
+**Acceptance**
+- Replace heat_level with three optional ratings: sex, violence, and language. Each is 0 (none) to 5 (explicit), or null when the author doesn't rate it
+- A migration moves existing heat_level values into the sex rating
+- The book form gets a \"Content intensity (optional)\" section, collapsed by default, with a plain-language label for each level of each rating
+- The same bounds as today: 0–5 checks in both the database and the Zod schema
+- Not here: genre-aware fields driven by a content pack. That comes later, once positioning needs a controlled genre list
+
+Do this after #10.
+
+Spec: sections 1.1 (C2), 5"
+
 mk "Account deletion with export offered first" \
   "M1 Organized truth" "type:feat,area:data,size:S" \
 "An author who leaves can delete everything. The database side already exists: every author_id cascades on delete from authors (#2).
