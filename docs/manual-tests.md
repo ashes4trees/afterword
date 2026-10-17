@@ -30,6 +30,7 @@ Open a book, then the **Launch timeline** tab, and scroll to **Ideas**.
 - [ ] The "Reveal your tropes" idea is a key date: once added, it shows in Coming up when it's near
 - [ ] Unboxing only appears for books with a print format
 - [ ] Moving the release date doesn't move or remove added ideas or your own steps
+- [ ] "Have an idea other authors would love? Suggest it" at the end of Ideas opens GitHub's "Suggest a promo idea" form in a new tab, asking for the idea, when it fits, timing, why it works, and sharing consent
 
 ---
 

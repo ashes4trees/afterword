@@ -54,6 +54,7 @@ if [[ "$PHASE" == "all" || "$PHASE" == "labels" ]]; then
   label "size:L"        "a9a9a9" "Multiple days"
 
   label "constraint"    "e11d48" "Enforces a hard product constraint (C1-C5)"
+  label "idea-suggestion" "a2eeef" "A promo idea suggested by a user, awaiting review"
   label "blocked"       "000000" "Waiting on something external"
 fi
 
@@ -509,6 +510,33 @@ mk "Promo ideas library: optional social moments to add to a timeline" \
 Build after #46.
 
 Spec: sections 1.1, 6.1"
+
+mk "My ideas: save your own promo ideas to reuse across books" \
+  "M1 Organized truth" "type:feat,area:ui,size:M" \
+"A private library of the author's own promo ideas, which they can add to any book's timeline alongside the shared ideas. No moderation is needed, because nobody else ever sees them.
+
+**Acceptance**
+- An author_ideas table, under row-level security like every tenant table: a label (120 characters max), an optional short note, a phase, an optional timing window relative to release, and a repeatable flag
+- \"Save to my ideas\" when adding your own step, and a \"My ideas\" group in the Ideas section with add, edit, and delete
+- Adding one of your ideas to a book works like a shared idea: a suggested date, weekly repeats, and a tag on the timeline
+- Your ideas never appear for another author. \"Not for this book\" works for them too
+- No post content: the label and note are short, bounded text (C2)
+
+Spec: sections 1.1 (C2), 6.1"
+
+mk "Suggest an idea for everyone, via GitHub" \
+  "M1 Organized truth" "type:feat,area:content,size:S" \
+"A lightweight way for users to suggest promo ideas for the shared library, vetted by the maintainer before anything ships. The repo is public, so this uses GitHub issues rather than in-app moderation. An in-app community library stays deliberately later (spec §9.4).
+
+**Acceptance**
+- A GitHub issue form (.github/ISSUE_TEMPLATE/promo-idea.yml) asks for the idea, its phase, its timing, and why it works, and labels the issue idea-suggestion
+- A \"Suggest an idea for everyone\" link at the end of the Ideas section opens that form in a new tab
+- Accepted suggestions are rewritten in the brand voice and added to the ideas pack with a version bump. Nothing a user submits appears in the app unreviewed
+- CLAUDE.md explains how to triage suggestions
+
+Related: private ideas are #91.
+
+Spec: sections 6.1, 9.4"
 
 mk "Account deletion with export offered first" \
   "M1 Organized truth" "type:feat,area:data,size:S" \

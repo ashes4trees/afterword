@@ -1,0 +1,48 @@
+name: Suggest a promo idea
+description: Suggest an idea for the shared promo ideas library in Afterword.
+title: 'Idea: '
+labels: ['idea-suggestion']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing! Every idea is reviewed before it's added, and may be reworded to fit
+        the app's voice. Describe the kind of post or activity, not the post itself.
+  - type: input
+    id: idea
+    attributes:
+      label: The idea
+      placeholder: Share a map of your book's world
+    validations:
+      required: true
+  - type: dropdown
+    id: phase
+    attributes:
+      label: When does it fit?
+      options:
+        - While writing
+        - Before launch
+        - Launch week
+        - After launch
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: timing
+    attributes:
+      label: Best timing (optional)
+      placeholder: About a month before release
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it works
+      description: What does it do for readers or for the launch?
+    validations:
+      required: true
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Sharing
+      options:
+        - label: I'm happy for this idea to be reworded and shared with every author using Afterword.
+          required: true

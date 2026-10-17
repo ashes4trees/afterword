@@ -5,6 +5,7 @@
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import { daysBetween, dueDistance, formatDate } from '$lib/shared/dates';
 	import { PHASE_LABELS, describeWindow } from '$lib/shared/ideas';
+	import { SUGGEST_IDEA_URL } from '$lib/shared/links';
 
 	let { data, form } = $props();
 
@@ -337,6 +338,20 @@
 				</ul>
 			</details>
 		{/if}
+
+		<p class="mt-6 text-sm text-fg-muted">
+			Have an idea other authors would love?
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external site -->
+			<a
+				href={SUGGEST_IDEA_URL}
+				target="_blank"
+				rel="external noopener"
+				class="font-medium text-accent hover:underline"
+				>Suggest it<span class="sr-only"> (opens GitHub in a new tab)</span><span aria-hidden="true"
+					>&nbsp;↗</span
+				></a
+			>
+		</p>
 
 		{#if data.timeline.ideasAsOf}
 			<p class="mt-4 text-xs text-fg-muted">

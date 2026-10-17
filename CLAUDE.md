@@ -55,6 +55,13 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 - Playbook packs: see spec §6.1 and [src/lib/server/content/schema.ts](src/lib/server/content/schema.ts). Each pack needs `as_of` (not in the future) and at least one source. Folder and file name must match `channel` (or `title`) and `pack`. Steps can carry `due` (relative to `release_date`), `milestone`, `formats`, `fields`, `gotchas`, and `preconditions` (other step ids or `PLAYBOOK_FACTS`). Bump `version` when a pack's advice changes. `kind: ideas` packs (#84) hold optional ideas: each step needs a `phase`, uses a `window` instead of `due`, and may be `repeatable`.
 
+## Idea suggestions
+
+Users suggest shared promo ideas through the GitHub issue form (`.github/ISSUE_TEMPLATE/promo-idea.yml`, label `idea-suggestion`, #92). To triage one:
+- Close it if it describes post content rather than a kind of post, or if it's off-topic or a duplicate. Leave a kind note.
+- If it's worth adding, rewrite it in the brand voice, give it a `phase` and a `window` (and `repeatable` if it fits), add it to `content/playbooks/title/promo-ideas.yaml`, bump `version`, and reference the issue in the PR.
+- Nothing a user submits reaches the app unreviewed.
+
 ## Brand voice
 
 Applies to playbook advice and all UI copy (hints, empty states, errors).
