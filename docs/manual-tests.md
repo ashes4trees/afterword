@@ -57,7 +57,7 @@ At http://localhost:5173/books
 
 **Editing and deleting**
 - [ ] Click a book in the list, change its stage and release date, and save. The list shows the new stage and date
-- [ ] Tropes come back as comma-separated text
+- [ ] Tropes come back as chips
 - [ ] Delete a book. A confirmation appears first, and the book is gone afterwards
 - [ ] Visiting a made-up book address, such as /books/nope, shows "not found"
 
