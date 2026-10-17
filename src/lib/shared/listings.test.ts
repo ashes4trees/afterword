@@ -32,6 +32,19 @@ describe('matrixChannels', () => {
 	it('never hides every column', () => {
 		expect(matrixChannels(channels, ['kdp', 'kobo', 'ingram'])).toEqual(channels);
 	});
+
+	it('can show only channels in use, within the chosen ones', () => {
+		const ls = [listing({ channelSlug: 'kobo' }), listing({ channelSlug: 'ingram' })];
+		expect(matrixChannels(channels, [], true, ls).map((c) => c.slug)).toEqual(['kobo', 'ingram']);
+		expect(matrixChannels(channels, ['ingram'], true, ls).map((c) => c.slug)).toEqual(['kobo']);
+	});
+
+	it('falls back to the chosen channels when none are in use', () => {
+		expect(matrixChannels(channels, ['kobo'], true, []).map((c) => c.slug)).toEqual([
+			'kdp',
+			'ingram'
+		]);
+	});
 });
 
 describe('matrixCells', () => {

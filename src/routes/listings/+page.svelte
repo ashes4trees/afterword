@@ -25,12 +25,20 @@
 		statusCounts,
 		type MatrixCell
 	} from '$lib/shared/listings';
+	import { withQuery } from '$lib/shared/query';
 	import { STAGE_LABELS } from '$lib/shared/titles';
 
 	let { data, form } = $props();
 
 	// Every store shows except the ones the author hid in the Stores menu.
-	const channels = $derived(matrixChannels([...CHANNELS], data.hiddenChannels));
+	// A view option, not a saved setting: it follows the listings as they change.
+	const onlyInUse = $derived(page.url.searchParams.get('stores') === 'used');
+	const channels = $derived(
+		matrixChannels([...CHANNELS], data.hiddenChannels, onlyInUse, data.listings)
+	);
+	const inUseHref = $derived(
+		withQuery(resolve('/listings'), page.url.searchParams, { stores: onlyInUse ? null : 'used' })
+	);
 	const listingsPerStore = $derived(
 		Object.fromEntries(
 			CHANNELS.map((c) => [c.slug, data.listings.filter((l) => l.channelSlug === c.slug).length])
@@ -98,7 +106,11 @@
 			<summary
 				class="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-surface-2"
 			>
-				Stores{data.hiddenChannels.length ? ` (${data.hiddenChannels.length} hidden)` : ''}
+				Stores{onlyInUse
+					? ' (in use)'
+					: data.hiddenChannels.length
+						? ` (${data.hiddenChannels.length} hidden)`
+						: ''}
 			</summary>
 			<form
 				method="POST"
@@ -110,6 +122,24 @@
 						if (result.type === 'success' && storesMenu) storesMenu.open = false;
 					}}
 			>
+				<!-- eslint-disable svelte/no-navigation-without-resolve -- built on resolve() -->
+				<a
+					href={inUseHref}
+					data-sveltekit-replacestate
+					data-sveltekit-noscroll
+					onclick={() => storesMenu && (storesMenu.open = false)}
+					class="mb-4 flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm hover:bg-surface-2"
+				>
+					<span
+						class={[
+							'flex size-4 items-center justify-center rounded-sm border',
+							onlyInUse ? 'border-accent bg-accent text-accent-fg' : 'border-fg-muted'
+						]}
+						aria-hidden="true">{onlyInUse ? '✓' : ''}</span
+					>
+					Only show stores in use
+				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				<fieldset>
 					<legend class="mb-2 text-sm text-fg-muted">Show these stores in the grid</legend>
 					<ul class="space-y-1.5">
