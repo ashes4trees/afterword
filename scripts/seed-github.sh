@@ -655,7 +655,9 @@ mk "Email delivery for reminders" \
 **Acceptance**
 - A scheduled job sends the reminders that the engine from #46 says are due, including decision commits_until dates from #26
 - Resend on its free tier
-- One digest per author per run, never one email per item
+- At most one reminder email per author per day. Everything due that day goes into that single digest: every kind (key dates, commitment dates, and later cadence) and every book. Never one email per item, per milestone, or per book
+- Within the digest, items are grouped by book, then ordered by date, with overdue items first
+- A test sends a day with several milestones across several books and asserts exactly one email
 - A sent log, so the same reminder is never sent twice even if the job reruns
 - Unsubscribe is respected, and lead times come from the author's reminder preference (#46)
 - No model call involved
