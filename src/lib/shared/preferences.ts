@@ -1,11 +1,19 @@
 import { z } from 'zod';
 import { CHANNEL_SLUGS } from './channels';
+import { REMINDER_KINDS } from './reminders';
 
 // Author-tunable configuration (spec §2 invariant 4, §5). Stored sparse in
 // authors.preferences: only the keys the author has set. Defaults resolve at read
 // time, so changing a default here applies to every account that hasn't set that key.
 
 const unique = <T>(xs: T[]) => new Set(xs).size === xs.length;
+
+/** Days before a date to be reminded: up to five, each 0 (the day itself) to 90. */
+const leadDays = z
+	.array(z.int().min(0).max(90))
+	.max(5, 'up to five reminder times')
+	.refine(unique, 'duplicate reminder time')
+	.transform((ds) => [...ds].sort((a, b) => b - a));
 
 export const preferenceFields = {
 	/** Target ad spend ÷ attributed sales. Above 1 is allowed: KU authors often accept it for read-through. */
@@ -28,6 +36,11 @@ export const preferenceFields = {
 		.array(z.enum(CHANNEL_SLUGS))
 		.max(CHANNEL_SLUGS.length - 1, 'Keep at least one store visible')
 		.refine(unique, 'duplicate channel'),
+	/** When to be reminded (#46): default lead times, optionally overridden per kind. */
+	reminders: z.strictObject({
+		lead_days: leadDays,
+		by_kind: z.partialRecord(z.enum(REMINDER_KINDS), leadDays).default({})
+	}),
 	/** Share of scheduled posts that are promotional, 0–1. */
 	cadence_ratio: z.number().min(0).max(1)
 };
@@ -46,6 +59,7 @@ export const DEFAULT_PREFERENCES: Readonly<Preferences> = Object.freeze({
 	marketplaces: ['US'],
 	default_channels: [],
 	hidden_channels: [],
+	reminders: { lead_days: [7, 3], by_kind: {} },
 	cadence_ratio: 0.2
 });
 

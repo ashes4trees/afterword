@@ -1,5 +1,5 @@
-import { and, eq, inArray } from 'drizzle-orm';
-import { tasks } from '$lib/server/db/schema';
+import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
+import { tasks, titles } from '$lib/server/db/schema';
 import type { Executor } from '$lib/server/db/types';
 import type { PlannedTask } from '$lib/server/engine/tasks';
 
@@ -58,4 +58,29 @@ export async function updateTask(
 export async function deleteTasks(tx: Executor, authorId: string, ids: string[]) {
 	if (ids.length === 0) return;
 	await tx.delete(tasks).where(and(eq(tasks.authorId, authorId), inArray(tasks.id, ids)));
+}
+
+/** Open, dated playbook tasks across every book, with each book's title, for reminders. */
+export function listOpenDatedTasks(tx: Executor, authorId: string) {
+	return tx
+		.select({
+			id: tasks.id,
+			titleId: tasks.titleId,
+			bookTitle: titles.workingTitle,
+			pack: tasks.pack,
+			stepId: tasks.stepId,
+			label: tasks.label,
+			dueOn: tasks.dueOn
+		})
+		.from(tasks)
+		.innerJoin(titles, eq(titles.id, tasks.titleId))
+		.where(
+			and(
+				eq(tasks.authorId, authorId),
+				eq(tasks.source, 'playbook'),
+				isNull(tasks.doneAt),
+				isNull(tasks.skippedAt),
+				isNotNull(tasks.dueOn)
+			)
+		);
 }
