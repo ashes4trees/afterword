@@ -5,8 +5,10 @@ import type { Executor } from '$lib/server/db/types';
 import { comingUp, type DatedItem } from '$lib/server/engine/reminders';
 import { packRef } from '$lib/server/engine/tasks';
 import { getPreferences, updatePreferences, type SessionAuthor } from '$lib/server/repo/authors';
+import * as decisionsRepo from '$lib/server/repo/decisions';
 import * as tasksRepo from '$lib/server/repo/tasks';
 import * as works from '$lib/server/repo/works';
+import { CHANNELS, FORMAT_LABELS, type BookFormat } from '$lib/shared/channels';
 import type { Preferences } from '$lib/shared/preferences';
 import { syncTitleTasks } from './tasks';
 
@@ -32,8 +34,31 @@ async function keyDateItems(tx: Executor, authorId: string, packs: Playbook[]) {
 				label: t.label,
 				key: `task:${t.id}`
 			} satisfies DatedItem,
-			titleId: t.titleId
+			link: { kind: 'timeline' as const, titleId: t.titleId }
 		}));
+}
+
+/** Current exclusivity commitments (#12): "your KDP Select term ends in 7 days". */
+async function commitmentItems(tx: Executor, authorId: string) {
+	const rows = await decisionsRepo.listCurrentListingCommitments(tx, authorId);
+	return rows.map((c) => {
+		const store = CHANNELS.find((ch) => ch.slug === c.channelSlug)?.displayName ?? c.channelSlug;
+		return {
+			item: {
+				kind: 'commitment' as const,
+				subject: `${c.bookTitle} · ${FORMAT_LABELS[c.format as BookFormat]}`,
+				date: c.commitsUntil!,
+				label: `${c.choice.replace(/^Enrolled in /, '')} term ends on ${store}`,
+				key: `decision:${c.id}`
+			} satisfies DatedItem,
+			link: {
+				kind: 'listing' as const,
+				titleId: c.titleId,
+				channel: c.channelSlug,
+				format: c.format as BookFormat
+			}
+		};
+	});
 }
 
 /** What's coming up for this author today, with the book each item belongs to. */
@@ -49,15 +74,18 @@ export async function comingUpFor(
 		for (const book of await works.listTitles(tx, author.id)) {
 			await syncTitleTasks(tx, author.id, book.id, packs);
 		}
-		const sources = await keyDateItems(tx, author.id, packs);
-		const titleFor = new Map(sources.map((s) => [s.item.key, s.titleId]));
+		const sources = [
+			...(await keyDateItems(tx, author.id, packs)),
+			...(await commitmentItems(tx, author.id))
+		];
+		const linkFor = new Map(sources.map((s) => [s.item.key, s.link]));
 		return {
 			leadDays: reminders.lead_days,
 			items: comingUp(
 				sources.map((s) => s.item),
 				reminders,
 				today
-			).map((r) => ({ ...r, titleId: titleFor.get(r.key)! }))
+			).map((r) => ({ ...r, link: linkFor.get(r.key)! }))
 		};
 	});
 }

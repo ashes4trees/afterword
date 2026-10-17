@@ -381,3 +381,50 @@ export const ideaDismissals = pgTable(
 		unique('idea_dismissals_title_step_key').on(t.titleId, t.pack, t.stepId)
 	]
 );
+
+// ---------------------------------------------------------------- decisions (#12, #26)
+
+export const decisionKind = pgEnum('decision_kind', [
+	'enrollment',
+	'pricing',
+	'distribution',
+	'promo',
+	'ads'
+]);
+export const decisionSource = pgEnum('decision_source', ['author', 'engine', 'agent']);
+
+/**
+ * Append-only (spec §2, invariant 5): a decision is never edited. A new decision about the
+ * same subject is a new row, and the old row's superseded_by points at it. That pointer is
+ * the only change a trigger allows (migration 0011). commits_until drives reminders such as
+ * a KDP Select term about to renew.
+ */
+export const decisions = pgTable(
+	'decisions',
+	{
+		id: uuid('id')
+			.primaryKey()
+			.default(sql`uuidv7()`),
+		authorId: authorId(),
+		subjectType: varchar('subject_type', { length: 40 }).notNull(),
+		subjectId: uuid('subject_id').notNull(),
+		kind: decisionKind('kind').notNull(),
+		/** Short, plain statement of what was decided, such as "Enrolled in KDP Select". */
+		choice: varchar('choice', { length: 200 }).notNull(),
+		rationale: varchar('rationale', { length: 500 }),
+		assumptions: jsonb('assumptions').notNull().default({}),
+		commitsUntil: date('commits_until'),
+		source: decisionSource('source').notNull(),
+		decidedAt: timestamp('decided_at', { withTimezone: true }).notNull().defaultNow(),
+		supersededBy: uuid('superseded_by')
+	},
+	(t) => [
+		tenantPolicy(),
+		unique('decisions_author_id_id_key').on(t.authorId, t.id),
+		foreignKey({
+			name: 'decisions_superseded_by_fk',
+			columns: [t.authorId, t.supersededBy],
+			foreignColumns: [t.authorId, t.id]
+		})
+	]
+);

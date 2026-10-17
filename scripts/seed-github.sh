@@ -674,7 +674,9 @@ mk "Migration and UI: append-only decision log" \
 - Timeline view per title and across the account
 - Each entry shows choice, rationale, assumptions, source, and any commitment date
 
-Spec: sections 2 (invariant 5), 5"
+Spec: sections 2 (invariant 5), 5
+
+The decisions table, the append-only trigger, and KDP Select enrollment decisions landed with #12, and current commitments already feed Coming up. What's left here is the decision log UI, plus recording other kinds of decisions."
 
 mk "Email delivery for reminders" \
   "M2 Engine" "type:feat,area:infra,size:M" \

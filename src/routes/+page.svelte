@@ -46,7 +46,13 @@
 				{#each data.items as item (item.key)}
 					<li>
 						<a
-							href={resolve('/books/[id]/timeline', { id: item.titleId })}
+							href={item.link.kind === 'listing'
+								? resolve('/listings/[titleId]/[channel]/[format]', {
+										titleId: item.link.titleId,
+										channel: item.link.channel,
+										format: item.link.format
+									})
+								: resolve('/books/[id]/timeline', { id: item.link.titleId })}
 							class="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 hover:bg-surface-2"
 						>
 							<div class="min-w-0 flex-1">
