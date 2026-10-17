@@ -34,7 +34,8 @@ At http://localhost:5173/listings
 - [ ] Cmd- or Ctrl-click on a cell opens the listing's own page in a new tab. That page can also change status and returns you to the grid
 
 **Which stores show**
-- [ ] Once any book has a listing, only stores in use (plus any default stores in settings) show, and "Show all stores (+N)" adds the rest. "Show my stores" goes back
+- [ ] All stores always show, even after listing a book somewhere, so any book can be listed on any store from the grid
+- [ ] "Hide N unused stores" narrows to stores in use (plus any default stores in settings), and "Show all stores (+N)" brings them back
 - [ ] KDP Select shows "Select · until <date>" in its cell. Settable once #12 adds Select fields
 
 **Phone width**
