@@ -84,6 +84,7 @@ const titleColumns = {
 	contentLanguage: titles.contentLanguage,
 	pageCount: titles.pageCount,
 	wordCount: titles.wordCount,
+	formats: titles.formats,
 	releaseDate: titles.releaseDate,
 	stage: titles.stage,
 	createdAt: titles.createdAt,

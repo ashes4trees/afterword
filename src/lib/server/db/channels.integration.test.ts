@@ -57,6 +57,7 @@ describe.skipIf(!hasDatabase)('channels and channel listings', () => {
 		authorId: a,
 		titleId: bookA,
 		channelSlug: 'kdp',
+		format: 'ebook' as const,
 		...fields
 	});
 
@@ -92,6 +93,17 @@ describe.skipIf(!hasDatabase)('channels and channel listings', () => {
 		);
 		await expect(
 			asA((tx) => tx.insert(channelListings).values(listing({ marketplace: 'US' })))
+		).rejects.toMatchObject(pgError('23505'));
+	});
+
+	it('keeps each format separate on the same store', async () => {
+		await asA((tx) =>
+			tx
+				.insert(channelListings)
+				.values([listing({ format: 'paperback' }), listing({ format: 'hardcover' })])
+		);
+		await expect(
+			asA((tx) => tx.insert(channelListings).values(listing({ format: 'paperback' })))
 		).rejects.toMatchObject(pgError('23505'));
 	});
 

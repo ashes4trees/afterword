@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { BOOK_FORMATS } from './channels';
 
 // Book metadata as the author enters it (#9). Product facts only, never prose (C2):
 // every text field is short and bounded, matching the varchar limits in schema.ts.
@@ -90,6 +91,20 @@ export const TitleInputSchema = z
 		contentLanguage: rating,
 		pageCount: optional(count('Page count', 10_000)),
 		wordCount: optional(count('Word count', 2_000_000)),
+		formats: z.preprocess(
+			(v) =>
+				typeof v === 'string'
+					? v
+							.split(',')
+							.map((f) => f.trim())
+							.filter(Boolean)
+					: v,
+			z
+				.array(z.enum(BOOK_FORMATS))
+				.min(1, 'Choose at least one format')
+				// One of each, in the standard order.
+				.transform((fs) => BOOK_FORMATS.filter((f) => fs.includes(f)))
+		),
 		releaseDate: optional(z.iso.date('Use a full date')),
 		stage: z.preprocess((v) => (v === '' ? undefined : v), z.enum(TITLE_STAGES).default('metadata'))
 	})
@@ -120,6 +135,7 @@ export function titleFormValues(form: FormData): TitleFormValues {
 		contentLanguage: get('contentLanguage'),
 		pageCount: get('pageCount'),
 		wordCount: get('wordCount'),
+		formats: form.getAll('formats').map(String).join(','),
 		releaseDate: get('releaseDate'),
 		stage: get('stage')
 	};
@@ -138,6 +154,7 @@ export const EMPTY_TITLE_FORM: TitleFormValues = {
 	contentLanguage: '',
 	pageCount: '',
 	wordCount: '',
+	formats: 'ebook,paperback',
 	releaseDate: '',
 	stage: 'metadata'
 };

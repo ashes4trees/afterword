@@ -26,6 +26,13 @@ At http://localhost:5173/listings
 - [ ] Scrolling sideways moves only the grid, with the book column fixed. The page itself never scrolls sideways
 - [ ] Search and the series, pen name, and stage filters work as on Books
 
+**Formats (#72)**
+- [ ] Each book shows a row per format it's published in. Change a book's Formats on its edit page and the rows follow
+- [ ] Cells where a store doesn't sell that format show a faint "—" and aren't clickable, for example Kobo · Paperback or ACX · Ebook
+- [ ] On Amazon KDP, set Ebook to Live and Paperback to In review: two separate cells, two separate statuses
+- [ ] Remove a format from a book that has listings in it: the row stays until those listings are removed
+- [ ] New books start with Ebook and Paperback ticked, and saving with no format shows an error
+
 **Quick edit**
 - [ ] Clicking a cell opens a dialog for that book and store, with the current status highlighted
 - [ ] One click on a status saves it and closes the dialog. A "Not listed" cell becomes listed

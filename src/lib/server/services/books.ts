@@ -60,6 +60,7 @@ async function resolve(
 		contentLanguage: input.contentLanguage,
 		pageCount: input.pageCount,
 		wordCount: input.wordCount,
+		formats: input.formats,
 		releaseDate: input.releaseDate,
 		stage: input.stage
 	};
@@ -99,6 +100,7 @@ export function toFormValues(book: works.TitleRow): TitleFormValues {
 		contentLanguage: str(book.contentLanguage),
 		pageCount: str(book.pageCount),
 		wordCount: str(book.wordCount),
+		formats: book.formats.join(','),
 		releaseDate: book.releaseDate ?? '',
 		stage: book.stage
 	};
