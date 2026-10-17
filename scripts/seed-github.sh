@@ -255,13 +255,15 @@ mk "Build the channel listing matrix view" \
 **Acceptance**
 - Titles down, channels across, each cell showing listing status in both color and shape so state reads at a glance without relying on color alone
 - Outstanding obligations surfaced per cell
-- Filters by pen name, series, and stage
+- Filters by pen name, series, and stage, using the shared filter bar from #64
 - Horizontal scroll contained to the grid; the page body never scrolls sideways
 - Readable at 400px, even if that means a stacked per-title view on narrow screens
 
 This single view is most of the answer to I have lost track. Give it the most design attention of anything in M1.
 
-Spec: section 5"
+Spec: section 5
+
+First step: build the shared filter bar (#64) on the books list, then reuse it here."
 
 mk "Listing detail editor with enrollment and print settings" \
   "M1 Organized truth" "type:feat,area:ui,size:M" \
@@ -423,6 +425,37 @@ mk "Content intensity instead of heat level" \
 Do this after #10.
 
 Spec: sections 1.1 (C2), 5"
+
+mk "Shared filter bar: search and filters for Books and Listings" \
+  "M1 Organized truth" "type:feat,area:ui,size:M" \
+"A search box plus pen name, series, and stage filters, built once and used on the books list now and on the listing matrix (#11). It filters the rows the page has already loaded. App-wide search is separate and later (#63).
+
+**Acceptance**
+- A search box that matches title, series, pen name, genre, subgenre, and tropes as you type, ignoring case and accents
+- Filters for pen name, series, and stage, each shown only when there's more than one option to choose from
+- Everything lives in the URL alongside sort and grouping, so refresh, Back, and shared links keep it
+- A pure matching function in src/lib/shared with unit tests, and one filter bar component reused by both pages
+- \"N of M books\" when filtered, and an empty state with a \"Clear filters\" link when nothing matches
+- Works at 400px: the filters collapse behind a \"Filters\" toggle on narrow screens
+- Used on the books list in this ticket; #11 uses it for the matrix
+
+Build this first, as the first step of #11.
+
+Spec: section 5"
+
+mk "App-wide search" \
+  "" "type:feat,area:ui,size:M" \
+"Type a book, series, or pen name from anywhere and jump to it, along with its listings, tasks, decisions, and campaigns.
+
+**Acceptance**
+- A search field in the app shell, reachable by keyboard shortcut (/ or Cmd+K)
+- Server-side search across the author's books, series, pen names, listings, tasks, decisions, and campaigns, run inside withAuthor() so row-level security applies
+- Results are grouped by type, and each links to its item
+- Postgres full-text or trigram matching, chosen once there's real data to test against
+
+Deliberately later: only worth building after M2, once those pages hold data. Filtering within a page is #64.
+
+Spec: section 4"
 
 mk "Account deletion with export offered first" \
   "M1 Organized truth" "type:feat,area:data,size:S" \
