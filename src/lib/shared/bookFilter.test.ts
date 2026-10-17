@@ -23,15 +23,15 @@ const book = (fields: Partial<FilterableBook>): FilterableBook => ({
 
 const none: BookFilter = { q: '', pen: null, series: null, stage: null };
 const spy = book({
-	workingTitle: 'A Spy Revealed',
-	penName: 'Stevie Summers',
-	seriesTitle: 'Love Unveiled',
+	workingTitle: 'The Glass Archive',
+	penName: 'Ava Marlowe',
+	seriesTitle: 'Harbor Lights',
 	genre: 'Romance',
 	subgenre: 'historical fantasy romance',
 	tropes: ['secret identity', 'kidnapping']
 });
 const gothic = book({
-	workingTitle: 'Test Book',
+	workingTitle: 'Hollow House',
 	genre: 'Horror',
 	subgenre: 'Gothic',
 	stage: 'preorder'
@@ -43,19 +43,19 @@ describe('matchesBook', () => {
 	});
 
 	it.each([
-		['title', 'spy'],
-		['series', 'unveiled'],
-		['pen name', 'stevie'],
+		['title', 'glass'],
+		['series', 'harbor'],
+		['pen name', 'marlowe'],
 		['genre', 'ROMANCE'],
 		['subgenre', 'fantasy'],
 		['a trope', 'kidnap'],
-		['several words across fields', 'secret summers']
+		['several words across fields', 'secret marlowe']
 	])('searches %s', (_label, q) => {
 		expect(matchesBook(spy, { ...none, q })).toBe(true);
 	});
 
 	it('requires every word to match', () => {
-		expect(matchesBook(spy, { ...none, q: 'spy horror' })).toBe(false);
+		expect(matchesBook(spy, { ...none, q: 'glass horror' })).toBe(false);
 	});
 
 	it('ignores accents', () => {
@@ -66,8 +66,8 @@ describe('matchesBook', () => {
 	});
 
 	it('filters by pen name, series, and stage, including "has none"', () => {
-		expect(matchesBook(spy, { ...none, pen: 'stevie summers' })).toBe(true);
-		expect(matchesBook(gothic, { ...none, pen: 'Stevie Summers' })).toBe(false);
+		expect(matchesBook(spy, { ...none, pen: 'ava marlowe' })).toBe(true);
+		expect(matchesBook(gothic, { ...none, pen: 'Ava Marlowe' })).toBe(false);
 		expect(matchesBook(gothic, { ...none, pen: NONE })).toBe(true);
 		expect(matchesBook(spy, { ...none, series: NONE })).toBe(false);
 		expect(matchesBook(gothic, { ...none, stage: 'preorder' })).toBe(true);
@@ -88,8 +88,8 @@ describe('bookFilterFields', () => {
 	it('offers only fields with a real choice, with "none" options where some books lack one', () => {
 		const fields = bookFilterFields([spy, gothic]);
 		expect(fields.map((f) => [f.param, f.options.map((o) => o.label)])).toEqual([
-			['pen', ['Stevie Summers', 'No pen name']],
-			['series', ['Love Unveiled', 'Standalones']],
+			['pen', ['Ava Marlowe', 'No pen name']],
+			['series', ['Harbor Lights', 'Standalones']],
 			['stage', ['Metadata', 'Preorder']]
 		]);
 	});
@@ -99,7 +99,7 @@ describe('bookFilterFields', () => {
 	});
 
 	it('merges values that differ only in case', () => {
-		const fields = bookFilterFields([spy, { ...spy, penName: 'stevie summers' }, gothic]);
-		expect(fields[0]!.options.map((o) => o.label)).toEqual(['Stevie Summers', 'No pen name']);
+		const fields = bookFilterFields([spy, { ...spy, penName: 'ava marlowe' }, gothic]);
+		expect(fields[0]!.options.map((o) => o.label)).toEqual(['Ava Marlowe', 'No pen name']);
 	});
 });
