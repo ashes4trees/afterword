@@ -15,6 +15,22 @@ server started. You're signed in automatically as the author in `DEV_AUTHOR_EMAI
 
 ---
 
+## Launch timeline (#45)
+
+Open a book, then the **Launch timeline** tab.
+
+- [ ] A book with a release date shows 11 dated steps counting back from it, with ★ on milestones. Steps already in the past are outlined in amber as overdue
+- [ ] A book without a release date shows the steps undated, with a link to add a release date
+- [ ] Ticking a step marks it done and strikes it through. Ticking again undoes it. A step waiting on it ("Waiting on: …") stops waiting
+- [ ] "Skip for this book" greys a step out, and "Bring back" restores it
+- [ ] "Change date" sets your own date, labelled "date set by you". Move the book's release date: that step stays put and the rest move. "Back to the schedule" puts it back on the schedule
+- [ ] "Advice" expands the step's details and pitfalls (the KDP 72-hour rule on the preorder step)
+- [ ] The footer shows the timeline's version, as-of date, and sources, and the links open
+- [ ] The ebook-only steps (preorder, final files) disappear for a print-only or audio-only book
+- [ ] At 400px everything wraps and stays usable
+
+---
+
 ## Listings (#11)
 
 At http://localhost:5173/listings
