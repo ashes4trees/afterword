@@ -57,8 +57,8 @@ describe('TitleInputSchema', () => {
 		['a missing working title', { workingTitle: '  ' }, 'workingTitle'],
 		['a position without a series', { seriesPosition: '1' }, 'seriesPosition'],
 		[
-			'a position with three decimals',
-			{ seriesTitle: 'S', seriesPosition: '1.125' },
+			"a position that isn't a whole number or half",
+			{ seriesTitle: 'S', seriesPosition: '1.25' },
 			'seriesPosition'
 		],
 		['a fractional page count', { pageCount: '12.5' }, 'pageCount'],
