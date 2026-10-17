@@ -50,11 +50,22 @@ export type MatrixCell = {
 
 /**
  * Channels shown as columns, in reference order: every channel except the ones the
- * author has hidden (the hidden_channels preference). Never empty.
+ * author has hidden (the hidden_channels preference). With `onlyInUse`, also only
+ * channels where some book has a listing; that view follows the listings as they
+ * change. Never empty: if the result would be empty, the author's chosen channels show.
  */
-export function matrixChannels(all: MatrixChannel[], hidden: string[]): MatrixChannel[] {
-	const shown = all.filter((c) => !hidden.includes(c.slug));
-	return shown.length > 0 ? shown : all;
+export function matrixChannels(
+	all: MatrixChannel[],
+	hidden: string[],
+	onlyInUse = false,
+	listings: Pick<MatrixListing, 'channelSlug'>[] = []
+): MatrixChannel[] {
+	const chosen = all.filter((c) => !hidden.includes(c.slug));
+	const base = chosen.length > 0 ? chosen : all;
+	if (!onlyInUse) return base;
+	const used = new Set(listings.map((l) => l.channelSlug));
+	const inUse = base.filter((c) => used.has(c.slug));
+	return inUse.length > 0 ? inUse : base;
 }
 
 export function matrixCells(
