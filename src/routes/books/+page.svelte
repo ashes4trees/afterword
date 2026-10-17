@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import EmptyState from '$lib/components/EmptyState.svelte';
 	import PageHeader from '$lib/components/PageHeader.svelte';
+	import { confirmDeleteBook } from '$lib/components/confirmDelete';
 	import {
 		BOOK_SORTS,
 		SORT_LABELS,
@@ -13,7 +15,7 @@
 	} from '$lib/shared/bookList';
 	import { STAGE_LABELS } from '$lib/shared/titles';
 
-	let { data } = $props();
+	let { data, form } = $props();
 
 	// View settings live in the URL, so refresh and back keep them.
 	const sort = $derived<BookSort>(
@@ -64,6 +66,15 @@
 		{/snippet}
 	</EmptyState>
 {:else}
+	<!-- Always present so screen readers announce the message when it appears. -->
+	<p role="status" class="text-sm">
+		{#if form?.deleted}
+			<span class="mt-4 block">Deleted “{form.deleted}”.</span>
+		{:else if form?.deleteError}
+			<span class="mt-4 block text-danger">{form.deleteError}</span>
+		{/if}
+	</p>
+
 	<!-- eslint-disable svelte/no-navigation-without-resolve -- viewHref and addToSeriesHref build on resolve() -->
 	<div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
 		<nav aria-label="Sort books" class="flex items-center gap-2">
@@ -131,10 +142,10 @@
 
 			<ul class="divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface">
 				{#each group.books as book (book.id)}
-					<li>
+					<li class="flex items-stretch hover:bg-surface-2">
 						<a
 							href={resolve('/books/[id]', { id: book.id })}
-							class="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 hover:bg-surface-2"
+							class="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1 py-3 pl-4"
 						>
 							{#if grouped && book.seriesPosition !== null}
 								<span
@@ -177,6 +188,39 @@
 								</span>
 							</div>
 						</a>
+						<form
+							method="POST"
+							action="?/delete"
+							class="flex"
+							use:enhance={({ cancel }) => {
+								if (!confirmDeleteBook(book.workingTitle)) return cancel();
+								return async ({ update }) => update({ reset: false });
+							}}
+						>
+							<input type="hidden" name="id" value={book.id} />
+							<input type="hidden" name="title" value={book.workingTitle} />
+							<button
+								type="submit"
+								aria-label="Delete {book.workingTitle}"
+								title="Delete"
+								class="px-3 text-fg-muted hover:text-danger focus-visible:text-danger"
+							>
+								<svg
+									viewBox="0 0 24 24"
+									class="size-5"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.75"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									aria-hidden="true"
+								>
+									<path
+										d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"
+									/>
+								</svg>
+							</button>
+						</form>
 					</li>
 				{/each}
 			</ul>

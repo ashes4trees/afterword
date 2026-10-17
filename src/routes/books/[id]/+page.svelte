@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import BookForm from '$lib/components/BookForm.svelte';
 	import PageHeader from '$lib/components/PageHeader.svelte';
+	import { confirmDeleteBook } from '$lib/components/confirmDelete';
 
 	let { data, form } = $props();
 </script>
@@ -21,7 +22,7 @@
 	action="?/delete"
 	class="mt-10 border-t border-border pt-6"
 	use:enhance={({ cancel }) => {
-		if (!confirm(`Delete “${data.title}”? This can't be undone.`)) cancel();
+		if (!confirmDeleteBook(data.title)) cancel();
 	}}
 >
 	<button
