@@ -24,17 +24,20 @@ const listing = (fields: Partial<MatrixListing>): MatrixListing => ({
 });
 
 describe('matrixChannels', () => {
-	it('shows every channel to an author with no listings', () => {
+	it('shows every channel by default, even once some are in use', () => {
 		expect(matrixChannels(channels, [], [], false)).toEqual(channels);
+		expect(matrixChannels(channels, [listing({ channelSlug: 'kdp' })], [], false)).toEqual(
+			channels
+		);
 	});
 
-	it('shows channels in use plus defaults, in reference order', () => {
-		const shown = matrixChannels(channels, [listing({ channelSlug: 'ingram' })], ['kdp'], false);
+	it('when hiding unused stores, shows channels in use plus defaults, in reference order', () => {
+		const shown = matrixChannels(channels, [listing({ channelSlug: 'ingram' })], ['kdp'], true);
 		expect(shown.map((c) => c.slug)).toEqual(['kdp', 'ingram']);
 	});
 
-	it('shows everything when asked', () => {
-		expect(matrixChannels(channels, [listing({})], [], true)).toEqual(channels);
+	it('never hides every column', () => {
+		expect(matrixChannels(channels, [], [], true)).toEqual(channels);
 	});
 });
 

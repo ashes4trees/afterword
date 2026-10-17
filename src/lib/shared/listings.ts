@@ -49,19 +49,21 @@ export type MatrixCell = {
 };
 
 /**
- * Channels shown as columns: every channel already in use plus the author's default
- * channels, in the reference order. A new author with no listings sees every channel,
- * and so does "Show all stores".
+ * Channels shown as columns, in reference order. Every channel shows by default, so
+ * any book can be listed anywhere from the grid. "Hide unused stores" narrows it to
+ * channels already in use plus the author's default channels, unless that would
+ * leave nothing to show.
  */
 export function matrixChannels(
 	all: MatrixChannel[],
 	listings: MatrixListing[],
 	defaultChannels: string[],
-	showAll: boolean
+	hideUnused: boolean
 ): MatrixChannel[] {
-	if (showAll || listings.length === 0) return all;
+	if (!hideUnused) return all;
 	const used = new Set([...listings.map((l) => l.channelSlug), ...defaultChannels]);
-	return all.filter((c) => used.has(c.slug));
+	const shown = all.filter((c) => used.has(c.slug));
+	return shown.length > 0 ? shown : all;
 }
 
 export function matrixCells(
