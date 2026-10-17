@@ -59,6 +59,8 @@ At http://localhost:5173/books
 - [ ] Click a book in the list, change its stage and release date, and save. The list shows the new stage and date
 - [ ] Tropes come back as chips
 - [ ] Delete a book. A confirmation appears first, and the book is gone afterwards
+- [ ] On the list, the trash icon on a row asks the same confirmation. Cancel leaves the book alone. Confirm removes it, shows "Deleted …", and keeps your sort and grouping
+- [ ] Tab reaches each trash icon, and a screen reader reads "Delete" plus the book's title
 - [ ] Visiting a made-up book address, such as /books/nope, shows "not found"
 
 **Unsaved changes**
