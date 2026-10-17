@@ -538,6 +538,26 @@ Related: private ideas are #91.
 
 Spec: sections 6.1, 9.4"
 
+mk "Playwright end-to-end tests for the critical browser flows" \
+  "M1 Organized truth" "type:chore,area:infra,size:M" \
+"Browser end-to-end tests for the flows that only work with JavaScript in a real browser, which unit and HTTP tests can't reach. They run in CI on every PR, so a merge that breaks one of these flows is blocked.
+
+**Acceptance**
+- Playwright, running against a production build in CI with the existing Postgres 18 service. Each run signs in as a throwaway author (DEV_AUTHOR_EMAIL) and never touches anyone's data
+- Flows covered:
+  - Books: add a book with trope chips and a series, search as you type, sort and group, delete from the list
+  - Listings: open a cell's dialog, set a status, then follow \"Edit price, store ID, and more\" to save a price and a KDP Select term
+  - Timeline: tick a step, add an idea weekly ×2, hide and restore an idea, add your own step
+  - Unsaved changes: leaving a dirty form via a nav link asks first
+  - Settings: change reminder times from Home's link, Save returns to Home, and Coming up reflects it
+- At least one flow at 400px width
+- No step needs secrets or an Anthropic API key
+- Runs in a reasonable time for every PR (aim for under 3 minutes)
+
+Build after the owner's manual QA, so it locks in what they've signed off on.
+
+Spec: section 3"
+
 mk "Account deletion with export offered first" \
   "M1 Organized truth" "type:feat,area:data,size:S" \
 "An author who leaves can delete everything. The database side already exists: every author_id cascades on delete from authors (#2).
