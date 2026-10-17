@@ -119,6 +119,7 @@ channel and marketplace. `author_id` on everything except `channels`.
 - **`authors`** — `id`, `email`, `display_name`, `ai_mode` (`off` | `byok` | `managed`),
   `preferences` jsonb (Zod-validated: `target_acos`, `min_ad_eval_days`,
   `min_ad_eval_spend_minor`, `currency`, `marketplaces[]`, `default_channels[]`,
+  `hidden_channels[]` (stores left out of the listing matrix),
   `cadence_ratio`, `reminders` — lead days, with optional per-kind overrides), `created_at`
 - **`pen_names`** — `id`, `author_id`, `name`
 - **`series`** — `id`, `author_id`, `pen_name_id?`, `title`, `planned_count`

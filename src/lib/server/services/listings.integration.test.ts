@@ -4,9 +4,16 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { authors } from '$lib/server/db/schema';
 import type { SessionAuthor } from '$lib/server/repo/authors';
 import { connect, connectOwner, hasDatabase, type TestDb } from '$lib/server/testing/db';
+import { CHANNEL_SLUGS } from '$lib/shared/channels';
 import { EMPTY_TITLE_FORM, TitleInputSchema } from '$lib/shared/titles';
 import { createBook } from './books';
-import { getListing, listingMatrix, removeListing, setListingStatus } from './listings';
+import {
+	getListing,
+	listingMatrix,
+	removeListing,
+	setHiddenChannels,
+	setListingStatus
+} from './listings';
 
 describe.skipIf(!hasDatabase)('listings service', () => {
 	const tag = crypto.randomUUID();
@@ -66,7 +73,16 @@ describe.skipIf(!hasDatabase)('listings service', () => {
 		expect(await removeListing(app.db, me, book, 'kdp')).toBe(false);
 	});
 
-	it("returns the author's default channels for the column choice", async () => {
-		expect((await listingMatrix(app.db, me)).defaultChannels).toEqual([]);
+	it('saves which stores are hidden, per author', async () => {
+		expect((await listingMatrix(app.db, me)).hiddenChannels).toEqual([]);
+		await setHiddenChannels(app.db, me, ['kobo', 'apple']);
+		expect((await listingMatrix(app.db, me)).hiddenChannels).toEqual(['kobo', 'apple']);
+		expect((await listingMatrix(app.db, other)).hiddenChannels).toEqual([]);
+		await setHiddenChannels(app.db, me, []);
+		expect((await listingMatrix(app.db, me)).hiddenChannels).toEqual([]);
+	});
+
+	it('refuses to hide every store', async () => {
+		await expect(setHiddenChannels(app.db, me, [...CHANNEL_SLUGS])).rejects.toThrow();
 	});
 });
