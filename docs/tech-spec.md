@@ -193,8 +193,11 @@ channel and marketplace. `author_id` on everything except `channels`.
   `post_type`, `active`
 - **`cadence_log`** — `id`, `author_id`, `slot_id?`, `date`, `platform`, `post_type`,
   `done`, `noted_at`
-- **`tasks`** — `id`, `author_id`, `title_id?`, `channel_slug?`, `playbook_step_ref`,
-  `label`, `due_on`, `done_at`, `source`
+- **`tasks`** — `id`, `author_id`, `title_id`, `source` (`playbook` | `author`), `pack`,
+  `pack_version`, `step_id`, `channel_slug?`, `format?`, `label`, `due_on`, `due_pinned`,
+  `done_at`, `skipped_at`. Playbook tasks are generated per book (title packs) or per
+  listing (channel packs), unique per step, and kept in step with release date, formats,
+  and listings; done and skipped tasks are never regenerated.
 
 ### AI
 
