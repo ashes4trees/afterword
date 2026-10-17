@@ -299,3 +299,60 @@ export const channelListings = pgTable(
 		)
 	]
 );
+
+// ---------------------------------------------------------------- tasks (#16)
+
+export const taskSource = pgEnum('task_source', ['playbook', 'author']);
+
+/**
+ * A checklist item for a book. Playbook tasks come from task generation and are unique
+ * per book, pack, step, channel, and format; author tasks are free-form. Done and skipped
+ * tasks are history and are never regenerated.
+ */
+export const tasks = pgTable(
+	'tasks',
+	{
+		id: uuid('id')
+			.primaryKey()
+			.default(sql`uuidv7()`),
+		authorId: authorId(),
+		titleId: uuid('title_id').notNull(),
+		source: taskSource('source').notNull(),
+		/** "title/launch-timeline", "kdp/kdp-setup"; null for author tasks. */
+		pack: varchar('pack', { length: 80 }),
+		packVersion: integer('pack_version'),
+		stepId: varchar('step_id', { length: 60 }),
+		channelSlug: varchar('channel_slug', { length: 40 }).references(() => channels.slug),
+		format: bookFormat('format'),
+		label: varchar('label', { length: 120 }).notNull(),
+		dueOn: date('due_on'),
+		/** The author set due_on by hand, so it no longer follows the release date. */
+		duePinned: boolean('due_pinned').notNull().default(false),
+		doneAt: timestamp('done_at', { withTimezone: true }),
+		skippedAt: timestamp('skipped_at', { withTimezone: true }),
+		...timestamps
+	},
+	(t) => [
+		tenantPolicy(),
+		foreignKey({
+			name: 'tasks_title_fk',
+			columns: [t.authorId, t.titleId],
+			foreignColumns: [titles.authorId, titles.id]
+		}).onDelete('cascade'),
+		// One task per step: per book for title packs, per listing (channel and format) for
+		// channel packs. Two partial indexes rather than one over coalesce(), because a cast
+		// of an enum to text isn't immutable and can't appear in an index.
+		uniqueIndex('tasks_title_step_idx')
+			.on(t.titleId, t.pack, t.stepId)
+			.where(sql`${t.source} = 'playbook' and ${t.channelSlug} is null`),
+		uniqueIndex('tasks_listing_step_idx')
+			.on(t.titleId, t.pack, t.stepId, t.channelSlug, t.format)
+			.where(sql`${t.source} = 'playbook' and ${t.channelSlug} is not null`),
+		check('tasks_listing_has_format', sql`(${t.channelSlug} is null) = (${t.format} is null)`),
+		check(
+			'tasks_playbook_has_step',
+			sql`${t.source} = 'author' or (${t.pack} is not null and ${t.stepId} is not null and ${t.packVersion} is not null)`
+		),
+		check('tasks_done_or_skipped', sql`${t.doneAt} is null or ${t.skippedAt} is null`)
+	]
+);

@@ -3,6 +3,7 @@ import type { Executor } from '$lib/server/db/types';
 import type { SessionAuthor } from '$lib/server/repo/authors';
 import * as works from '$lib/server/repo/works';
 import type { TitleFormValues, TitleInput } from '$lib/shared/titles';
+import { syncTitleTasks } from './tasks';
 
 // Books (#9). "Book" in the UI, `titles` in the schema.
 
@@ -67,16 +68,20 @@ async function resolve(
 }
 
 export function createBook(db: Executor, author: SessionAuthor, input: TitleInput) {
-	return withAuthor(db, author.id, async (tx) =>
-		works.insertTitle(tx, author.id, await resolve(tx, author.id, input))
-	);
+	return withAuthor(db, author.id, async (tx) => {
+		const id = await works.insertTitle(tx, author.id, await resolve(tx, author.id, input));
+		await syncTitleTasks(tx, author.id, id);
+		return id;
+	});
 }
 
 /** Returns false if the book doesn't exist for this author. */
 export function updateBook(db: Executor, author: SessionAuthor, id: string, input: TitleInput) {
-	return withAuthor(db, author.id, async (tx) =>
-		works.updateTitle(tx, author.id, id, await resolve(tx, author.id, input))
-	);
+	return withAuthor(db, author.id, async (tx) => {
+		const updated = await works.updateTitle(tx, author.id, id, await resolve(tx, author.id, input));
+		if (updated) await syncTitleTasks(tx, author.id, id);
+		return updated;
+	});
 }
 
 /** Returns false if the book doesn't exist for this author. */
