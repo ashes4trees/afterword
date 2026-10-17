@@ -23,6 +23,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	const book = await getBook(db, author, bookId(params.id));
 	if (!book) error(404, 'Book not found');
 	return {
+		id: book.id,
 		title: book.workingTitle,
 		values: toFormValues(book),
 		options: await bookFormOptions(db, author)

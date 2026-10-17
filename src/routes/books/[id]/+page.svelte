@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import BookForm from '$lib/components/BookForm.svelte';
+	import BookTabs from '$lib/components/BookTabs.svelte';
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import { confirmDeleteBook } from '$lib/components/confirmDelete';
 
@@ -8,6 +9,7 @@
 </script>
 
 <PageHeader title={data.title} />
+<BookTabs id={data.id} />
 
 <BookForm
 	values={form?.values ?? data.values}
