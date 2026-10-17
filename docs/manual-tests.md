@@ -32,7 +32,7 @@ At http://localhost:5173/books
 **Validation**
 - [ ] Submit with no working title. A field error appears and your other entries stay filled in
 - [ ] The position field is disabled until a series is entered
-- [ ] Enter a position with three decimals, such as 1.125. You get a field error
+- [ ] Enter a position that isn't a whole number or half, such as 1.25. You get a field error. The arrows step by 0.5
 - [ ] Enter more than 20 tropes. You get a field error
 
 **Content intensity**

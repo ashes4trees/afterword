@@ -68,7 +68,7 @@ export const TitleInputSchema = z
 				.number({ error: 'Position must be a number' })
 				.positive('Position must be more than 0')
 				.max(999.99, 'Position looks too large')
-				.refine((n) => Number.isInteger(n * 100), 'Use at most two decimal places')
+				.refine((n) => Number.isInteger(n * 2), 'Use a whole number or a half, like 2.5')
 		),
 		genre: optional(shortText(60, 'Genre')),
 		subgenre: optional(shortText(60, 'Subgenre')),
