@@ -61,6 +61,15 @@ At http://localhost:5173/books
 - [ ] Delete a book. A confirmation appears first, and the book is gone afterwards
 - [ ] Visiting a made-up book address, such as /books/nope, shows "not found"
 
+**Unsaved changes**
+- [ ] Change a field on a book, then click a nav link. You're asked "You have unsaved changes to this book. Leave without saving?" Cancel keeps you there with your edits
+- [ ] The same with the browser's Back button
+- [ ] With unsaved changes, refresh or close the tab. The browser's own "Leave site?" dialog appears
+- [ ] Add or remove a trope chip, or type a trope without pressing Enter. That counts as a change too
+- [ ] Change a field and change it back. Leaving doesn't warn
+- [ ] Save, and Delete after confirming, never trigger the warning
+- [ ] A form you haven't touched never warns
+
 **Layout**
 - [ ] At about 400px wide, the list and form fit with no sideways scrolling
 - [ ] In light and dark mode, text, hints, warnings, and errors are all readable

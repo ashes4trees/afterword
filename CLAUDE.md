@@ -66,6 +66,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-10-17: Forms that edit data call `guardUnsavedChanges()` ([src/lib/components/unsavedChanges.ts](src/lib/components/unsavedChanges.ts)). It compares the form to a snapshot taken on mount, asks before links and Back, and lets the browser prompt on unload. It skips `goto`, which in this app only follows a form submission. The listing editor (#12) should use it too.
 - 2026-10-17: The books list groups by series (standalones last) and sorts by series order, release date, or date added. The view lives in the URL (`?sort=release&group=none`). The logic is pure, in [src/lib/shared/bookList.ts](src/lib/shared/bookList.ts). "Add book to this series" links to `/books/new?series=…`, which prefills the next whole position.
 - Headless Chrome screenshots: wrap the call in `perl -e 'alarm 25; exec @ARGV'` so it can't hang. Windows narrower than about 500px are silently widened, so phone layouts need a real browser.
 - 2026-10-17: Tropes stay a per-book array. The form uses a chip input with suggestions from the author's other books (`listTropes` in the works repo), reusing the existing spelling so case variants don't split. Text typed but not yet added as a chip is submitted as `tropesDraft` and merged on the server. Series positions are whole numbers or halves only.
