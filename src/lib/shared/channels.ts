@@ -107,3 +107,27 @@ export function sellsFormat(slug: string, format: BookFormat): boolean {
 	const channel = CHANNELS.find((c) => c.slug === slug);
 	return !!channel && (channel.capabilities.formats as readonly string[]).includes(format);
 }
+
+/**
+ * Exclusivity programs (#12): which stores run one, for which formats, and what authors
+ * call it. KDP Select covers ebooks only; ACX's exclusive option covers audiobooks.
+ */
+export const EXCLUSIVE_PROGRAMS: Partial<
+	Record<ChannelSlug, { name: string; formats: BookFormat[] }>
+> = {
+	kdp: { name: 'KDP Select', formats: ['ebook'] },
+	acx: { name: 'ACX exclusive distribution', formats: ['audiobook'] }
+};
+
+export const exclusiveProgram = (slug: string, format: BookFormat) => {
+	const program = EXCLUSIVE_PROGRAMS[slug as ChannelSlug];
+	return program && program.formats.includes(format) ? program : null;
+};
+
+/** Whether a listing gets wholesale discount and returns settings: print through IngramSpark. */
+export const hasPrintTerms = (slug: string, format: BookFormat) => {
+	const channel = CHANNELS.find((c) => c.slug === slug);
+	return (
+		!!channel?.capabilities.wholesaleDiscount && (format === 'paperback' || format === 'hardcover')
+	);
+};

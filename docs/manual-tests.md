@@ -15,6 +15,24 @@ server started. You're signed in automatically as the author in `DEV_AUTHOR_EMAI
 
 ---
 
+## Listing editor (#12)
+
+From Listings, Cmd- or Ctrl-click a cell (or open it without JavaScript) to reach a listing's own page.
+
+- [ ] An untracked listing says "You're not tracking this listing yet", and Save starts tracking it
+- [ ] Status, store ID, and price with currency save and come back as entered. "4.999" or a blank currency shows a friendly error
+- [ ] Amazon KDP · Ebook has a KDP Select section. Tick Enrolled and the term dates appear. Saving without an end date asks "When does this term end?"
+- [ ] After saving an enrollment, "Last decision: Enrolled in KDP Select, term ending …" appears. Change the end date or untick Enrolled, and the last decision updates
+- [ ] The grid cell shows "Select · until <date>"
+- [ ] With your reminder window wide enough (Settings → Reminders, 30 days or more), Coming up shows "KDP Select term ends on Amazon KDP", linking back to this page
+- [ ] KDP · Paperback has no KDP Select section. IngramSpark · Paperback has Bookstore terms (wholesale discount and returnable)
+- [ ] "+ Add a marketplace" with a code like GB opens a GB tab with its own status and fields. Other tabs are unaffected
+- [ ] "Stop tracking this listing" asks first, then returns to the grid
+- [ ] Leaving with unsaved changes asks first
+- [ ] Advice under fields appears once the KDP and IngramSpark playbooks exist (#14, #15). Until then there's none
+
+---
+
 ## Promo ideas (#84)
 
 Open a book, then the **Launch timeline** tab, and scroll to **Ideas**.

@@ -79,7 +79,10 @@ describe.skipIf(!hasDatabase)('reminders and Coming up', () => {
 			['Overdue key date', -20, true, null],
 			['Soon key date', 5, false, 7]
 		]);
-		expect(items[0]).toMatchObject({ subject: 'The Glass Archive', titleId: book });
+		expect(items[0]).toMatchObject({
+			subject: 'The Glass Archive',
+			link: { kind: 'timeline', titleId: book }
+		});
 	});
 
 	it('drops a key date once it is done', async () => {
