@@ -20,47 +20,54 @@ server started. You're signed in automatically as the author in `DEV_AUTHOR_EMAI
 At http://localhost:5173/books
 
 **Adding books**
-- [ ] The empty state explains what Books is for and offers "Add your first book"
-- [ ] Add a standalone book with only a working title
-- [ ] Add a book in a new series at position 1, with a pen name
-- [ ] Add another book to the same series, typing the series name in different case. It should be suggested as you type
-- [ ] Leave the pen name blank on a series book. The hint says it will use the series' pen name, and the list shows that pen name afterwards
-- [ ] Type a different pen name on a series book. A warning explains the book will keep the pen name you entered
-- [ ] Add a novella at position 2.5
-- [ ] Add a book with no pen name at all
+- [x ] The empty state explains what Books is for and offers "Add your first book"
+- [x ] Add a standalone book with only a working title
+- [x ] Add a book in a new series at position 1, with a pen name
+- [x ] Add another book to the same series, typing the series name in different case. It should be suggested as you type
+- [x ] Leave the pen name blank on a series book. The hint says it will use the series' pen name, and the list shows that pen name afterwards
+- [ x] Type a different pen name on a series book. A warning explains the book will keep the pen name you entered
+- [x ] Add a novella at position 2.5
+- [x ] Add a book with no pen name at all
 
 **Validation**
-- [ ] Submit with no working title. A field error appears and your other entries stay filled in
-- [ ] The position field is disabled until a series is entered
-- [ ] Enter a position that isn't a whole number or half, such as 1.25. You get a field error. The arrows step by 0.5
-- [ ] Enter more than 20 tropes. You get a field error
+- [x ] Submit with no working title. A field error appears and your other entries stay filled in
+- [x ] The position field is disabled until a series is entered
+- [ x] Enter a position that isn't a whole number or half, such as 1.25. You get a field error. The arrows step by 0.5
+- [x ] Enter more than 20 tropes. You get a field error
 
 **Tropes**
-- [ ] Type a trope and press Enter or a comma. It becomes a chip. Backspace in the empty box removes the last chip, and × removes any chip
+- [x ] Type a trope and press Enter or a comma. It becomes a chip. Backspace in the empty box removes the last chip, and × removes any chip
 - [ ] On a second book, typing suggests tropes from your other books. Picking one adds it straight away, in your existing spelling
-- [ ] Type a trope and click Save without pressing Enter. It's still saved
-- [ ] After 20 tropes the box says "Limit reached"
+- [x ] Type a trope and click Save without pressing Enter. It's still saved
+- [ x] After 20 tropes the box says "Limit reached"
 
 **Content intensity**
-- [ ] The section is collapsed on a new book
-- [ ] Rate only violence and language, save, and reopen the book. The section is open and only those two ratings are set
-- [ ] The level labels read sensibly for your genre (note wording changes for #48)
+- [ x] The section is collapsed on a new book
+- [ x] Rate only violence and language, save, and reopen the book. The section is open and only those two ratings are set
+- [ x] The level labels read sensibly for your genre (note wording changes for #48)
 
 **Books list**
-- [ ] Books are grouped by series, alphabetically, each with its pen name and book count, in reading order (0.5 before 1). Standalones come last
-- [ ] The Sort options (Series order, Release date, Date added) reorder books within each series, and series by their first book
-- [ ] Group: None shows one flat list, with series and position in each row's details
-- [ ] Refresh and Back keep the chosen sort and grouping
-- [ ] "+ Add book to this series" opens the form with the series and the next position filled in
-- [ ] Release dates show a countdown (in 9 days, in 4 months), and books without one say "No release date"
-- [ ] At 400px wide, the controls and rows wrap with no sideways scrolling
+- [x ] Books are grouped by series, alphabetically, each with its pen name and book count, in reading order (0.5 before 1). Standalones come last
+- [x ] The Sort options (Series order, Release date, Date added) reorder books within each series, and series by their first book
+- [x ] Group: None shows one flat list, with series and position in each row's details
+- [x ] Refresh and Back keep the chosen sort and grouping
+- [x ] "+ Add book to this series" opens the form with the series and the next position filled in
+- [x ] Release dates show a countdown (in 9 days, in 4 months), and books without one say "No release date"
+- [x ] At 400px wide, the controls and rows wrap with no sideways scrolling
+
+**Search and filters (#64)**
+- [ ] Typing in the search box narrows the list as you type. It matches title, series, pen name, genre, subgenre, and tropes, ignoring case and accents
+- [ ] Several words must all match, for example "romance kidnapping"
+- [ ] Dropdowns appear only for fields with a real choice (pen name, series, stage), with "No pen name" and "Standalones" where relevant
+- [ ] "Showing N of M books · Clear filters" appears while filtering, and Clear filters resets everything except sort and grouping
+- [ ] Changing sort or grouping keeps your search and filters, and refresh keeps all of it
+- [ ] Searching for something that matches nothing shows "No books match" with Clear filters
+- [ ] At 400px the dropdowns sit behind a "Filters" button, which shows a count when any are set
 
 **Editing and deleting**
-- [ ] Click a book in the list, change its stage and release date, and save. The list shows the new stage and date
-- [ ] Tropes come back as chips
-- [ ] Delete a book. A confirmation appears first, and the book is gone afterwards
-- [ ] On the list, the trash icon on a row asks the same confirmation. Cancel leaves the book alone. Confirm removes it, shows "Deleted …", and keeps your sort and grouping
-- [ ] Tab reaches each trash icon, and a screen reader reads "Delete" plus the book's title
+- [x ] Click a book in the list, change its stage and release date, and save. The list shows the new stage and date
+- [x ] Tropes come back as chips
+- [x ] Delete a book. A confirmation appears first, and the book is gone afterwards
 - [ ] Visiting a made-up book address, such as /books/nope, shows "not found"
 
 **Unsaved changes**

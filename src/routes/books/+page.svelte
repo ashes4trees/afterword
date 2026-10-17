@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import EmptyState from '$lib/components/EmptyState.svelte';
+	import FilterBar from '$lib/components/FilterBar.svelte';
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import { confirmDeleteBook } from '$lib/components/confirmDelete';
 	import {
@@ -13,6 +14,14 @@
 		releaseCountdown,
 		type BookSort
 	} from '$lib/shared/bookList';
+	import {
+		FILTER_PARAMS,
+		bookFilterFields,
+		isFiltered,
+		matchesBook,
+		parseBookFilter
+	} from '$lib/shared/bookFilter';
+	import { withQuery } from '$lib/shared/query';
 	import { STAGE_LABELS } from '$lib/shared/titles';
 
 	let { data, form } = $props();
@@ -24,16 +33,30 @@
 			: 'series'
 	);
 	const grouped = $derived(page.url.searchParams.get('group') !== 'none');
-	const groups = $derived(organizeBooks(data.books, sort, grouped));
+	const filter = $derived(parseBookFilter(page.url.searchParams));
+	const visible = $derived(data.books.filter((b) => matchesBook(b, filter)));
+	const fields = $derived(bookFilterFields(data.books));
+	const groups = $derived(organizeBooks(visible, sort, grouped));
 	const hasSeries = $derived(data.books.some((b) => b.seriesId));
 	const today = localToday();
 
+	// Sort and grouping links keep any search and filters, and vice versa.
 	function viewHref(change: { sort?: BookSort; grouped?: boolean }) {
 		const s = change.sort ?? sort;
 		const g = change.grouped ?? grouped;
-		const query = [s !== 'series' && `sort=${s}`, !g && 'group=none'].filter(Boolean).join('&');
-		return `${resolve('/books')}${query ? `?${query}` : ''}`;
+		return withQuery(resolve('/books'), page.url.searchParams, {
+			sort: s === 'series' ? null : s,
+			group: g ? null : 'none'
+		});
 	}
+
+	const clearFiltersHref = $derived(
+		withQuery(
+			resolve('/books'),
+			page.url.searchParams,
+			Object.fromEntries(FILTER_PARAMS.map((p) => [p, null]))
+		)
+	);
 
 	const addToSeriesHref = (seriesTitle: string) =>
 		`${resolve('/books/new')}?series=${encodeURIComponent(seriesTitle)}`;
@@ -66,6 +89,15 @@
 		{/snippet}
 	</EmptyState>
 {:else}
+	<FilterBar
+		base={resolve('/books')}
+		{fields}
+		shown={visible.length}
+		total={data.books.length}
+		noun={{ one: 'book', many: 'books' }}
+		searchLabel="Search titles, series, tropes"
+	/>
+
 	<!-- Always present so screen readers announce the message when it appears. -->
 	<p role="status" class="text-sm">
 		{#if form?.deleted}
@@ -225,6 +257,15 @@
 				{/each}
 			</ul>
 		</section>
+	{:else}
+		{#if isFiltered(filter)}
+			<EmptyState title="No books match">
+				Nothing matches your search and filters.
+				{#snippet action()}
+					<a href={clearFiltersHref} class={addButton}>Clear filters</a>
+				{/snippet}
+			</EmptyState>
+		{/if}
 	{/each}
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 {/if}
