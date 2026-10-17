@@ -66,6 +66,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-10-17: Listing matrix (#11) at `/listings`. Status shapes, colors, and labels live in `STATUS_META` in [src/lib/shared/listings.ts](src/lib/shared/listings.ts), along with column choice (stores in use plus `default_channels`, or all for a new author, or with `?stores=all`). Cells open a quick-edit dialog with JavaScript, or link to `/listings/[titleId]/[channel]` without it. That page is where #12's editor grows. The matrix edits only the default (no marketplace) listing; marketplace listings show as "+N markets". Shared form actions are in `src/lib/server/listingActions.ts`.
 - 2026-10-17: List pages filter with the shared `FilterBar` component (#64), using pure matching in [src/lib/shared/bookFilter.ts](src/lib/shared/bookFilter.ts). It filters loaded rows in the browser, keeps all state in the URL, and preserves other params via `withQuery()`. #11 reuses it. App-wide search is #63, deliberately after M2.
 - 2026-10-17: Forms that edit data call `guardUnsavedChanges()` ([src/lib/components/unsavedChanges.ts](src/lib/components/unsavedChanges.ts)). It compares the form to a snapshot taken on mount, asks before links and Back, and lets the browser prompt on unload. It skips `goto`, which in this app only follows a form submission. The listing editor (#12) should use it too.
 - 2026-10-17: The books list groups by series (standalones last) and sorts by series order, release date, or date added. The view lives in the URL (`?sort=release&group=none`). The logic is pure, in [src/lib/shared/bookList.ts](src/lib/shared/bookList.ts). "Add book to this series" links to `/books/new?series=…`, which prefills the next whole position.
@@ -90,4 +91,4 @@ Record decisions that aren't in the spec here, newest first, with a date.
 
 ## Status
 - Manual test checklists live in [docs/manual-tests.md](docs/manual-tests.md). Add a section whenever a screen is ready to test by hand.
-- M0 is done except #7 (VPS). M1 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), #5 (layout), #8 (works schema), #9 (books), #10 (channels and listings), and #53 (content intensity) are done. #7 needs the owner's hosting account. Next: #11 (listing matrix).
+- M0 is done except #7 (VPS). M1 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), #5 (layout), #8 (works schema), #9 (books), #10 (channels and listings), #53 (content intensity), #64 (filter bar), and #11 (listing matrix) are done. #7 needs the owner's hosting account. Next: #12 (listing detail editor).
