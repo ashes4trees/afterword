@@ -38,6 +38,7 @@ At http://localhost:5173/listings
 - [ ] The Stores menu lists every store with a checkbox, and marks stores that have listings. Untick Kobo and Save: its column disappears, and the button says "Stores (1 hidden)"
 - [ ] Tick Kobo again and Save: it comes back, along with any listings it had
 - [ ] Unticking every store and saving shows "Keep at least one store."
+- [ ] "Only show stores in use" at the top of the Stores menu narrows the grid to stores where some book has a listing, and the button says "Stores (in use)". It still respects hidden stores, follows new listings as you add them, and clicking it again turns it off
 - [ ] The choice sticks after a refresh and a restart
 - [ ] KDP Select shows "Select · until <date>" in its cell. Settable once #12 adds Select fields
 
