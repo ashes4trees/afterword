@@ -13,6 +13,7 @@ const listingColumns = {
 	format: channelListings.format,
 	marketplace: channelListings.marketplace,
 	status: channelListings.status,
+	externalId: channelListings.externalId,
 	enrolledInSelect: channelListings.enrolledInSelect,
 	exclusivityEnd: channelListings.exclusivityEnd,
 	updatedAt: channelListings.updatedAt
