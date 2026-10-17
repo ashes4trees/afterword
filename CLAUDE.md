@@ -45,6 +45,10 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 - Renaming a column: drizzle-kit asks interactively whether it's a rename, which blocks here. Split it into two migrations, one adding (with any data copy appended to the generated SQL) and one dropping, as in 0004 and 0005.
 - When an open question in spec §9 gets resolved, strike it through there and record the date, as was done for Q2.
 
+## Content
+
+- Playbook packs: see spec §6.1 and [src/lib/server/content/schema.ts](src/lib/server/content/schema.ts). Each pack needs `as_of` (not in the future) and at least one source. Folder and file name must match `channel` (or `title`) and `pack`. Steps can carry `due` (relative to `release_date`), `milestone`, `formats`, `fields`, `gotchas`, and `preconditions` (other step ids or `PLAYBOOK_FACTS`). Bump `version` when a pack's advice changes.
+
 ## Commands
 
 - `npm run dev`: dev server
@@ -66,6 +70,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-10-17: Playbooks (#13) are YAML in `content/playbooks/<channel>/` or `content/playbooks/title/` (per-book packs such as the launch timeline). They're bundled at build time with `import.meta.glob` and validated when `src/lib/server/content/playbooks.ts` loads. `hooks.server.ts` imports it so a bad pack stops the server, and a test fails CI the same way. The schema is in `content/schema.ts`. Playbooks are always deterministic, hand-written data. AI may explain them later (M3), but never writes or changes them.
 - 2026-10-17: Listings are per format (#72): book × store × format × marketplace. Formats are ebook, paperback, hardcover, and audiobook (`BOOK_FORMATS` in `src/lib/shared/channels.ts`). Store capabilities list the formats each store sells, and `sellsFormat()` gates editing. KDP Print merged into Amazon KDP (migration 0008, which also gave existing books ebook + paperback). Books record their formats, and matrix rows are those formats plus any format that still has listings. Full editions are #71, deliberately later.
 - 2026-10-17: Added Barnes & Noble Press, Audible (ACX), Spotify (Findaway Voices), and Kickstarter as shared stores (migration 0007). New stores are added by the maintainer to `CHANNELS` plus a seed migration. Author-defined custom stores are deferred until needed. Payhip and Shopify stay under "Direct sales".
 - 2026-10-17: Listing matrix (#11) at `/listings`. Status shapes, colors, and labels live in `STATUS_META` in [src/lib/shared/listings.ts](src/lib/shared/listings.ts), along with column choice. Every store shows unless the author hides it in the Stores menu, saved as the `hidden_channels` preference. Hiding is explicit and per author, never inferred from which stores have listings, because inferring it blocked listing a book on a new store. "Only show stores in use" (`?stores=used`) is an opt-in view in the same menu. It isn't saved, and it follows the listings as they change. Cells open a quick-edit dialog with JavaScript, or link to `/listings/[titleId]/[channel]/[format]` without it. That page is where #12's editor grows. The matrix edits only the default (no marketplace) listing; marketplace listings show as "+N markets". Shared form actions are in `src/lib/server/listingActions.ts`.
@@ -93,4 +98,4 @@ Record decisions that aren't in the spec here, newest first, with a date.
 
 ## Status
 - Manual test checklists live in [docs/manual-tests.md](docs/manual-tests.md). Add a section whenever a screen is ready to test by hand.
-- M0 is done except #7 (VPS). M1 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), #5 (layout), #8 (works schema), #9 (books), #10 (channels and listings), #53 (content intensity), #64 (filter bar), and #11 (listing matrix) are done. #7 needs the owner's hosting account. Next: #12 (listing detail editor).
+- M0 is done except #7 (VPS). M1 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), #5 (layout), #8 (works schema), #9 (books), #10 (channels and listings), #53 (content intensity), #64 (filter bar), #11 (listing matrix), #72 (per-format listings), and #13 (playbook loader) are done. #7 needs the owner's hosting account. Next, by the owner's choice: the launch timeline chain, #16 (tasks), then #45 (launch timeline), then #46 (reminders). After that, #12.
