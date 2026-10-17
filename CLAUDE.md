@@ -61,6 +61,7 @@ Applies to playbook advice and all UI copy (hints, empty states, errors).
 - Give the advice, never its pedigree. No "guides suggest", "sources say", or "older guides say" in anything an author reads. Sources live in the pack's `sources` and in YAML comments.
 - The author decides. Advice is optional, and skipping is fine; never scold.
 - Warnings are plain and name the consequence: "Miss it and KDP cancels the preorder."
+- Tools can be suggested with a step's `links` (at most 3, https only), shown as "Popular options". Check each URL resolves before shipping.
 - Short and concrete. Give numbers as rules of thumb ("about five weeks out"), not ranges with caveats.
 
 ## Commands

@@ -89,6 +89,25 @@ describe('parsePlaybooks', () => {
 			/duplicate step id/
 		],
 		['an unexpected key', ingram.replace('version: 3', 'version: 3\nnotes: hi'), /notes/],
+		[
+			'four links on a step',
+			ingram.replace(
+				'    label: Assign an ISBN',
+				'    label: Assign an ISBN\n    links:\n' +
+					[1, 2, 3, 4]
+						.map((n) => `      - { label: L${n}, url: https://example.com/${n} }`)
+						.join('\n')
+			),
+			/at most three links/
+		],
+		[
+			'a non-https link',
+			ingram.replace(
+				'    label: Assign an ISBN',
+				'    label: Assign an ISBN\n    links:\n      - { label: L, url: http://example.com }'
+			),
+			/https/
+		],
 		['invalid YAML', 'pack: [unclosed', /not valid YAML/]
 	])('rejects %s', (_label, text, message) => {
 		expect(problems({ '/content/playbooks/ingram/print-setup.yaml': text }).join('\n')).toMatch(

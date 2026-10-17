@@ -66,6 +66,7 @@ export type TimelineStep = {
 	label: string;
 	detail: string | null;
 	gotchas: string[];
+	links: { label: string; url: string }[];
 	milestone: boolean;
 	dueOn: string | null;
 	duePinned: boolean;
@@ -136,6 +137,7 @@ export function bookTimelines(
 							label: task.label,
 							detail: step.detail ?? null,
 							gotchas: step.gotchas,
+							links: step.links,
 							milestone: step.milestone,
 							dueOn: task.dueOn,
 							duePinned: task.duePinned,

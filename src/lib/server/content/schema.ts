@@ -34,6 +34,16 @@ const Step = z.strictObject({
 	formats: z.array(z.enum(BOOK_FORMATS)).min(1).optional(),
 	fields: z.array(z.enum(LISTING_FIELDS)).default([]),
 	gotchas: z.array(z.string().min(1).max(500)).default([]),
+	/** Tools authors commonly use for this step, shown as "Popular options". At most three. */
+	links: z
+		.array(
+			z.strictObject({
+				label: z.string().min(1).max(40),
+				url: z.url({ protocol: /^https$/, error: 'links must be https URLs' })
+			})
+		)
+		.max(3, 'at most three links per step')
+		.default([]),
 	/** Other step ids in this pack, or PLAYBOOK_FACTS. */
 	preconditions: z.array(z.string()).default([]),
 	/** When the step is due, relative to a date on the book. */

@@ -13,6 +13,7 @@ const step = (s: Partial<Playbook['steps'][number]> & { id: string }) => ({
 	label: s.id,
 	fields: [],
 	gotchas: [],
+	links: [],
 	preconditions: [],
 	milestone: false,
 	...s
