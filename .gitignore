@@ -22,3 +22,6 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Playwright MCP snapshots from agent QA runs
+/.playwright-mcp
