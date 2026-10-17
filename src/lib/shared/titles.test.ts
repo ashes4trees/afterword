@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { EMPTY_TITLE_FORM, TitleInputSchema, type TitleFormValues } from './titles';
+import {
+	EMPTY_TITLE_FORM,
+	TitleInputSchema,
+	titleFormValues,
+	type TitleFormValues
+} from './titles';
 
 const parse = (fields: Partial<TitleFormValues>) =>
 	TitleInputSchema.safeParse({ ...EMPTY_TITLE_FORM, workingTitle: 'Book', ...fields });
@@ -72,5 +77,21 @@ describe('TitleInputSchema', () => {
 		const result = parse(fields);
 		expect(result.success).toBe(false);
 		expect(result.error!.issues.map((i) => i.path[0])).toContain(path);
+	});
+});
+
+describe('titleFormValues', () => {
+	it('keeps a trope that was typed but never added as a chip', () => {
+		const form = new FormData();
+		form.set('tropes', 'heist, slow burn');
+		form.set('tropesDraft', 'found family');
+		expect(titleFormValues(form).tropes).toBe('heist, slow burn, found family');
+	});
+
+	it('ignores an empty draft', () => {
+		const form = new FormData();
+		form.set('tropes', 'heist');
+		form.set('tropesDraft', '  ');
+		expect(titleFormValues(form).tropes).toBe('heist');
 	});
 });

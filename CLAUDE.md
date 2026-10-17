@@ -29,6 +29,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 - The author comes from `event.locals.author`, never from a global. The only auth seam is `authenticate()` in [src/lib/server/auth.ts](src/lib/server/auth.ts). Use `requireAuthor(locals)` in loads and actions.
 - CI must never need an Anthropic API key.
 - SvelteKit's cross-site form check only runs in production builds, not in `npm run dev`. adapter-node needs `ORIGIN` set for it.
+- The local database holds the owner's own test data. Manual checks against it may only touch rows the check itself created, targeted by exact id. Never act on "the first row", and never delete by a broad filter.
 - When testing by hand with curl, run the script under `bash`. The default shell is zsh, which doesn't split an unquoted `$VAR` holding several flags.
 
 ## Workflow
@@ -65,6 +66,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-10-17: Tropes stay a per-book array. The form uses a chip input with suggestions from the author's other books (`listTropes` in the works repo), reusing the existing spelling so case variants don't split. Text typed but not yet added as a chip is submitted as `tropesDraft` and merged on the server. Series positions are whole numbers or halves only.
 - 2026-09-27: Listings (#10) are one row per title, channel, and marketplace. A null marketplace is the channel default, unique with `NULLS NOT DISTINCT`. `returnable` stays a boolean as in the spec, even though IngramSpark offers "deliver" or "destroy" for returns; revisit when #12 builds the Ingram settings. Channel capabilities (`formats`, `exclusivity`, `wholesaleDiscount`, `returns`, `aggregator`) live in `src/lib/shared/channels.ts`.
 - 2026-09-27: Heat level is romance-only, so it's replaced by optional content intensity ratings (sex, violence, language, each 0–5, labelled in `CONTENT_RATINGS` in `src/lib/shared/titles.ts`) for every genre (#53). Existing heat levels were copied into the sex rating. Genre-aware fields from a content pack are deferred until positioning needs a controlled genre list.
 - 2026-09-27: Books UI (#9). Pen names and series are entered by name, with suggestions from existing ones, and found or created on save. There's no separate screen to manage them yet. Tropes are comma-separated. Services take the database handle as their first argument so they can be tested against a real database; routes pass `db` from `db/client.ts`.
@@ -84,5 +86,4 @@ Record decisions that aren't in the spec here, newest first, with a date.
 
 ## Status
 - Manual test checklists live in [docs/manual-tests.md](docs/manual-tests.md). Add a section whenever a screen is ready to test by hand.
-
-- M0 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), #5 (layout), #8 (works schema), #9 (books), #10 (channels and listings), and #53 (content intensity) are done. M0 has only #7 (VPS) left, and it needs the owner's hosting account. Next: #11 (listing matrix).
+- M0 is done except #7 (VPS). M1 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), #5 (layout), #8 (works schema), #9 (books), #10 (channels and listings), and #53 (content intensity) are done. #7 needs the owner's hosting account. Next: #11 (listing matrix).
