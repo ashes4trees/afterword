@@ -46,6 +46,15 @@ At http://localhost:5173/books
 - [ ] Rate only violence and language, save, and reopen the book. The section is open and only those two ratings are set
 - [ ] The level labels read sensibly for your genre (note wording changes for #48)
 
+**Books list**
+- [ ] Books are grouped by series, alphabetically, each with its pen name and book count, in reading order (0.5 before 1). Standalones come last
+- [ ] The Sort options (Series order, Release date, Date added) reorder books within each series, and series by their first book
+- [ ] Group: None shows one flat list, with series and position in each row's details
+- [ ] Refresh and Back keep the chosen sort and grouping
+- [ ] "+ Add book to this series" opens the form with the series and the next position filled in
+- [ ] Release dates show a countdown (in 9 days, in 4 months), and books without one say "No release date"
+- [ ] At 400px wide, the controls and rows wrap with no sideways scrolling
+
 **Editing and deleting**
 - [ ] Click a book in the list, change its stage and release date, and save. The list shows the new stage and date
 - [ ] Tropes come back as comma-separated text
