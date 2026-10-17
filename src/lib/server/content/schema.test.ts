@@ -75,7 +75,7 @@ describe('parsePlaybooks', () => {
 	it.each([
 		['a missing as_of', ingram.replace('as_of: 2026-09-14\n', ''), /as_of/],
 		['an as_of in the future', ingram.replace('2026-09-14', '2027-01-01'), /in the future/],
-		['no sources', ingram.replace(/sources:\n  - .*\n/, 'sources: []\n'), /at least one source/],
+		['no sources', ingram.replace(/sources:\n {2}- .*\n/, 'sources: []\n'), /at least one source/],
 		['an unknown channel', ingram.replace('channel: ingram', 'channel: smashwords'), /channel/],
 		['an unknown field', ingram.replace('[wholesale_discount_pct]', '[blurb]'), /fields/],
 		[
