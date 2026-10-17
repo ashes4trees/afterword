@@ -15,6 +15,18 @@ server started. You're signed in automatically as the author in `DEV_AUTHOR_EMAI
 
 ---
 
+## Reminders and Coming up (#46)
+
+- [ ] Home shows **Coming up**: key dates within your reminder window, soonest first, each linking to its book's timeline. Overdue key dates you haven't done show first, in amber
+- [ ] Plain steps (not key dates), done or skipped steps, and dates beyond your window don't appear
+- [ ] With nothing due, Home says "Nothing in the next N days"
+- [ ] In **Settings → Reminders**, tick different times (for example 30 days before) and Save. "Saved." appears, and Coming up widens to match
+- [ ] "Choose different times" for key dates overrides the defaults just for them
+- [ ] Untick everything and save: Home says reminders are off
+- [ ] Leaving Settings with unsaved changes asks first
+
+---
+
 ## Launch timeline (#45)
 
 Open a book, then the **Launch timeline** tab.

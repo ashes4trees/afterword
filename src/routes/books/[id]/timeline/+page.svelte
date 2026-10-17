@@ -71,7 +71,8 @@
 							{#if step.milestone}
 								<span
 									class="rounded-full border border-warn px-2 py-0.5 text-xs font-medium text-warn"
-									title="One of the big moments in your launch">Key date</span
+									title="One of the big moments in your launch. Key dates show in Coming up on your home page."
+									>Key date</span
 								>
 							{/if}
 						</p>
