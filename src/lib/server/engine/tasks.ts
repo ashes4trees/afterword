@@ -58,6 +58,8 @@ export function plannedTasks(
 ): PlannedTask[] {
 	const tasks: PlannedTask[] = [];
 	for (const pack of packs) {
+		// Ideas are only ever added by the author (#84).
+		if (pack.kind === 'ideas') continue;
 		const base = { pack: packRef(pack), packVersion: pack.version };
 		if (!pack.channel) {
 			for (const step of pack.steps) {

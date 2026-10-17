@@ -17,11 +17,13 @@ const step = (s: Partial<Playbook['steps'][number]> & { id: string }) => ({
 	links: [],
 	preconditions: [],
 	milestone: false,
+	repeatable: false,
 	...s
 });
 
 const launch: Playbook = {
 	pack: 'launch-timeline',
+	kind: 'timeline' as const,
 	title: 'Launch',
 	version: 1,
 	as_of: '2026-10-01',
@@ -40,6 +42,7 @@ const launch: Playbook = {
 
 const kdp: Playbook = {
 	pack: 'kdp-setup',
+	kind: 'timeline' as const,
 	channel: 'kdp',
 	title: 'KDP setup',
 	version: 2,

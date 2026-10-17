@@ -5,6 +5,9 @@ import { BOOK_FORMATS, CHANNEL_SLUGS } from '$lib/shared/channels';
 // Playbook packs (spec §6.1, #13): dated, sourced advice as data. Pure: the loader in
 // playbooks.ts feeds it files, and tests feed it fixtures.
 
+export { IDEA_PHASES, type IdeaPhase } from '$lib/shared/ideas';
+import { IDEA_PHASES } from '$lib/shared/ideas';
+
 /** Conditions a step can wait on besides other steps. Evaluated by task generation (#16). */
 export const PLAYBOOK_FACTS = ['isbn_assigned', 'release_date_set'] as const;
 
@@ -53,8 +56,21 @@ const Step = z.strictObject({
 			offset_days: z.int().min(-730).max(730)
 		})
 		.optional(),
-	/** Worth a reminder (#46). Needs a due date. */
-	milestone: z.boolean().default(false)
+	/** Worth a reminder (#46). Timeline steps need a due date; ideas a window. */
+	milestone: z.boolean().default(false),
+	/** Ideas packs only (#84): which part of the journey the idea belongs to. */
+	phase: z.enum(IDEA_PHASES).optional(),
+	/** Ideas packs only: when it tends to work best, relative to a date on the book. */
+	window: z
+		.strictObject({
+			anchor: z.enum(['release_date']),
+			from_days: z.int().min(-730).max(730),
+			to_days: z.int().min(-730).max(730)
+		})
+		.refine((w) => w.from_days <= w.to_days, 'from_days must not be after to_days')
+		.optional(),
+	/** Ideas packs only: can be added to a timeline more than once, such as weekly teasers. */
+	repeatable: z.boolean().default(false)
 });
 
 const Pack = z
@@ -62,6 +78,11 @@ const Pack = z
 		pack: slug,
 		/** A title-scoped pack (such as the launch timeline) has no channel. */
 		channel: z.enum(CHANNEL_SLUGS).optional(),
+		/**
+		 * A timeline generates tasks for every book. An ideas pack (#84) is a library the
+		 * author picks from; nothing is added until they choose to.
+		 */
+		kind: z.enum(['timeline', 'ideas']).default('timeline'),
 		title: z.string().min(1).max(120),
 		version: z.int().positive(),
 		as_of: z.iso.date('as_of must be a YYYY-MM-DD date'),
@@ -70,6 +91,9 @@ const Pack = z
 	})
 	.superRefine((pack, ctx) => {
 		const ids = new Set<string>();
+		if (pack.kind === 'ideas' && pack.channel) {
+			ctx.addIssue({ code: 'custom', path: ['channel'], message: 'ideas packs are title-scoped' });
+		}
 		pack.steps.forEach((step, i) => {
 			if (ids.has(step.id)) {
 				ctx.addIssue({
@@ -79,12 +103,19 @@ const Pack = z
 				});
 			}
 			ids.add(step.id);
-			if (step.milestone && !step.due) {
-				ctx.addIssue({
-					code: 'custom',
-					path: ['steps', i, 'milestone'],
-					message: 'a milestone needs a due date'
-				});
+			const ideas = pack.kind === 'ideas';
+			const problem = (key: string, message: string) =>
+				ctx.addIssue({ code: 'custom', path: ['steps', i, key], message });
+			if (step.milestone && !(ideas ? step.window : step.due)) {
+				problem(
+					'milestone',
+					ideas ? 'a milestone idea needs a window' : 'a milestone needs a due date'
+				);
+			}
+			if (ideas && !step.phase) problem('phase', 'every idea needs a phase');
+			if (ideas && step.due) problem('due', 'ideas use a window, not a due date');
+			if (!ideas && (step.phase || step.window || step.repeatable)) {
+				problem('phase', 'phase, window, and repeatable are only for ideas packs');
 			}
 		});
 		pack.steps.forEach((step, i) =>

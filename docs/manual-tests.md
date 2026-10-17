@@ -15,6 +15,24 @@ server started. You're signed in automatically as the author in `DEV_AUTHOR_EMAI
 
 ---
 
+## Promo ideas (#84)
+
+Open a book, then the **Launch timeline** tab, and scroll to **Ideas**.
+
+- [ ] Ideas are grouped While you write, Before launch, Launch week, and After launch, each with a plain timing line ("Best 8 to 5 weeks before release") and a short description
+- [ ] No idea appears on the timeline until you add it
+- [ ] "Add to timeline" suggests a date (the start of its window, or today if that's passed). Saving adds it to the timeline in date order, tagged "Idea"
+- [ ] Repeatable ideas (teaser quotes, character intros) offer "Weekly, N times" and add numbered steps a week apart, labelled (1 of 4), (2 of 4), and so on. Afterwards the idea says "On your timeline ×4" and offers "Add again"
+- [ ] One-off ideas say "On your timeline" once added, with no second add
+- [ ] Added ideas can be ticked, re-dated, or removed. Core steps can only be skipped
+- [ ] "Not for this book" moves an idea to "Ideas you've set aside", where "Bring back" restores it
+- [ ] "+ Add your own step" adds a step tagged "Your step", with an optional date
+- [ ] The "Reveal your tropes" idea is a key date: once added, it shows in Coming up when it's near
+- [ ] Unboxing only appears for books with a print format
+- [ ] Moving the release date doesn't move or remove added ideas or your own steps
+
+---
+
 ## Reminders and Coming up (#46)
 
 - [ ] Home shows **Coming up**: key dates within your reminder window, soonest first, each linking to its book's timeline. Overdue key dates you haven't done show first, in amber
