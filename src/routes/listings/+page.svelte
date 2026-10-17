@@ -29,11 +29,16 @@
 
 	let { data, form } = $props();
 
-	const showAll = $derived(page.url.searchParams.get('stores') === 'all');
+	// Every store shows unless the author chooses the compact view (?stores=used).
+	const hideUnused = $derived(page.url.searchParams.get('stores') === 'used');
 	const channels = $derived(
-		matrixChannels([...CHANNELS], data.listings, data.defaultChannels, showAll)
+		matrixChannels([...CHANNELS], data.listings, data.defaultChannels, hideUnused)
 	);
 	const hiddenStores = $derived(CHANNELS.length - channels.length);
+	const unusedStores = $derived(
+		CHANNELS.length -
+			matrixChannels([...CHANNELS], data.listings, data.defaultChannels, true).length
+	);
 
 	const filter = $derived(parseBookFilter(page.url.searchParams));
 	const visible = $derived(data.books.filter((b) => matchesBook(b, filter)));
@@ -48,7 +53,7 @@
 	const counts = $derived(statusCounts(rows.flatMap((g) => g.books.flatMap((r) => r.cells))));
 
 	const storesHref = $derived(
-		withQuery(resolve('/listings'), page.url.searchParams, { stores: showAll ? null : 'all' })
+		withQuery(resolve('/listings'), page.url.searchParams, { stores: hideUnused ? null : 'used' })
 	);
 	const cellHref = (titleId: string, channel: string) =>
 		resolve('/listings/[titleId]/[channel]', { titleId, channel });
@@ -94,13 +99,15 @@
 <PageHeader title="Listings">
 	Every book on every store, so nothing slips.
 	{#snippet actions()}
-		{#if data.listings.length > 0}
+		{#if hideUnused || unusedStores > 0}
 			<!-- eslint-disable svelte/no-navigation-without-resolve -- built on resolve() -->
 			<a
 				href={storesHref}
 				class="rounded-md px-3 py-2 text-sm font-medium text-accent hover:bg-surface-2"
 			>
-				{showAll ? 'Show my stores' : `Show all stores${hiddenStores ? ` (+${hiddenStores})` : ''}`}
+				{hideUnused
+					? `Show all stores (+${hiddenStores})`
+					: `Hide ${unusedStores} unused ${unusedStores === 1 ? 'store' : 'stores'}`}
 			</a>
 			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		{/if}
