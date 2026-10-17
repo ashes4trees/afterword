@@ -15,6 +15,33 @@ server started. You're signed in automatically as the author in `DEV_AUTHOR_EMAI
 
 ---
 
+## Listings (#11)
+
+At http://localhost:5173/listings
+
+**The grid**
+- [ ] Books run down the side, grouped by series in reading order. Stores run across the top. With no listings yet, all 8 stores show
+- [ ] Every cell shows an icon and a word. Each status reads without color: dashed circle, circle, pencil, arrow, hourglass, filled check, crossed circle
+- [ ] The legend counts what's in view, and the counts follow the filters
+- [ ] Scrolling sideways moves only the grid, with the book column fixed. The page itself never scrolls sideways
+- [ ] Search and the series, pen name, and stage filters work as on Books
+
+**Quick edit**
+- [ ] Clicking a cell opens a dialog for that book and store, with the current status highlighted
+- [ ] One click on a status saves it and closes the dialog. A "Not listed" cell becomes listed
+- [ ] "Remove from …" asks first, then the cell goes back to Not listed
+- [ ] ×, Escape, and clicking the dimmed backdrop all close without saving
+- [ ] Cmd- or Ctrl-click on a cell opens the listing's own page in a new tab. That page can also change status and returns you to the grid
+
+**Which stores show**
+- [ ] Once any book has a listing, only stores in use (plus any default stores in settings) show, and "Show all stores (+N)" adds the rest. "Show my stores" goes back
+- [ ] KDP Select shows "Select · until <date>" in its cell. Settable once #12 adds Select fields
+
+**Phone width**
+- [ ] Under 768px each book becomes a card listing every shown store with its status, and tapping a row opens the same dialog
+
+---
+
 ## Books (#9, #53)
 
 At http://localhost:5173/books

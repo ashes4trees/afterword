@@ -276,7 +276,10 @@ mk "Listing detail editor with enrollment and print settings" \
 - Inline warnings sourced from the playbook pack, not hardcoded in the component
 - Setting an exclusivity end date writes a decision row with commits_until
 
-Spec: sections 5, 6.1"
+Spec: sections 5, 6.1
+
+
+Build on the listing page from #11 at \`/listings/[titleId]/[channel]\`, which already has the status picker, and use \`guardUnsavedChanges()\` for the form."
 
 mk "Playbook pack schema, loader, and boot validation" \
   "M1 Organized truth" "type:feat,area:content,size:M" \
