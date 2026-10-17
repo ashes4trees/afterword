@@ -11,6 +11,16 @@ in-memory profile. Claude Code loads it at startup and asks once to approve it. 
 provides `browser_*` tools: navigate, click, type, select, take a screenshot, read the
 page, and resize the window.
 
+## Tips from the first pass
+
+- Wait for each page to finish loading (`waitUntil: 'networkidle'`) before typing. The dev
+  server loads code lazily, and a too-early click can submit before the page is ready.
+- The browser tool answers `confirm()` and "Leave site?" prompts on its own. To check a
+  prompt's wording, replace `window.confirm` in the page with one that records the message.
+- Navigate between app pages by clicking links, not by typing addresses. Typed addresses
+  make Back a full page change, which behaves differently from in-app Back.
+- Snapshots land in `.playwright-mcp/`, which git ignores.
+
 ## Never test as the owner
 
 The dev server on port 5173 is the owner's, with their real books. Always test against
