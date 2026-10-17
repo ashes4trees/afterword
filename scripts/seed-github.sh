@@ -493,6 +493,23 @@ Deliberately later: per-format listings cover tracking status today. Build this 
 
 Spec: section 5"
 
+mk "Promo ideas library: optional social moments to add to a timeline" \
+  "M1 Organized truth" "type:feat,area:content,size:M" \
+"A library of optional promo ideas beside the launch timeline: the looser social moments (teasers, trope reveals, character intros, countdowns) that authors can add to a book's timeline, or not.
+
+**Acceptance**
+- A title-scoped promo ideas pack in content/playbooks/title/, in the brand voice. Ideas are grouped by phase (while writing, before launch, launch week, after launch). Each has a short description, a suggested timing window relative to the release date, and optional tool links. Drafted, then merged with the owner's research
+- Ideas are never added automatically. The Launch timeline tab gets an Ideas section, grouped by phase, with \"Add to timeline\" (the date is prefilled from the window) and \"Not for this book\" (hidden for that book only)
+- Ideas that naturally repeat can be added several times at once, such as a teaser quote weekly ×4
+- \"Add your own\" creates a free-form step with a short label and a date
+- Added ideas behave like any timeline step: done, skip, re-date, and reminders for key ones (#46)
+- The app suggests the kind of post and its timing, and never writes or publishes it (C1, C4). No excerpt or manuscript text is stored (C2)
+- Recurring rhythms such as weekly WIP updates belong to the cadence planner (#35), not this library
+
+Build after #46.
+
+Spec: sections 1.1, 6.1"
+
 mk "Account deletion with export offered first" \
   "M1 Organized truth" "type:feat,area:data,size:S" \
 "An author who leaves can delete everything. The database side already exists: every author_id cascades on delete from authors (#2).
@@ -753,7 +770,9 @@ mk "Cadence planner UI with streak tracking" \
 - The app never suggests what to write, only when and what kind
 - Missing a slot is recorded neutrally, not scolded
 
-Spec: sections 1.1 (C1, C4), 5"
+Spec: sections 1.1 (C1, C4), 5
+
+Recurring ideas from the promo ideas library (#84), such as weekly WIP updates, should be addable as cadence slots."
 
 mk "Export cadence as .ics and CSV" \
   "M4 Cadence and mobile" "type:feat,area:ui,size:S,constraint" \
