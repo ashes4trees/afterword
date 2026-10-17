@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CHANNEL_SLUGS } from './channels';
 import {
 	DEFAULT_PREFERENCES,
 	PreferencesPatchSchema,
@@ -73,16 +74,7 @@ describe('PreferencesPatchSchema', () => {
 		[
 			'every store hidden',
 			{
-				hidden_channels: [
-					'kdp',
-					'kdp_print',
-					'kobo',
-					'd2d',
-					'ingram',
-					'apple',
-					'google_play',
-					'direct'
-				]
+				hidden_channels: [...CHANNEL_SLUGS]
 			}
 		],
 		['ratio above 1', { cadence_ratio: 1.5 }]

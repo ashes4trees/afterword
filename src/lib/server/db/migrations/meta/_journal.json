@@ -50,6 +50,13 @@
 			"when": 1792251585528,
 			"tag": "0006_series_position_halves",
 			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "7",
+			"when": 1792263697116,
+			"tag": "0007_more_stores",
+			"breakpoints": true
 		}
 	]
 }

@@ -139,7 +139,7 @@ channel and marketplace. `author_id` on everything except `channels`.
 ### The cross product that solves "I lost track"
 
 - **`channels`** — global reference: `slug` (`kdp`, `kdp_print`, `kobo`, `d2d`,
-  `ingram`, `apple`, `google_play`, `direct`), `display_name`, `capabilities` jsonb
+  `ingram`, `apple`, `google_play`, `bn_press`, `acx`, `findaway`, `kickstarter`, `direct`), `display_name`, `capabilities` jsonb
 - **`channel_listings`** — `id`, `author_id`, `title_id`, `channel_slug`, `marketplace`,
   `status` (`not_started` | `metadata_draft` | `submitted` | `in_review` | `live` |
   `unpublished`), `external_id`, `price_minor`, `currency`, `enrolled_in_select`,
