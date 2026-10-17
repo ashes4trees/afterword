@@ -29,6 +29,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 - The author comes from `event.locals.author`, never from a global. The only auth seam is `authenticate()` in [src/lib/server/auth.ts](src/lib/server/auth.ts). Use `requireAuthor(locals)` in loads and actions.
 - CI must never need an Anthropic API key.
 - SvelteKit's cross-site form check only runs in production builds, not in `npm run dev`. adapter-node needs `ORIGIN` set for it.
+- The repo is public. Never put the owner's real book titles, pen names, series, email, or local paths in code, fixtures, commits, issues, or PRs. Use made-up names.
 - The local database holds the owner's own test data. Manual checks against it may only touch rows the check itself created, targeted by exact id. Never act on "the first row", and never delete by a broad filter.
 - When testing by hand with curl, run the script under `bash`. The default shell is zsh, which doesn't split an unquoted `$VAR` holding several flags.
 
