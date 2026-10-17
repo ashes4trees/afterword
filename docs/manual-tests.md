@@ -17,7 +17,7 @@ server started. You're signed in automatically as the author in `DEV_AUTHOR_EMAI
 
 ## Listing editor (#12)
 
-From Listings, Cmd- or Ctrl-click a cell (or open it without JavaScript) to reach a listing's own page.
+From Listings, click a cell, then "Edit price, store ID, and more →" at the bottom of the dialog. Cmd- or Ctrl-click a cell to open the editor directly in a new tab.
 
 - [ ] An untracked listing says "You're not tracking this listing yet", and Save starts tracking it
 - [ ] Status, store ID, and price with currency save and come back as entered. "4.999" or a blank currency shows a friendly error

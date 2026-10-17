@@ -431,5 +431,16 @@
 				onDone={() => dialog?.close()}
 			/>
 		</div>
+		<div class="border-t border-border px-5 py-3">
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- cellHref uses resolve() -->
+			<a
+				href={cellHref(editing.bookId, editing.cell)}
+				class="text-sm font-medium text-accent hover:underline"
+			>
+				Edit price, store ID{editing.cell.channel.slug === 'kdp' && editing.cell.format === 'ebook'
+					? ', KDP Select'
+					: ''}, and more →
+			</a>
+		</div>
 	{/if}
 </dialog>
