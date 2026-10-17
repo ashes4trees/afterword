@@ -31,6 +31,8 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 - SvelteKit's cross-site form check only runs in production builds, not in `npm run dev`. adapter-node needs `ORIGIN` set for it.
 - The repo is public. Never put the owner's real book titles, pen names, series, email, or local paths in code, fixtures, commits, issues, or PRs. Use made-up names.
 - The local database holds the owner's own test data. Manual checks against it may only touch rows the check itself created, targeted by exact id. Never act on "the first row", and never delete by a broad filter.
+- To test writes over HTTP without touching the owner's data, run a second dev server as a throwaway author: `DEV_AUTHOR_EMAIL=probe-<n>@example.test npx vite dev --port 5198`. Then delete that author, which cascades to everything it created.
+- In shell chains, never put a check (`grep -c`, `test`) ahead of real work with `&&`. A check that "fails" silently skips everything after it (that's how #87's docs went missing).
 - When testing by hand with curl, run the script under `bash`. The default shell is zsh, which doesn't split an unquoted `$VAR` holding several flags.
 
 ## Workflow
@@ -85,6 +87,7 @@ Applies to playbook advice and all UI copy (hints, empty states, errors).
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-10-17: Links into Settings can carry `?return=<path>`, and Save redirects back there. `safeReturnPath()` in `src/lib/shared/returnTo.ts` accepts only in-app paths.
 - 2026-10-17: Reminders (#46). The pure engine is in [src/lib/server/engine/reminders.ts](src/lib/server/engine/reminders.ts): the tightest open lead-time window wins, so there are no stale reminders, and overdue items show in Coming up but are never "due" for delivery. Reminder kinds are registered in `src/lib/shared/reminders.ts` (only `key_date` so far), and sources map rows to `DatedItem` in `services/reminders.ts`. Home's Coming up syncs every book's tasks first. Settings → Reminders edits `reminders.lead_days` and per-kind overrides.
 - 2026-10-17: The repo went public. History was rewritten with `git filter-repo --replace-text` to remove the owner's real pen name and titles from an old test fixture, so commit SHAs from PR #42 onward changed. Old SHAs in earlier PR pages and in this log point at pre-rewrite commits. Merged commits from that range lost GitHub's "Verified" badge.
 - 2026-10-17: Brand voice adopted (see Brand voice above). The launch timeline was rewritten to version 2 in that voice. The timeline footer shows only "Advice last reviewed <as_of>"; sources stay in the pack file.
