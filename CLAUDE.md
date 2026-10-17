@@ -40,6 +40,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 - Each issue has an **Acceptance** list. Treat it as the definition of done.
 - Labels: `type:*`, `area:*`, `size:S|M|L`, `constraint`, `blocked`. [scripts/seed-github.sh](scripts/seed-github.sh) created them. Don't re-run the issue phase, because it doesn't deduplicate.
 - Branching: one short-lived branch and PR per issue (`<type>/<issue>-<slug>`). Merge (squash) once CI passes. CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs typecheck, lint, migrations against a Postgres 18 service container, tests with coverage, and the build.
+- Merge only on a passing CI exit code: `gh pr checks --watch` then `gh pr merge` only if it exited 0. Never pipe the watch into `tail` or `grep`, which hides a failure (that's how #74 merged on red). Run `npm run lint` and read its exit code before pushing.
 - Reference the issue in commits and PRs (`Closes #n`).
 - UI-only fixes and changes go on the running checklist in #48, never in their own tickets. #48 is **parked**: add items to it, but don't work on it until the owner says they're ready to make design decisions.
 - Renaming a column: drizzle-kit asks interactively whether it's a rename, which blocks here. Split it into two migrations, one adding (with any data copy appended to the generated SQL) and one dropping, as in 0004 and 0005.
