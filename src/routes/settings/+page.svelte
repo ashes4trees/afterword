@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
+	import { safeReturnPath } from '$lib/shared/returnTo';
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import { guardUnsavedChanges } from '$lib/components/unsavedChanges';
 	import {
@@ -10,6 +12,10 @@
 	} from '$lib/shared/reminders';
 
 	let { data, form } = $props();
+
+	// Keep ?return= on the form action so Save sends the author back where they came from.
+	const returnPath = $derived(safeReturnPath(page.url.searchParams.get('return')));
+	const returnQuery = $derived(returnPath ? `&return=${encodeURIComponent(returnPath)}` : '');
 
 	const dayLabel = (d: number) =>
 		d === 0 ? 'On the day' : d === 1 ? '1 day before' : `${d} days before`;
@@ -50,7 +56,7 @@
 <form
 	bind:this={formEl}
 	method="POST"
-	action="?/reminders"
+	action="?/reminders{returnQuery}"
 	class="mt-6 max-w-2xl space-y-6 rounded-lg border border-border bg-surface p-5"
 	use:enhance={() => {
 		saving = true;

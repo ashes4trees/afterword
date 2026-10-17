@@ -25,7 +25,8 @@
 	<section class="mt-6" aria-labelledby="coming-up">
 		<div class="flex flex-wrap items-baseline justify-between gap-2">
 			<h2 id="coming-up" class="font-display text-heading">Coming up</h2>
-			<a href={resolve('/settings')} class="text-sm text-accent hover:underline"
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- built on resolve() -->
+			<a href="{resolve('/settings')}?return=%2F" class="text-sm text-accent hover:underline"
 				>Reminder settings</a
 			>
 		</div>
