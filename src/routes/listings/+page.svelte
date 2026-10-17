@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import EmptyState from '$lib/components/EmptyState.svelte';
@@ -24,21 +25,18 @@
 		statusCounts,
 		type MatrixCell
 	} from '$lib/shared/listings';
-	import { withQuery } from '$lib/shared/query';
 	import { STAGE_LABELS } from '$lib/shared/titles';
 
 	let { data, form } = $props();
 
-	// Every store shows unless the author chooses the compact view (?stores=used).
-	const hideUnused = $derived(page.url.searchParams.get('stores') === 'used');
-	const channels = $derived(
-		matrixChannels([...CHANNELS], data.listings, data.defaultChannels, hideUnused)
+	// Every store shows except the ones the author hid in the Stores menu.
+	const channels = $derived(matrixChannels([...CHANNELS], data.hiddenChannels));
+	const listingsPerStore = $derived(
+		Object.fromEntries(
+			CHANNELS.map((c) => [c.slug, data.listings.filter((l) => l.channelSlug === c.slug).length])
+		)
 	);
-	const hiddenStores = $derived(CHANNELS.length - channels.length);
-	const unusedStores = $derived(
-		CHANNELS.length -
-			matrixChannels([...CHANNELS], data.listings, data.defaultChannels, true).length
-	);
+	let storesMenu: HTMLDetailsElement | undefined = $state();
 
 	const filter = $derived(parseBookFilter(page.url.searchParams));
 	const visible = $derived(data.books.filter((b) => matchesBook(b, filter)));
@@ -52,9 +50,6 @@
 	);
 	const counts = $derived(statusCounts(rows.flatMap((g) => g.books.flatMap((r) => r.cells))));
 
-	const storesHref = $derived(
-		withQuery(resolve('/listings'), page.url.searchParams, { stores: hideUnused ? null : 'used' })
-	);
 	const cellHref = (titleId: string, channel: string) =>
 		resolve('/listings/[titleId]/[channel]', { titleId, channel });
 
@@ -99,18 +94,58 @@
 <PageHeader title="Listings">
 	Every book on every store, so nothing slips.
 	{#snippet actions()}
-		{#if hideUnused || unusedStores > 0}
-			<!-- eslint-disable svelte/no-navigation-without-resolve -- built on resolve() -->
-			<a
-				href={storesHref}
-				class="rounded-md px-3 py-2 text-sm font-medium text-accent hover:bg-surface-2"
+		<details bind:this={storesMenu} class="relative">
+			<summary
+				class="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-surface-2"
 			>
-				{hideUnused
-					? `Show all stores (+${hiddenStores})`
-					: `Hide ${unusedStores} unused ${unusedStores === 1 ? 'store' : 'stores'}`}
-			</a>
-			<!-- eslint-enable svelte/no-navigation-without-resolve -->
-		{/if}
+				Stores{data.hiddenChannels.length ? ` (${data.hiddenChannels.length} hidden)` : ''}
+			</summary>
+			<form
+				method="POST"
+				action="?/stores"
+				class="absolute right-0 z-30 mt-2 w-72 rounded-lg border border-border bg-surface p-4 shadow-lg"
+				use:enhance={() =>
+					async ({ update, result }) => {
+						await update({ reset: false });
+						if (result.type === 'success' && storesMenu) storesMenu.open = false;
+					}}
+			>
+				<fieldset>
+					<legend class="mb-2 text-sm text-fg-muted">Show these stores in the grid</legend>
+					<ul class="space-y-1.5">
+						{#each CHANNELS as channel (channel.slug)}
+							<li>
+								<label class="flex items-center gap-2">
+									<input
+										type="checkbox"
+										name="show"
+										value={channel.slug}
+										checked={!data.hiddenChannels.includes(channel.slug)}
+										class="size-4 accent-(--color-accent)"
+									/>
+									<span class="flex-1">{channel.displayName}</span>
+									{#if listingsPerStore[channel.slug]}
+										<span class="text-xs text-fg-muted">
+											{listingsPerStore[channel.slug]}
+											{listingsPerStore[channel.slug] === 1 ? 'listing' : 'listings'}
+										</span>
+									{/if}
+								</label>
+							</li>
+						{/each}
+					</ul>
+				</fieldset>
+				{#if form?.storesError}
+					<p class="mt-2 text-sm text-danger" role="alert">{form.storesError}</p>
+				{/if}
+				<button
+					type="submit"
+					class="mt-4 w-full rounded-md bg-accent px-3 py-2 text-sm font-medium text-accent-fg hover:opacity-90"
+				>
+					Save
+				</button>
+			</form>
+		</details>
 	{/snippet}
 </PageHeader>
 

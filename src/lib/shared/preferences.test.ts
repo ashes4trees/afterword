@@ -70,6 +70,21 @@ describe('PreferencesPatchSchema', () => {
 		['duplicate marketplace', { marketplaces: ['US', 'US'] }],
 		['unknown channel', { default_channels: ['smashwords'] }],
 		['duplicate channel', { default_channels: ['kdp', 'kdp'] }],
+		[
+			'every store hidden',
+			{
+				hidden_channels: [
+					'kdp',
+					'kdp_print',
+					'kobo',
+					'd2d',
+					'ingram',
+					'apple',
+					'google_play',
+					'direct'
+				]
+			}
+		],
 		['ratio above 1', { cadence_ratio: 1.5 }]
 	])('rejects %s', (_label, patch) => {
 		expect(PreferencesPatchSchema.safeParse(patch).success).toBe(false);

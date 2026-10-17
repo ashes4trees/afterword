@@ -34,8 +34,11 @@ At http://localhost:5173/listings
 - [ ] Cmd- or Ctrl-click on a cell opens the listing's own page in a new tab. That page can also change status and returns you to the grid
 
 **Which stores show**
-- [ ] All stores always show, even after listing a book somewhere, so any book can be listed on any store from the grid
-- [ ] "Hide N unused stores" narrows to stores in use (plus any default stores in settings), and "Show all stores (+N)" brings them back
+- [ ] All stores show until you hide some, even after listing a book somewhere
+- [ ] The Stores menu lists every store with a checkbox, and marks stores that have listings. Untick Kobo and Save: its column disappears, and the button says "Stores (1 hidden)"
+- [ ] Tick Kobo again and Save: it comes back, along with any listings it had
+- [ ] Unticking every store and saving shows "Keep at least one store."
+- [ ] The choice sticks after a refresh and a restart
 - [ ] KDP Select shows "Select · until <date>" in its cell. Settable once #12 adds Select fields
 
 **Phone width**

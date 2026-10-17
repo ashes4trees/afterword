@@ -23,6 +23,11 @@ export const preferenceFields = {
 		.refine(unique, 'duplicate marketplace'),
 	/** Channels a new title gets listings for. */
 	default_channels: z.array(z.enum(CHANNEL_SLUGS)).refine(unique, 'duplicate channel'),
+	/** Stores left out of the listing matrix. At least one store always stays visible. */
+	hidden_channels: z
+		.array(z.enum(CHANNEL_SLUGS))
+		.max(CHANNEL_SLUGS.length - 1, 'Keep at least one store visible')
+		.refine(unique, 'duplicate channel'),
 	/** Share of scheduled posts that are promotional, 0–1. */
 	cadence_ratio: z.number().min(0).max(1)
 };
@@ -40,6 +45,7 @@ export const DEFAULT_PREFERENCES: Readonly<Preferences> = Object.freeze({
 	currency: 'USD',
 	marketplaces: ['US'],
 	default_channels: [],
+	hidden_channels: [],
 	cadence_ratio: 0.2
 });
 
