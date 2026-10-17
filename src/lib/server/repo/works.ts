@@ -45,6 +45,20 @@ export async function listPenNames(tx: Executor, authorId: string) {
 		.orderBy(asc(penNames.name));
 }
 
+/**
+ * Every trope the author has used, most used first. Spellings that differ only in case
+ * count as one trope, shown in a single spelling.
+ */
+export async function listTropes(tx: Executor, authorId: string): Promise<string[]> {
+	const rows = (await tx.execute(sql`
+		select min(trope) as trope
+		from ${titles}, unnest(${titles.tropes}) as trope
+		where ${titles.authorId} = ${authorId}
+		group by lower(trope)
+		order by count(*) desc, min(trope)`)) as unknown as { trope: string }[];
+	return rows.map((r) => r.trope);
+}
+
 export async function listSeries(tx: Executor, authorId: string) {
 	return tx
 		.select({ id: series.id, title: series.title, penName: penNames.name })

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import TropeInput from './TropeInput.svelte';
 	import {
 		CONTENT_RATINGS,
 		STAGE_LABELS,
@@ -7,7 +8,11 @@
 		type TitleFormValues
 	} from '$lib/shared/titles';
 
-	type Options = { penNames: string[]; series: { title: string; penName: string | null }[] };
+	type Options = {
+		penNames: string[];
+		series: { title: string; penName: string | null }[];
+		tropes: string[];
+	};
 
 	let {
 		values,
@@ -177,17 +182,19 @@
 			{@render error('subgenre')}
 		</label>
 
-		<label class="sm:col-span-2">
-			<span class="text-sm font-medium">Tropes</span>
-			<input
-				name="tropes"
+		<div class="sm:col-span-2">
+			<label for="tropes-input" class="text-sm font-medium">Tropes</label>
+			<TropeInput
 				value={values.tropes}
-				placeholder="enemies to lovers, found family"
-				class={input}
+				suggestions={options.tropes}
+				invalid={!!errors.tropes}
+				describedBy={errors.tropes ? 'tropes-error' : 'tropes-hint'}
 			/>
-			{@render hint('Separate with commas. Up to 20.')}
+			<p id="tropes-hint" class="mt-1 text-sm text-fg-muted">
+				Press Enter or a comma after each one. Up to 20.
+			</p>
 			{@render error('tropes')}
-		</label>
+		</div>
 	</fieldset>
 
 	<details

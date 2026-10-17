@@ -124,6 +124,18 @@ describe.skipIf(!hasDatabase)('books service', () => {
 		expect((await getBook(app.db, me, id))?.stage).toBe('preorder');
 	});
 
+	it('suggests tropes from every book, most used first, one spelling per trope', async () => {
+		await createBook(app.db, me, input({ workingTitle: 'T1', tropes: 'Found family, heist' }));
+		await createBook(app.db, me, input({ workingTitle: 'T2', tropes: 'found family, Heist' }));
+		await createBook(app.db, me, input({ workingTitle: 'T3', tropes: 'found family' }));
+		// An earlier test also used heist; one more keeps found family clearly ahead.
+		await createBook(app.db, me, input({ workingTitle: 'T4', tropes: 'FOUND FAMILY' }));
+		const { tropes } = await bookFormOptions(app.db, me);
+		expect(tropes.map((t) => t.toLowerCase()).slice(0, 2)).toEqual(['found family', 'heist']);
+		expect(tropes.filter((t) => t.toLowerCase() === 'found family')).toHaveLength(1);
+		expect((await bookFormOptions(app.db, other)).tropes).toEqual([]);
+	});
+
 	it("never shows, edits, or deletes another author's books", async () => {
 		const [mine] = await listBooks(app.db, me);
 		expect(await listBooks(app.db, other)).toEqual([]);
