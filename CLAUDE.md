@@ -53,7 +53,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 ## Content
 
-- Playbook packs: see spec §6.1 and [src/lib/server/content/schema.ts](src/lib/server/content/schema.ts). Each pack needs `as_of` (not in the future) and at least one source. Folder and file name must match `channel` (or `title`) and `pack`. Steps can carry `due` (relative to `release_date`), `milestone`, `formats`, `fields`, `gotchas`, and `preconditions` (other step ids or `PLAYBOOK_FACTS`). Bump `version` when a pack's advice changes.
+- Playbook packs: see spec §6.1 and [src/lib/server/content/schema.ts](src/lib/server/content/schema.ts). Each pack needs `as_of` (not in the future) and at least one source. Folder and file name must match `channel` (or `title`) and `pack`. Steps can carry `due` (relative to `release_date`), `milestone`, `formats`, `fields`, `gotchas`, and `preconditions` (other step ids or `PLAYBOOK_FACTS`). Bump `version` when a pack's advice changes. `kind: ideas` packs (#84) hold optional ideas: each step needs a `phase`, uses a `window` instead of `due`, and may be `repeatable`.
 
 ## Brand voice
 
@@ -87,6 +87,7 @@ Applies to playbook advice and all UI copy (hints, empty states, errors).
 
 Record decisions that aren't in the spec here, newest first, with a date.
 
+- 2026-10-17: Promo ideas (#84) are an ideas pack (`kind: ideas`, `content/playbooks/title/promo-ideas.yaml`, a draft to merge with the owner's research). Ideas are never generated as tasks. Adding one creates `source = 'idea'` tasks, which can repeat and are pinned to their chosen dates, so sync never moves or removes them. Own steps are `source = 'author'`. "Not for this book" is stored in `idea_dismissals`. The timeline merges every source by date. Idea-pack key dates feed Coming up. Canva was left out of the ideas' links because scripted requests can't verify it (403).
 - 2026-10-17: Links into Settings can carry `?return=<path>`, and Save redirects back there. `safeReturnPath()` in `src/lib/shared/returnTo.ts` accepts only in-app paths.
 - 2026-10-17: Reminders (#46). The pure engine is in [src/lib/server/engine/reminders.ts](src/lib/server/engine/reminders.ts): the tightest open lead-time window wins, so there are no stale reminders, and overdue items show in Coming up but are never "due" for delivery. Reminder kinds are registered in `src/lib/shared/reminders.ts` (only `key_date` so far), and sources map rows to `DatedItem` in `services/reminders.ts`. Home's Coming up syncs every book's tasks first. Settings → Reminders edits `reminders.lead_days` and per-kind overrides.
 - 2026-10-17: The repo went public. History was rewritten with `git filter-repo --replace-text` to remove the owner's real pen name and titles from an old test fixture, so commit SHAs from PR #42 onward changed. Old SHAs in earlier PR pages and in this log point at pre-rewrite commits. Merged commits from that range lost GitHub's "Verified" badge.
@@ -121,4 +122,4 @@ Record decisions that aren't in the spec here, newest first, with a date.
 
 ## Status
 - Manual test checklists live in [docs/manual-tests.md](docs/manual-tests.md). Add a section whenever a screen is ready to test by hand.
-- M0 is done except #7 (VPS). M1 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), #5 (layout), #8 (works schema), #9 (books), #10 (channels and listings), #53 (content intensity), #64 (filter bar), #11 (listing matrix), #72 (per-format listings), #13 (playbook loader), #16 (task generation), #45 (launch timeline, draft content), and #46 (reminders) are done. #7 needs the owner's hosting account. Next, by the owner's choice: #84 (promo ideas library), then #12 (listing editor). After that, #12.
+- M0 is done except #7 (VPS). M1 in progress. #1 (scaffold) #2 (Postgres and Drizzle), #3 (preferences), #4 (dev auth bypass), #6 (CI), #39 (RLS), #5 (layout), #8 (works schema), #9 (books), #10 (channels and listings), #53 (content intensity), #64 (filter bar), #11 (listing matrix), #72 (per-format listings), #13 (playbook loader), #16 (task generation), #45 (launch timeline, draft content), #46 (reminders), and #84 (promo ideas, draft content) are done. #7 needs the owner's hosting account. Next: #12 (listing editor). After that, #12.

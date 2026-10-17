@@ -1,0 +1,178 @@
+# DRAFT (2026-10-17). Optional social ideas authors can add to a book's timeline (#84),
+# researched from bookstagram/BookTok and indie marketing guides, to be merged with the
+# owner's research. Brand voice: friendly suggestions, no attributions in the text.
+# The app suggests the kind of post and its timing; it never writes or publishes it.
+# Research notes, for us only: buzz-building usually starts 6-8 weeks out; trope and
+# character-intro posts mid-runway; first lines and quote graphics rotate in the last
+# weeks; countdowns in launch week; reader-first content works during drafting.
+pack: promo-ideas
+kind: ideas
+title: Promo ideas
+version: 1
+as_of: 2026-10-17
+sources:
+  - url: https://gatekeeperpress.com/creating-a-pre-launch-buzz/
+    title: Gatekeeper Press, Creating Pre-Launch Buzz
+  - url: https://blog.bublish.com/build-buzz-in-7-days-a-fall-book-teaser-plan-for-authors-who-want-more-preorders
+    title: Bublish, Build Buzz in 7 Days
+  - url: https://socialk.it/en/blog/booktok-for-authors
+    title: SocialKit, BookTok for Authors
+  - url: https://www.cedarfort.com/pages/booktok-bookstagram
+    title: Cedar Fort, BookTok, Bookstagram and Book Communities
+  - url: https://www.kdpeasy.com/blog/instagram-marketing-self-published-authors
+    title: KDP Easy, Instagram Marketing for Self-Published Authors
+  - url: https://insights.bookbub.com/new-release-marketing-examples-we-love/
+    title: BookBub Insights, New Release Marketing Examples
+steps:
+  # While writing: no release date needed, so no window.
+  - id: mood-board
+    phase: writing
+    label: Share a mood board for the book
+    detail: >
+      A handful of images that capture the feel of the story gives readers a first taste
+      long before there's a cover. It's an easy one to share while you're still drafting.
+
+  - id: trope-poll
+    phase: writing
+    label: Run a "guess the trope" poll
+    detail: >
+      Drop a few hints and let readers guess the tropes. It's fun, it gets people
+      talking, and it tells you which hooks your readers love most.
+
+  - id: book-playlist
+    phase: writing
+    label: Share a playlist for the book
+    detail: >
+      If certain songs set the mood while you write, consider sharing them. Readers love
+      a peek at what's playing behind the scenes.
+
+  - id: reader-you
+    phase: writing
+    label: Post about yourself as a reader
+    repeatable: true
+    detail: >
+      Your favorite tropes, the books that wrecked you, a hot take on your genre. Showing
+      up as a reader first is how a lot of authors find their people.
+
+  - id: writing-milestone
+    phase: writing
+    label: Celebrate a writing milestone
+    repeatable: true
+    detail: >
+      Hit 50,000 words or finished the draft? Share it. Small wins invite readers along
+      for the ride. For regular check-ins, a weekly rhythm in your posting cadence fits
+      better than one-off steps.
+
+  # Before launch
+  - id: title-reveal
+    phase: prelaunch
+    label: Reveal the title
+    detail: >
+      A title reveal is a natural first beat for a new book, well before the cover. Pair
+      it with a line about what kind of story it is.
+    window: { anchor: release_date, from_days: -120, to_days: -75 }
+
+  - id: cover-countdown
+    phase: prelaunch
+    label: Count down to your cover reveal
+    detail: >
+      A few days of teasing (a color, a corner, a guess-the-cover game) makes the reveal
+      itself land harder.
+    window: { anchor: release_date, from_days: -63, to_days: -57 }
+
+  - id: trope-reveal
+    phase: prelaunch
+    label: Reveal your tropes
+    detail: >
+      Tell readers exactly what they're getting. A trope map or a simple list of tropes
+      works well, since many readers choose books by trope.
+    window: { anchor: release_date, from_days: -56, to_days: -35 }
+    milestone: true
+
+  - id: character-intro
+    phase: prelaunch
+    label: Introduce a character
+    repeatable: true
+    detail: >
+      One post per main character: who they are, what they want, maybe a dream cast or
+      the kind of board they'd pin. Spread them out to keep momentum.
+    window: { anchor: release_date, from_days: -49, to_days: -14 }
+
+  - id: dream-cast
+    phase: prelaunch
+    label: Share your dream cast
+    detail: >
+      Who would play your characters? Readers love to argue about this one, which is
+      exactly the point.
+    window: { anchor: release_date, from_days: -49, to_days: -21 }
+
+  - id: first-line
+    phase: prelaunch
+    label: Share your first line
+    detail: >
+      Post the opening line and ask readers whether they'd keep going. It's short,
+      shareable, and a great hook.
+    window: { anchor: release_date, from_days: -35, to_days: -21 }
+
+  - id: teaser-quote
+    phase: prelaunch
+    label: Share a teaser quote
+    repeatable: true
+    detail: >
+      Pick two or three strong lines that work on their own, design them once in a
+      consistent style, and rotate them. Weekly works well in the last month.
+    window: { anchor: release_date, from_days: -42, to_days: -7 }
+
+  # Launch week
+  - id: launch-countdown
+    phase: launch
+    label: Count down the last week
+    repeatable: true
+    detail: >
+      A short daily post in the final days: a quote, a character, a reminder that
+      preorders are open. Keep each one light.
+    window: { anchor: release_date, from_days: -7, to_days: -1 }
+
+  - id: unboxing
+    phase: launch
+    label: Unbox your print copies
+    formats: [paperback, hardcover]
+    detail: >
+      Holding the finished book for the first time is a moment readers love to share
+      with you. Film it if you can.
+    window: { anchor: release_date, from_days: -7, to_days: 7 }
+
+  - id: live-qa
+    phase: launch
+    label: Host a live reading or Q&A
+    detail: >
+      A short live session around launch day gives readers a way to celebrate with you.
+      Even fifteen minutes counts.
+    window: { anchor: release_date, from_days: 0, to_days: 7 }
+
+  # After launch
+  - id: review-highlights
+    phase: after
+    label: Share a review highlight
+    repeatable: true
+    detail: >
+      A favorite line from a reader review makes great social proof. Ask the reviewer
+      first, and credit them.
+    window: { anchor: release_date, from_days: 7, to_days: 60 }
+
+  - id: fan-art
+    phase: after
+    label: Share reader fan art
+    repeatable: true
+    detail: >
+      If readers make art of your characters, sharing it (with credit and their
+      blessing) is a lovely way to say thank you.
+    window: { anchor: release_date, from_days: 14, to_days: 90 }
+
+  - id: read-alikes
+    phase: after
+    label: Post "if you liked this, try mine"
+    detail: >
+      Name a few well-loved books in your genre and how yours compares. It helps new
+      readers place your book fast.
+    window: { anchor: release_date, from_days: 14, to_days: 60 }

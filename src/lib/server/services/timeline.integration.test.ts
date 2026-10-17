@@ -7,7 +7,7 @@ import type { SessionAuthor } from '$lib/server/repo/authors';
 import { connect, connectOwner, hasDatabase, type TestDb } from '$lib/server/testing/db';
 import { EMPTY_TITLE_FORM, TitleInputSchema } from '$lib/shared/titles';
 import { createBook } from './books';
-import { bookTimelines, setTaskDone, setTaskDue, setTaskSkipped } from './tasks';
+import { bookTimeline, setTaskDone, setTaskDue, setTaskSkipped } from './tasks';
 
 const step = (s: Partial<Playbook['steps'][number]> & { id: string }) => ({
 	label: s.id,
@@ -16,11 +16,13 @@ const step = (s: Partial<Playbook['steps'][number]> & { id: string }) => ({
 	links: [],
 	preconditions: [],
 	milestone: false,
+	repeatable: false,
 	...s
 });
 const packs: Playbook[] = [
 	{
 		pack: 'launch-timeline',
+		kind: 'timeline' as const,
 		title: 'Launch timeline',
 		version: 1,
 		as_of: '2026-10-01',
@@ -48,7 +50,7 @@ describe.skipIf(!hasDatabase)('book timeline', () => {
 	let me: SessionAuthor;
 	let book: string;
 
-	const timeline = async () => (await bookTimelines(app.db, me, book, packs))[0]!;
+	const timeline = async () => (await bookTimeline(app.db, me, book, '2026-10-17', packs))!;
 	const stepOf = async (id: string) => (await timeline()).steps.find((s) => s.label === id)!;
 
 	beforeAll(async () => {
@@ -74,7 +76,7 @@ describe.skipIf(!hasDatabase)('book timeline', () => {
 
 	it('lists dated steps with advice, pack details, and what each waits on', async () => {
 		const t = await timeline();
-		expect(t.pack).toMatchObject({ title: 'Launch timeline', version: 1, asOf: '2026-10-01' });
+		expect(t.asOf).toBe('2026-10-01');
 		expect(t.steps.map((s) => [s.label, s.dueOn, s.milestone])).toEqual([
 			['Recruit', '2026-11-09', false],
 			['Send', '2027-01-03', true]

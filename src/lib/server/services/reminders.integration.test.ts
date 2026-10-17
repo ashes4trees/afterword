@@ -8,7 +8,7 @@ import { connect, connectOwner, hasDatabase, type TestDb } from '$lib/server/tes
 import { EMPTY_TITLE_FORM, TitleInputSchema } from '$lib/shared/titles';
 import { createBook } from './books';
 import { comingUpFor, getReminderSettings, saveReminderSettings } from './reminders';
-import { bookTimelines, setTaskDone } from './tasks';
+import { bookTimeline, setTaskDone } from './tasks';
 
 const step = (s: Partial<Playbook['steps'][number]> & { id: string }) => ({
 	label: s.id,
@@ -17,12 +17,14 @@ const step = (s: Partial<Playbook['steps'][number]> & { id: string }) => ({
 	links: [],
 	preconditions: [],
 	milestone: false,
+	repeatable: false,
 	...s
 });
 const due = (offset_days: number) => ({ anchor: 'release_date' as const, offset_days });
 const packs: Playbook[] = [
 	{
 		pack: 'launch-timeline',
+		kind: 'timeline' as const,
 		title: 'Launch',
 		version: 1,
 		as_of: '2026-10-01',
@@ -81,7 +83,7 @@ describe.skipIf(!hasDatabase)('reminders and Coming up', () => {
 	});
 
 	it('drops a key date once it is done', async () => {
-		const [timeline] = await bookTimelines(app.db, me, book, packs);
+		const timeline = await bookTimeline(app.db, me, book, TODAY, packs);
 		await setTaskDone(
 			app.db,
 			me,

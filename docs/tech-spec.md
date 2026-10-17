@@ -251,6 +251,12 @@ milestones among them feed reminders:
 
 It tracks the purpose and timing of each step, never the content of a post (**C1**, **C4**).
 
+A pack can also be an **ideas** pack (`kind: ideas`): a library of optional promo ideas
+(teaser quotes, trope reveals, character intros, countdowns) grouped by `phase`, each with
+a suggested `window` around the release date and an optional `repeatable` flag. Ideas
+never become tasks on their own; the author adds the ones they want to a book's timeline,
+hides the rest per book, and can add steps of their own.
+
 ### 6.2 Rule packs — `content/rules/*.yaml`
 
 ```yaml

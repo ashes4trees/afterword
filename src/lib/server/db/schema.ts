@@ -302,7 +302,8 @@ export const channelListings = pgTable(
 
 // ---------------------------------------------------------------- tasks (#16)
 
-export const taskSource = pgEnum('task_source', ['playbook', 'author']);
+/** playbook: generated from a timeline. idea: picked from an ideas pack (#84). author: their own. */
+export const taskSource = pgEnum('task_source', ['playbook', 'author', 'idea']);
 
 /**
  * A checklist item for a book. Playbook tasks come from task generation and are unique
@@ -354,5 +355,29 @@ export const tasks = pgTable(
 			sql`${t.source} = 'author' or (${t.pack} is not null and ${t.stepId} is not null and ${t.packVersion} is not null)`
 		),
 		check('tasks_done_or_skipped', sql`${t.doneAt} is null or ${t.skippedAt} is null`)
+	]
+);
+
+/** Ideas an author marked "Not for this book" (#84), so the library stays relevant. */
+export const ideaDismissals = pgTable(
+	'idea_dismissals',
+	{
+		id: uuid('id')
+			.primaryKey()
+			.default(sql`uuidv7()`),
+		authorId: authorId(),
+		titleId: uuid('title_id').notNull(),
+		pack: varchar('pack', { length: 80 }).notNull(),
+		stepId: varchar('step_id', { length: 60 }).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(t) => [
+		tenantPolicy(),
+		foreignKey({
+			name: 'idea_dismissals_title_fk',
+			columns: [t.authorId, t.titleId],
+			foreignColumns: [titles.authorId, titles.id]
+		}).onDelete('cascade'),
+		unique('idea_dismissals_title_step_key').on(t.titleId, t.pack, t.stepId)
 	]
 );

@@ -142,3 +142,62 @@ describe('parsePlaybooks', () => {
 		expect(found).toHaveLength(2);
 	});
 });
+
+describe('ideas packs (#84)', () => {
+	const ideas = `
+pack: promo-ideas
+kind: ideas
+title: Promo ideas
+version: 1
+as_of: 2026-10-17
+sources:
+  - https://example.com
+steps:
+  - id: teaser
+    phase: prelaunch
+    label: Share a teaser quote
+    repeatable: true
+    window: { anchor: release_date, from_days: -42, to_days: -7 }
+`;
+	const path = '/content/playbooks/title/promo-ideas.yaml';
+
+	it('reads an ideas pack', () => {
+		const [pack] = parse({ [path]: ideas });
+		expect(pack).toMatchObject({ kind: 'ideas' });
+		expect(pack!.steps[0]).toMatchObject({ phase: 'prelaunch', repeatable: true });
+	});
+
+	it.each([
+		['an idea without a phase', ideas.replace('    phase: prelaunch\n', ''), /needs a phase/],
+		[
+			'an idea with a due date',
+			ideas.replace(
+				'    repeatable: true',
+				'    repeatable: true\n    due: { anchor: release_date, offset_days: -7 }'
+			),
+			/window, not a due date/
+		],
+		[
+			'a window that ends before it starts',
+			ideas.replace('to_days: -7', 'to_days: -60'),
+			/from_days/
+		],
+		[
+			'an ideas pack for a store',
+			ideas.replace('kind: ideas', 'kind: ideas\nchannel: kdp'),
+			/title-scoped/
+		]
+	])('rejects %s', (_label, text, message) => {
+		expect(problems({ [path]: text }).join('\n')).toMatch(message);
+	});
+
+	it('rejects idea-only fields on a timeline step', () => {
+		const timeline = ingram.replace(
+			'    label: Assign an ISBN',
+			'    label: Assign an ISBN\n    phase: writing'
+		);
+		expect(problems({ '/content/playbooks/ingram/print-setup.yaml': timeline }).join()).toMatch(
+			/only for ideas packs/
+		);
+	});
+});
