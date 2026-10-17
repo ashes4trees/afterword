@@ -112,7 +112,9 @@ export function titleFormValues(form: FormData): TitleFormValues {
 		seriesPosition: get('seriesPosition'),
 		genre: get('genre'),
 		subgenre: get('subgenre'),
-		tropes: get('tropes'),
+		// tropesDraft is text typed into the trope box but never turned into a chip. Keep it,
+		// so a trope isn't lost when the author saves without pressing Enter.
+		tropes: [get('tropes'), get('tropesDraft')].filter((t) => t.trim()).join(', '),
 		contentSex: get('contentSex'),
 		contentViolence: get('contentViolence'),
 		contentLanguage: get('contentLanguage'),

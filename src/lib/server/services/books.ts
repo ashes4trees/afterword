@@ -21,7 +21,8 @@ export function bookFormOptions(db: Executor, author: SessionAuthor) {
 		series: (await works.listSeries(tx, author.id)).map((s) => ({
 			title: s.title,
 			penName: s.penName
-		}))
+		})),
+		tropes: await works.listTropes(tx, author.id)
 	}));
 }
 

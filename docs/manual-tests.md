@@ -35,6 +35,12 @@ At http://localhost:5173/books
 - [ ] Enter a position that isn't a whole number or half, such as 1.25. You get a field error. The arrows step by 0.5
 - [ ] Enter more than 20 tropes. You get a field error
 
+**Tropes**
+- [ ] Type a trope and press Enter or a comma. It becomes a chip. Backspace in the empty box removes the last chip, and × removes any chip
+- [ ] On a second book, typing suggests tropes from your other books. Picking one adds it straight away, in your existing spelling
+- [ ] Type a trope and click Save without pressing Enter. It's still saved
+- [ ] After 20 tropes the box says "Limit reached"
+
 **Content intensity**
 - [ ] The section is collapsed on a new book
 - [ ] Rate only violence and language, save, and reopen the book. The section is open and only those two ratings are set
