@@ -1,5 +1,5 @@
-// Channels from spec §5. The `channels` table is seeded from this list by migration
-// 0003; a later change here needs a new migration, and channels.integration.test.ts
+// Channels from spec §5. The `channels` table is seeded from this list by migrations
+// (0003, then 0007 for the stores added later); a later change here needs a new migration, and channels.integration.test.ts
 // fails until the two match.
 
 export type ChannelCapabilities = {
@@ -49,6 +49,26 @@ export const CHANNELS = [
 		slug: 'google_play',
 		displayName: 'Google Play Books',
 		capabilities: caps({ formats: ['ebook'] })
+	},
+	{
+		slug: 'bn_press',
+		displayName: 'Barnes & Noble Press',
+		capabilities: caps({ formats: ['ebook', 'print'] })
+	},
+	{
+		slug: 'acx',
+		displayName: 'Audible (ACX)',
+		capabilities: caps({ formats: ['audio'], exclusivity: true })
+	},
+	{
+		slug: 'findaway',
+		displayName: 'Spotify (Findaway Voices)',
+		capabilities: caps({ formats: ['audio'], aggregator: true })
+	},
+	{
+		slug: 'kickstarter',
+		displayName: 'Kickstarter',
+		capabilities: caps({ formats: ['ebook', 'print', 'audio'] })
 	},
 	{
 		slug: 'direct',
