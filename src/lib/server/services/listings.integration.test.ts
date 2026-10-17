@@ -50,27 +50,39 @@ describe.skipIf(!hasDatabase)('listings service', () => {
 	});
 
 	it('creates a listing on first status, then updates the same row', async () => {
-		expect(await setListingStatus(app.db, me, book, 'kdp', 'metadata_draft')).toBe(true);
-		const first = (await getListing(app.db, me, book, 'kdp')).listing;
+		expect(await setListingStatus(app.db, me, book, 'kdp', 'ebook', 'metadata_draft')).toBe(true);
+		const first = (await getListing(app.db, me, book, 'kdp', 'ebook')).listing;
 		expect(first?.status).toBe('metadata_draft');
 
-		await setListingStatus(app.db, me, book, 'kdp', 'live');
+		await setListingStatus(app.db, me, book, 'kdp', 'ebook', 'live');
 		const { listings } = await listingMatrix(app.db, me);
 		expect(listings).toHaveLength(1);
 		expect(listings[0]).toMatchObject({ id: first!.id, status: 'live', channelSlug: 'kdp' });
 	});
 
 	it("can't touch another author's book", async () => {
-		expect(await setListingStatus(app.db, other, book, 'kobo', 'live')).toBe(false);
-		expect(await removeListing(app.db, other, book, 'kdp')).toBe(false);
+		expect(await setListingStatus(app.db, other, book, 'kobo', 'ebook', 'live')).toBe(false);
+		expect(await removeListing(app.db, other, book, 'kdp', 'ebook')).toBe(false);
 		expect((await listingMatrix(app.db, other)).listings).toEqual([]);
-		expect((await getListing(app.db, me, book, 'kdp')).listing?.status).toBe('live');
+		expect((await getListing(app.db, me, book, 'kdp', 'ebook')).listing?.status).toBe('live');
+	});
+
+	it('tracks formats separately and refuses formats a store does not sell', async () => {
+		await setListingStatus(app.db, me, book, 'kdp', 'paperback', 'in_review');
+		expect((await getListing(app.db, me, book, 'kdp', 'ebook')).listing?.status).toBe('live');
+		expect((await getListing(app.db, me, book, 'kdp', 'paperback')).listing?.status).toBe(
+			'in_review'
+		);
+		expect(() => setListingStatus(app.db, me, book, 'acx', 'ebook', 'live')).toThrow(
+			/doesn't sell/
+		);
+		await removeListing(app.db, me, book, 'kdp', 'paperback');
 	});
 
 	it('removes a listing', async () => {
-		expect(await removeListing(app.db, me, book, 'kdp')).toBe(true);
-		expect((await getListing(app.db, me, book, 'kdp')).listing).toBeUndefined();
-		expect(await removeListing(app.db, me, book, 'kdp')).toBe(false);
+		expect(await removeListing(app.db, me, book, 'kdp', 'ebook')).toBe(true);
+		expect((await getListing(app.db, me, book, 'kdp', 'ebook')).listing).toBeUndefined();
+		expect(await removeListing(app.db, me, book, 'kdp', 'ebook')).toBe(false);
 	});
 
 	it('saves which stores are hidden, per author', async () => {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+	bookFormats,
 	matrixCells,
 	matrixChannels,
 	selectObligation,
@@ -16,6 +17,7 @@ const channels = [
 const listing = (fields: Partial<MatrixListing>): MatrixListing => ({
 	titleId: 't1',
 	channelSlug: 'kdp',
+	format: 'ebook',
 	marketplace: null,
 	status: 'live',
 	enrolledInSelect: false,
@@ -55,13 +57,13 @@ describe('matrixCells', () => {
 			listing({ marketplace: 'CA', status: 'submitted' }),
 			listing({ titleId: 't2', status: 'unpublished' })
 		];
-		const [kdp, kobo] = matrixCells('t1', channels, ls);
+		const [kdp, kobo] = matrixCells('t1', 'ebook', channels, ls);
 		expect(kdp).toMatchObject({ status: 'live', extraMarkets: 2 });
 		expect(kobo).toMatchObject({ status: 'none', listing: null, extraMarkets: 0 });
 	});
 
 	it('falls back to a marketplace listing when there is no default', () => {
-		const [kdp] = matrixCells('t1', channels, [
+		const [kdp] = matrixCells('t1', 'ebook', channels, [
 			listing({ marketplace: 'US', status: 'submitted' })
 		]);
 		expect(kdp).toMatchObject({ status: 'submitted', extraMarkets: 0 });
@@ -70,7 +72,7 @@ describe('matrixCells', () => {
 
 describe('statusCounts', () => {
 	it('counts each state, including not listed', () => {
-		const cells = matrixCells('t1', channels, [
+		const cells = matrixCells('t1', 'ebook', channels, [
 			listing({}),
 			listing({ channelSlug: 'kobo', status: 'live' })
 		]);
@@ -87,5 +89,40 @@ describe('selectObligation', () => {
 		});
 		expect(selectObligation(listing({}))).toBeNull();
 		expect(selectObligation(null)).toBeNull();
+	});
+});
+
+describe('per-format cells (#72)', () => {
+	const stores = [
+		{ slug: 'kdp', displayName: 'Amazon KDP' },
+		{ slug: 'acx', displayName: 'Audible (ACX)' }
+	];
+
+	it('marks cells for formats a store does not sell', () => {
+		const ebook = matrixCells('t1', 'ebook', stores, []);
+		expect(ebook.map((c) => c.sold)).toEqual([true, false]);
+		const audio = matrixCells('t1', 'audiobook', stores, []);
+		expect(audio.map((c) => c.sold)).toEqual([false, true]);
+	});
+
+	it('keeps formats separate on the same store', () => {
+		const ls = [
+			listing({ format: 'ebook', status: 'live' }),
+			listing({ format: 'paperback', status: 'in_review' })
+		];
+		expect(matrixCells('t1', 'ebook', stores, ls)[0]!.status).toBe('live');
+		expect(matrixCells('t1', 'paperback', stores, ls)[0]!.status).toBe('in_review');
+	});
+
+	it('does not count unsold cells in the legend', () => {
+		expect(statusCounts(matrixCells('t1', 'ebook', stores, [])).none).toBe(1);
+	});
+
+	it('gives a book rows for its formats plus any format that still has listings', () => {
+		const book = { id: 't1', formats: ['paperback', 'ebook'] as ('ebook' | 'paperback')[] };
+		expect(bookFormats(book, [])).toEqual(['ebook', 'paperback']);
+		expect(
+			bookFormats({ ...book, formats: ['ebook'] }, [listing({ format: 'hardcover' })])
+		).toEqual(['ebook', 'hardcover']);
 	});
 });

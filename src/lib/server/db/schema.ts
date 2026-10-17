@@ -130,6 +130,9 @@ export const series = pgTable(
 	]
 );
 
+/** Mirrors BOOK_FORMATS in $lib/shared/channels (#72). */
+export const bookFormat = pgEnum('book_format', ['ebook', 'paperback', 'hardcover', 'audiobook']);
+
 export const titleStage = pgEnum('title_stage', [
 	'metadata',
 	'uploaded',
@@ -164,6 +167,11 @@ export const titles = pgTable(
 		contentLanguage: smallint('content_language'),
 		pageCount: integer('page_count'),
 		wordCount: integer('word_count'),
+		/** Formats this book is published in; each gets its own row in the listing matrix (#72). */
+		formats: bookFormat('formats')
+			.array()
+			.notNull()
+			.default(sql`'{ebook}'`),
 		/** Planned or actual publication date; the launch timeline counts from it (#45). */
 		releaseDate: date('release_date'),
 		stage: titleStage('stage').notNull().default('metadata'),
@@ -201,7 +209,8 @@ export const titles = pgTable(
 		check('titles_content_language_range', sql`${t.contentLanguage} between 0 and 5`),
 		check('titles_page_count_positive', sql`${t.pageCount} > 0`),
 		check('titles_word_count_positive', sql`${t.wordCount} > 0`),
-		check('titles_tropes_max', sql`cardinality(${t.tropes}) <= 20`)
+		check('titles_tropes_max', sql`cardinality(${t.tropes}) <= 20`),
+		check('titles_formats_present', sql`cardinality(${t.formats}) >= 1`)
 	]
 );
 
@@ -234,7 +243,7 @@ export const listingStatus = pgEnum('listing_status', [
 ]);
 
 /**
- * One book on one channel, optionally in one marketplace. Each has its own status and
+ * One book in one format on one channel, optionally in one marketplace. Each has its own status and
  * obligations: book 3 can be in preorder on KDP, live on Kobo, and unsubmitted to Ingram.
  * A null marketplace is the listing's default; uniqueness treats it as a value, so a
  * book can't get two default listings on the same channel.
@@ -250,6 +259,7 @@ export const channelListings = pgTable(
 		channelSlug: varchar('channel_slug', { length: 40 })
 			.notNull()
 			.references(() => channels.slug),
+		format: bookFormat('format').notNull(),
 		/** ISO 3166-1 alpha-2, matching the marketplaces preference. */
 		marketplace: varchar('marketplace', { length: 2 }),
 		status: listingStatus('status').notNull().default('not_started'),
@@ -272,8 +282,8 @@ export const channelListings = pgTable(
 			columns: [t.authorId, t.titleId],
 			foreignColumns: [titles.authorId, titles.id]
 		}).onDelete('cascade'),
-		unique('channel_listings_title_channel_marketplace_key')
-			.on(t.titleId, t.channelSlug, t.marketplace)
+		unique('channel_listings_title_channel_format_marketplace_key')
+			.on(t.titleId, t.channelSlug, t.format, t.marketplace)
 			.nullsNotDistinct(),
 		check('channel_listings_marketplace_code', sql`${t.marketplace} ~ '^[A-Z]{2}$'`),
 		check('channel_listings_currency_code', sql`${t.currency} ~ '^[A-Z]{3}$'`),

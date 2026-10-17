@@ -57,6 +57,13 @@
 			"when": 1792263697116,
 			"tag": "0007_more_stores",
 			"breakpoints": true
+		},
+		{
+			"idx": 8,
+			"version": "7",
+			"when": 1792264240395,
+			"tag": "0008_listing_formats",
+			"breakpoints": true
 		}
 	]
 }

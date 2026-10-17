@@ -125,7 +125,8 @@ channel and marketplace. `author_id` on everything except `channels`.
 - **`series`** — `id`, `author_id`, `pen_name_id?`, `title`, `planned_count`
 - **`titles`** — `id`, `author_id`, `pen_name_id?`, `series_id?`, `series_position`,
   `working_title`, `genre`, `subgenre`, `tropes[]`, `content_sex`, `content_violence`,
-  `content_language` (optional 0–5 intensity ratings for any genre), `page_count`,
+  `content_language` (optional 0–5 intensity ratings for any genre), `formats[]`
+  (`ebook` | `paperback` | `hardcover` | `audiobook`; at least one), `page_count`,
   `word_count`, `release_date` (planned or actual; the launch timeline counts from it),
   `stage` (`metadata` | `uploaded` | `preorder` | `launch` |
   `post_launch` | `backlist`)
@@ -138,9 +139,9 @@ channel and marketplace. `author_id` on everything except `channels`.
 
 ### The cross product that solves "I lost track"
 
-- **`channels`** — global reference: `slug` (`kdp`, `kdp_print`, `kobo`, `d2d`,
+- **`channels`** — global reference: `slug` (`kdp`, `kobo`, `d2d`,
   `ingram`, `apple`, `google_play`, `bn_press`, `acx`, `findaway`, `kickstarter`, `direct`), `display_name`, `capabilities` jsonb
-- **`channel_listings`** — `id`, `author_id`, `title_id`, `channel_slug`, `marketplace`,
+- **`channel_listings`** — `id`, `author_id`, `title_id`, `channel_slug`, `format`, `marketplace`,
   `status` (`not_started` | `metadata_draft` | `submitted` | `in_review` | `live` |
   `unpublished`), `external_id`, `price_minor`, `currency`, `enrolled_in_select`,
   `exclusivity_start`, `exclusivity_end`, `wholesale_discount_pct`, `returnable`,
@@ -150,7 +151,9 @@ channel and marketplace. `author_id` on everything except `channels`.
   be in preorder on KDP, live on Kobo, and unsubmitted to Ingram. Nearly all the
   "I've lost track" pain lives in this table.
 
-  One row per title, channel, and marketplace. A null marketplace is the listing's
+  One row per title, channel, format, and marketplace, so "ebook live, paperback in
+  review" is visible. Amazon KDP covers ebook, paperback, and hardcover; KDP Print was
+  merged into it. Full editions (per-format ISBN, trim size) are deferred (#71). A null marketplace is the listing's
   default for that channel, and at most one default exists per title and channel.
   Deleting a title deletes its listings. `channels` is seeded by migration from
   `src/lib/shared/channels.ts`; the app role can read it but has no write policy.

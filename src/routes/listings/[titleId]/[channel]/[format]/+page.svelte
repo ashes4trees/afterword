@@ -6,7 +6,7 @@
 	let { data, form } = $props();
 </script>
 
-<PageHeader title="{data.book.workingTitle} on {data.channel.displayName}">
+<PageHeader title="{data.book.workingTitle} · {data.format.label} on {data.channel.displayName}">
 	<a href={resolve('/listings')} class="text-accent hover:underline">← All listings</a>
 </PageHeader>
 
@@ -20,6 +20,7 @@
 		titleId={data.book.id}
 		bookTitle={data.book.workingTitle}
 		channel={data.channel}
+		format={data.format}
 		current={data.listing?.status ?? 'none'}
 	/>
 </div>
