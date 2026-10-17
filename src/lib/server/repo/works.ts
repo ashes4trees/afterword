@@ -86,6 +86,7 @@ const titleColumns = {
 	wordCount: titles.wordCount,
 	releaseDate: titles.releaseDate,
 	stage: titles.stage,
+	createdAt: titles.createdAt,
 	updatedAt: titles.updatedAt
 };
 
