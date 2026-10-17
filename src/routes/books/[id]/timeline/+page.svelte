@@ -155,15 +155,9 @@
 		{/each}
 	</ol>
 
+	<!-- Advice is shown without attribution (brand voice); sources live in the pack file. -->
 	<footer class="mt-6 text-xs text-fg-muted">
-		{timeline.pack.title}, version {timeline.pack.version}, as of {formatDate(timeline.pack.asOf)}.
-		Sources:
-		{#each timeline.pack.sources as source, i (source.url)}
-			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external source -->
-			<a href={source.url} rel="external noopener" target="_blank" class="underline hover:text-fg"
-				>{source.title ?? source.url}</a
-			>{i < timeline.pack.sources.length - 1 ? '; ' : '.'}
-		{/each}
+		Advice last reviewed {formatDate(timeline.pack.asOf)}.
 	</footer>
 {:else}
 	<p class="mt-6 text-fg-muted">No timeline steps apply to this book's formats.</p>

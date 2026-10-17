@@ -1,9 +1,14 @@
 # DRAFT (2026-10-17). Researched from public indie-publishing guides and KDP's help pages,
-# to be merged with the owner's own research before it counts as the timeline. Offsets
-# are points within the ranges the sources give; each step's detail notes the range.
+# to be merged with the owner's own research before it counts as the timeline.
+# Written in the brand voice (CLAUDE.md): friendly suggestions, no source attributions
+# in the text. Research notes, for us only: reader magnet has no fixed lead time; ARC
+# team planning ~3.5 months out, 20-50 readers for a first book, 20-40% post reviews;
+# trade reviewers want 3+ months; preorders 6-8 weeks to 3-4 months out; cover reveal
+# 6-8 weeks; ARCs out 4-6 weeks; KDP final files 72 hours before release (current KDP
+# help pages; older guides say 10 days).
 pack: launch-timeline
 title: Launch timeline
-version: 1
+version: 2
 as_of: 2026-10-17
 sources:
   - url: https://scribecount.com/author-resource/book-marketing/planning-a-book-launch-for-indie-authors
@@ -24,49 +29,50 @@ steps:
   - id: reader-magnet
     label: Set up a newsletter signup and reader magnet
     detail: >
-      A free bonus (a prequel, deleted scene, or the first chapters) offered in exchange
-      for an email address, with a signup form and a short welcome sequence. The list you
-      build now is who you'll tell on launch day. Sources give no fixed lead time; start
-      well before the cover reveal.
+      Consider offering a reader magnet, like a prequel, a deleted scene, or the first
+      few chapters, in exchange for an email address. Pair it with a simple signup form
+      and a short welcome sequence. Everyone who joins now is someone you can tell on
+      launch day, so the earlier you start, the better.
     due: { anchor: release_date, offset_days: -120 }
 
   - id: recruit-arc-readers
     label: Recruit ARC readers
     detail: >
-      Gather an advance reader team. Guides suggest planning the team about three and a
-      half months out, and starting with 20 to 50 readers for a first book, since only
-      about 20 to 40 percent typically post a review.
+      Start gathering your advance reader team. For a first book, aim for 20 to 50
+      readers. Not everyone will get to a review, so it helps to invite more than you
+      think you need.
     due: { anchor: release_date, offset_days: -90 }
     milestone: true
 
   - id: trade-reviews
     label: Send to trade reviewers, if you're using any
     detail: >
-      Professional reviewers (such as Kirkus or Booklist) usually want the book at least
-      three months before publication. Skip this step if you aren't pursuing trade reviews.
+      If you'd like a professional review from somewhere like Kirkus or Booklist, send
+      your book about three months before release; they need the lead time. Not going
+      that route? Skip this one.
     due: { anchor: release_date, offset_days: -90 }
 
   - id: preorder-live
     label: Put the ebook up for preorder
     detail: >
-      Guides range from 6 to 8 weeks out to 3 to 4 months out. Amazon and similar stores
-      only take ebook preorders; print preorders need IngramSpark.
+      Opening preorders around two months out gives readers time to find the book and
+      your launch-day sales a head start. Most stores, Amazon included, only take
+      preorders for ebooks. For print preorders, look at IngramSpark.
     formats: [ebook]
     gotchas:
-      - KDP needs the final manuscript submitted at least 72 hours before release, or it
-        cancels the preorder. The first miss is forgiven once per account; a second
-        removes preorder privileges for 6 months across your catalog.
-      - Older guides say 10 days. KDP's current help pages say 72 hours. Trust the
-        countdown on your KDP Bookshelf.
+      - KDP needs your final manuscript at least 72 hours before release. Miss it and KDP
+        cancels the preorder. The first miss is forgiven, but a second one blocks
+        preorders across your whole catalog for six months.
+      - Your KDP Bookshelf shows a countdown to that deadline, so keep an eye on it.
     due: { anchor: release_date, offset_days: -60 }
     milestone: true
 
   - id: cover-reveal
     label: Cover reveal
     detail: >
-      Usually 6 to 8 weeks out. Some authors wait until preorder links exist, so readers
-      who see the cover have somewhere to go; reveal to your newsletter first, then
-      publicly.
+      Try revealing your cover once the preorder link is live, so anyone who falls in
+      love with it can buy straight away. Your newsletter readers will appreciate seeing
+      it first, before you share it everywhere else.
     preconditions: [preorder-live]
     due: { anchor: release_date, offset_days: -56 }
     milestone: true
@@ -74,8 +80,8 @@ steps:
   - id: send-arcs
     label: Send ARCs to your readers
     detail: >
-      Commonly 4 to 6 weeks before launch. Too early and readers forget before launch
-      day; too late and reviews aren't ready.
+      About five weeks out is a sweet spot: early enough that reviews are ready on launch
+      day, close enough that readers still remember the book when it's out.
     preconditions: [recruit-arc-readers]
     due: { anchor: release_date, offset_days: -35 }
     milestone: true
@@ -83,14 +89,16 @@ steps:
   - id: newsletter-announce
     label: Announce the book to your newsletter
     detail: >
-      Behind-the-scenes updates and the preorder link. Write and schedule the launch
-      emails now so launch week is sending, not writing.
+      Share a little behind-the-scenes and the preorder link. While you're at it,
+      consider writing and scheduling your launch emails now, so launch week is about
+      celebrating rather than writing.
     due: { anchor: release_date, offset_days: -28 }
 
   - id: final-files
     label: Upload final files to every preorder store
     detail: >
-      Aim a week early rather than at the deadline, so a rejected file can be fixed.
+      Give yourself a week's cushion before the deadline, so there's time to fix a file
+      if a store rejects it.
     formats: [ebook]
     gotchas:
       - KDP's hard deadline is 72 hours before release.
@@ -100,8 +108,8 @@ steps:
   - id: launch-day
     label: Launch day
     detail: >
-      Email your list, share store links, and remind ARC readers that reviews can go up
-      now.
+      Email your list, share your store links, and let your ARC readers know their
+      reviews can go up now. Then take a moment to celebrate!
     preconditions: [release_date_set]
     due: { anchor: release_date, offset_days: 0 }
     milestone: true
@@ -109,14 +117,15 @@ steps:
   - id: review-followup
     label: Follow up with ARC readers who haven't reviewed
     detail: >
-      A gentle reminder about a week after launch. Reviews arriving steadily over time are
-      safer than a large batch on one day.
+      A friendly nudge about a week after launch goes a long way. Reviews that trickle
+      in over time look more natural than a big batch all at once.
     preconditions: [send-arcs]
     due: { anchor: release_date, offset_days: 7 }
 
   - id: review-followup-final
     label: Last review reminder, then thank your team
     detail: >
-      A final nudge about a month after launch, and a thank-you to everyone who read.
+      One last gentle reminder about a month after launch, and a thank-you to everyone
+      who read early. They're your best readers for the next book, too.
     preconditions: [send-arcs]
     due: { anchor: release_date, offset_days: 30 }

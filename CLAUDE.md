@@ -53,6 +53,16 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 - Playbook packs: see spec §6.1 and [src/lib/server/content/schema.ts](src/lib/server/content/schema.ts). Each pack needs `as_of` (not in the future) and at least one source. Folder and file name must match `channel` (or `title`) and `pack`. Steps can carry `due` (relative to `release_date`), `milestone`, `formats`, `fields`, `gotchas`, and `preconditions` (other step ids or `PLAYBOOK_FACTS`). Bump `version` when a pack's advice changes.
 
+## Brand voice
+
+Applies to playbook advice and all UI copy (hints, empty states, errors).
+
+- Talk like a knowledgeable friend: second person, suggestions rather than definitions. "Consider offering a reader magnet…", not "A reader magnet is…".
+- Give the advice, never its pedigree. No "guides suggest", "sources say", or "older guides say" in anything an author reads. Sources live in the pack's `sources` and in YAML comments.
+- The author decides. Advice is optional, and skipping is fine; never scold.
+- Warnings are plain and name the consequence: "Miss it and KDP cancels the preorder."
+- Short and concrete. Give numbers as rules of thumb ("about five weeks out"), not ranges with caveats.
+
 ## Commands
 
 - `npm run dev`: dev server
@@ -75,6 +85,7 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 Record decisions that aren't in the spec here, newest first, with a date.
 
 - 2026-10-17: The repo went public. History was rewritten with `git filter-repo --replace-text` to remove the owner's real pen name and titles from an old test fixture, so commit SHAs from PR #42 onward changed. Old SHAs in earlier PR pages and in this log point at pre-rewrite commits. Merged commits from that range lost GitHub's "Verified" badge.
+- 2026-10-17: Brand voice adopted (see Brand voice above). The launch timeline was rewritten to version 2 in that voice. The timeline footer shows only "Advice last reviewed <as_of>"; sources stay in the pack file.
 - 2026-10-17: Launch timeline (#45) is `content/playbooks/title/launch-timeline.yaml`, a **draft** researched from public guides and KDP's help pages. The owner is doing independent research, and the two will be merged before it counts. Each book has Details and Launch timeline tabs; the timeline page syncs tasks on load, so pack changes show up. Steps can be done, skipped, or given a pinned date ("Back to the schedule" unpins). `BookTabs` compares `page.route.id`, because `resolve()` can return relative paths during server rendering.
 - 2026-10-17: Task generation (#16) is pure, in [src/lib/server/engine/tasks.ts](src/lib/server/engine/tasks.ts): `plannedTasks` turns packs into tasks, `syncTasks` diffs them against stored tasks, and `blockedBy` works out preconditions when tasks are read, never storing them. `syncTitleTasks()` in `services/tasks.ts` runs inside the same transaction whenever a book or listing changes. Open tasks follow the release date unless `due_pinned`. Done and skipped tasks are history.
 - 2026-10-17: Playbooks (#13) are YAML in `content/playbooks/<channel>/` or `content/playbooks/title/` (per-book packs such as the launch timeline). They're bundled at build time with `import.meta.glob` and validated when `src/lib/server/content/playbooks.ts` loads. `hooks.server.ts` imports it so a bad pack stops the server, and a test fails CI the same way. The schema is in `content/schema.ts`. Playbooks are always deterministic, hand-written data. AI may explain them later (M3), but never writes or changes them.
