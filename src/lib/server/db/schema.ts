@@ -191,6 +191,11 @@ export const titles = pgTable(
 			sql`${t.seriesPosition} is null or ${t.seriesId} is not null`
 		),
 		check('titles_series_position_positive', sql`${t.seriesPosition} > 0`),
+		// Whole numbers or halves only: book 2, novella 2.5.
+		check(
+			'titles_series_position_halves',
+			sql`${t.seriesPosition} * 2 = trunc(${t.seriesPosition} * 2)`
+		),
 		check('titles_content_sex_range', sql`${t.contentSex} between 0 and 5`),
 		check('titles_content_violence_range', sql`${t.contentViolence} between 0 and 5`),
 		check('titles_content_language_range', sql`${t.contentLanguage} between 0 and 5`),

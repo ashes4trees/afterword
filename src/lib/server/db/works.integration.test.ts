@@ -139,6 +139,19 @@ describe.skipIf(!hasDatabase)('works schema: pen names, series, titles', () => {
 		).rejects.toMatchObject(pgError(code));
 	});
 
+	it('only accepts whole or half series positions', async () => {
+		await expect(
+			asA((tx) =>
+				tx.insert(titles).values({
+					authorId: a,
+					seriesId: seriesA,
+					seriesPosition: 1.25,
+					workingTitle: 'Quarter'
+				})
+			)
+		).rejects.toMatchObject(pgError(CHECK));
+	});
+
 	it('rejects duplicate pen names regardless of case', async () => {
 		await expect(
 			asA((tx) => tx.insert(penNames).values({ authorId: a, name: 'a. writer' }))

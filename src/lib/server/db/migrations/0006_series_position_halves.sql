@@ -1,0 +1,1 @@
+ALTER TABLE "titles" ADD CONSTRAINT "titles_series_position_halves" CHECK ("titles"."series_position" * 2 = trunc("titles"."series_position" * 2));

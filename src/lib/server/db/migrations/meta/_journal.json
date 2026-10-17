@@ -43,6 +43,13 @@
 			"when": 1790558852258,
 			"tag": "0005_drop_heat_level",
 			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
+			"when": 1792251585528,
+			"tag": "0006_series_position_halves",
+			"breakpoints": true
 		}
 	]
 }
