@@ -64,13 +64,16 @@
 					</form>
 
 					<div class="min-w-0 flex-1">
-						<p class={['font-medium', (step.done || step.skipped) && 'line-through']}>
-							{#if step.milestone}<span
-									class="mr-1.5 text-warn"
-									title="Milestone"
-									aria-label="Milestone">★</span
+						<p class="flex flex-wrap items-center gap-x-2 gap-y-1">
+							<span class={['font-medium', (step.done || step.skipped) && 'line-through']}
+								>{step.label}</span
+							>
+							{#if step.milestone}
+								<span
+									class="rounded-full border border-warn px-2 py-0.5 text-xs font-medium text-warn"
+									title="One of the big moments in your launch">Key date</span
 								>
-							{/if}{step.label}
+							{/if}
 						</p>
 						<p class="mt-0.5 text-sm text-fg-muted">
 							{#if step.skipped}
@@ -91,10 +94,29 @@
 							<p class="mt-1 text-sm text-fg-muted">Waiting on: {step.waitingOn.join(', ')}</p>
 						{/if}
 
-						{#if step.detail || step.gotchas.length}
+						{#if step.detail || step.gotchas.length || step.links.length}
 							<details class="mt-2 text-sm">
 								<summary class="cursor-pointer text-accent">Advice</summary>
 								{#if step.detail}<p class="mt-2">{step.detail}</p>{/if}
+								{#if step.links.length}
+									<p class="mt-2">
+										Popular options:
+										{#each step.links as link, i (link.url)}
+											<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external site -->
+											<a
+												href={link.url}
+												target="_blank"
+												rel="external noopener"
+												class="font-medium text-accent hover:underline"
+												>{link.label}<span class="sr-only"> (opens in a new tab)</span><span
+													aria-hidden="true"
+												>
+													↗</span
+												></a
+											>{i < step.links.length - 1 ? ', ' : ''}
+										{/each}
+									</p>
+								{/if}
 								{#if step.gotchas.length}
 									<ul class="mt-2 list-disc space-y-1 pl-5 text-fg-muted">
 										{#each step.gotchas as gotcha (gotcha)}<li>{gotcha}</li>{/each}

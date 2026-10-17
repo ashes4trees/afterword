@@ -8,7 +8,7 @@
 # help pages; older guides say 10 days).
 pack: launch-timeline
 title: Launch timeline
-version: 2
+version: 3
 as_of: 2026-10-17
 sources:
   - url: https://scribecount.com/author-resource/book-marketing/planning-a-book-launch-for-indie-authors
@@ -33,6 +33,10 @@ steps:
       few chapters, in exchange for an email address. Pair it with a simple signup form
       and a short welcome sequence. Everyone who joins now is someone you can tell on
       launch day, so the earlier you start, the better.
+    links:
+      - { label: MailerLite, url: https://www.mailerlite.com }
+      - { label: Kit, url: https://kit.com }
+      - { label: BookFunnel, url: https://bookfunnel.com }
     due: { anchor: release_date, offset_days: -120 }
 
   - id: recruit-arc-readers
@@ -41,6 +45,10 @@ steps:
       Start gathering your advance reader team. For a first book, aim for 20 to 50
       readers. Not everyone will get to a review, so it helps to invite more than you
       think you need.
+    links:
+      - { label: BookSirens, url: https://booksirens.com }
+      - { label: Booksprout, url: https://booksprout.co }
+      - { label: StoryOrigin, url: https://storyoriginapp.com }
     due: { anchor: release_date, offset_days: -90 }
     milestone: true
 
@@ -50,6 +58,9 @@ steps:
       If you'd like a professional review from somewhere like Kirkus or Booklist, send
       your book about three months before release; they need the lead time. Not going
       that route? Skip this one.
+    links:
+      - { label: Kirkus Indie, url: https://www.kirkusreviews.com/indie-reviews/ }
+      - { label: BookLife, url: https://booklife.com }
     due: { anchor: release_date, offset_days: -90 }
 
   - id: preorder-live
@@ -64,6 +75,10 @@ steps:
         cancels the preorder. The first miss is forgiven, but a second one blocks
         preorders across your whole catalog for six months.
       - Your KDP Bookshelf shows a countdown to that deadline, so keep an eye on it.
+    links:
+      - { label: Amazon KDP, url: https://kdp.amazon.com }
+      - { label: Draft2Digital, url: https://www.draft2digital.com }
+      - { label: IngramSpark, url: https://www.ingramspark.com }
     due: { anchor: release_date, offset_days: -60 }
     milestone: true
 
@@ -83,6 +98,9 @@ steps:
       About five weeks out is a sweet spot: early enough that reviews are ready on launch
       day, close enough that readers still remember the book when it's out.
     preconditions: [recruit-arc-readers]
+    links:
+      - { label: BookFunnel, url: https://bookfunnel.com }
+      - { label: StoryOrigin, url: https://storyoriginapp.com }
     due: { anchor: release_date, offset_days: -35 }
     milestone: true
 
