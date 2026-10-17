@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import TropeInput from './TropeInput.svelte';
+	import { guardUnsavedChanges } from './unsavedChanges';
 	import {
 		CONTENT_RATINGS,
 		STAGE_LABELS,
@@ -33,6 +34,9 @@
 	// svelte-ignore state_referenced_locally
 	let seriesTitle = $state(values.seriesTitle);
 	let saving = $state(false);
+	let formEl: HTMLFormElement | undefined = $state();
+
+	guardUnsavedChanges(() => formEl, 'You have unsaved changes to this book. Leave without saving?');
 
 	const series = $derived(
 		options.series.find((s) => s.title.toLowerCase() === seriesTitle.trim().toLowerCase())
@@ -61,6 +65,7 @@
 {/snippet}
 
 <form
+	bind:this={formEl}
 	method="POST"
 	{action}
 	class="mt-6 space-y-8"
