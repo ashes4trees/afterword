@@ -5,21 +5,29 @@ import { requireAuthor } from '$lib/server/auth';
 import { db } from '$lib/server/db/client';
 import { removeAction, setStatusAction } from '$lib/server/listingActions';
 import { getListing } from '$lib/server/services/listings';
-import { CHANNELS, CHANNEL_SLUGS } from '$lib/shared/channels';
+import { BOOK_FORMATS, CHANNELS, CHANNEL_SLUGS, FORMAT_LABELS } from '$lib/shared/channels';
 import type { Actions, PageServerLoad } from './$types';
 
-// One book on one channel. The matrix's fallback without JavaScript, and where the
+// One book in one format on one channel. The matrix's fallback without JavaScript, and where the
 // listing editor (#12) will grow.
 
 export const load: PageServerLoad = async ({ locals, params }) => {
 	const titleId = z.uuid().safeParse(params.titleId);
 	const channel = z.enum(CHANNEL_SLUGS).safeParse(params.channel);
-	if (!titleId.success || !channel.success) error(404, 'Listing not found');
-	const { book, listing } = await getListing(db, requireAuthor(locals), titleId.data, channel.data);
+	const format = z.enum(BOOK_FORMATS).safeParse(params.format);
+	if (!titleId.success || !channel.success || !format.success) error(404, 'Listing not found');
+	const { book, listing } = await getListing(
+		db,
+		requireAuthor(locals),
+		titleId.data,
+		channel.data,
+		format.data
+	);
 	if (!book) error(404, 'Book not found');
 	return {
 		book: { id: book.id, workingTitle: book.workingTitle },
 		channel: CHANNELS.find((c) => c.slug === channel.data)!,
+		format: { slug: format.data, label: FORMAT_LABELS[format.data] },
 		listing: listing ?? null
 	};
 };

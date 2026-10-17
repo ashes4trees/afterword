@@ -25,9 +25,24 @@ describe('TitleInputSchema', () => {
 			contentLanguage: null,
 			pageCount: null,
 			wordCount: null,
+			formats: ['ebook', 'paperback'],
 			releaseDate: null,
 			stage: 'metadata'
 		});
+	});
+
+	it('reads formats as one of each, in the standard order', () => {
+		const result = parse({ formats: 'audiobook,ebook,ebook' });
+		expect(result.success && result.data.formats).toEqual(['ebook', 'audiobook']);
+	});
+
+	it.each([
+		['no format', ''],
+		['an unknown format', 'scroll']
+	])('rejects %s', (_label, formats) => {
+		const result = parse({ formats });
+		expect(result.success).toBe(false);
+		expect(result.error!.issues.map((i) => i.path[0])).toContain('formats');
 	});
 
 	it('defaults a blank stage to metadata', () => {

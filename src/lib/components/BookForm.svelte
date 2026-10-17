@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { BOOK_FORMATS, FORMAT_LABELS } from '$lib/shared/channels';
 	import TropeInput from './TropeInput.svelte';
 	import { guardUnsavedChanges } from './unsavedChanges';
 	import {
@@ -163,6 +164,26 @@
 			{@render hint('Use 2.5 for a novella between books 2 and 3.')}
 			{@render error('seriesPosition')}
 		</label>
+
+		<fieldset class="sm:col-span-2">
+			<legend class="text-sm font-medium">Formats</legend>
+			<div class="mt-1 flex flex-wrap gap-x-5 gap-y-2">
+				{#each BOOK_FORMATS as format (format)}
+					<label class="flex items-center gap-2">
+						<input
+							type="checkbox"
+							name="formats"
+							value={format}
+							checked={values.formats.split(',').includes(format)}
+							class="size-4 accent-(--color-accent)"
+						/>
+						{FORMAT_LABELS[format]}
+					</label>
+				{/each}
+			</div>
+			{@render hint('Each format gets its own row on the Listings page.')}
+			{@render error('formats')}
+		</fieldset>
 
 		<label>
 			<span class="text-sm font-medium">Release date</span>

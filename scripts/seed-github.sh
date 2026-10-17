@@ -279,7 +279,9 @@ mk "Listing detail editor with enrollment and print settings" \
 Spec: sections 5, 6.1
 
 
-Build on the listing page from #11 at \`/listings/[titleId]/[channel]\`, which already has the status picker, and use \`guardUnsavedChanges()\` for the form."
+Build on the listing page from #11 at \`/listings/[titleId]/[channel]\`, which already has the status picker, and use \`guardUnsavedChanges()\` for the form.
+
+Prices, ISBNs, and settings are per format (#72). If per-edition data such as ISBN or trim size is needed here, that's #71."
 
 mk "Playbook pack schema, loader, and boot validation" \
   "M1 Organized truth" "type:feat,area:content,size:M" \
@@ -459,6 +461,37 @@ mk "App-wide search" \
 Deliberately later: only worth building after M2, once those pages hold data. Filtering within a page is #64.
 
 Spec: section 4"
+
+mk "Track listings per format" \
+  "M1 Organized truth" "type:feat,area:data,size:L" \
+"Track each format separately on each store, so \"the ebook is live but the paperback is in review\" is visible at a glance.
+
+**Acceptance**
+- Formats: ebook, paperback, hardcover, audiobook. Each book records which formats it's published in (at least one), chosen on the book form
+- A listing becomes book × store × format × marketplace, unique on those
+- Store capabilities list the formats each store sells. Amazon KDP and KDP Print merge into one Amazon KDP store, since format now carries the difference. Existing KDP Print listings move to Amazon KDP · Paperback
+- The listing matrix shows a row per format under each book. Cells appear only where the store sells that format
+- Setting a status is refused when the store doesn't sell that format
+- Removing a format from a book never deletes its listings. Formats that still have listings keep their rows
+- Saved preferences that name KDP Print are cleaned up by the migration
+
+Full editions (per-format ISBN, trim size, page count) are #71, deliberately later.
+
+Spec: section 5"
+
+mk "Editions: per-format ISBN, trim size, and page count" \
+  "" "type:feat,area:data,size:L" \
+"Model each format of a book as its own edition, the way publishing does: a paperback has its own ISBN, trim size, and page count, separate from the ebook's.
+
+**Acceptance**
+- An editions table: one row per book and format, with ISBN, trim size, page count, and binding, under row-level security like every tenant table
+- Listings reference an edition instead of a book and format, migrated from the format column added by the per-format listings ticket
+- The book form manages editions, and the listing editor (#12) reads per-edition details such as the ISBN to submit
+- The listing matrix keeps its book-and-format rows; only the data underneath changes
+
+Deliberately later: per-format listings cover tracking status today. Build this when per-edition data is actually needed, likely alongside #12's print settings or ISBN tracking.
+
+Spec: section 5"
 
 mk "Account deletion with export offered first" \
   "M1 Organized truth" "type:feat,area:data,size:S" \

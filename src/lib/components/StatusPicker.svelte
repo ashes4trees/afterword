@@ -9,6 +9,7 @@
 		titleId,
 		bookTitle,
 		channel,
+		format,
 		current,
 		onDone
 	}: {
@@ -17,6 +18,7 @@
 		titleId: string;
 		bookTitle: string;
 		channel: { slug: string; displayName: string };
+		format: { slug: string; label: string };
 		current: ListingStatus | 'none';
 		onDone?: () => void;
 	} = $props();
@@ -32,8 +34,11 @@
 <form method="POST" action="{action}/setStatus" use:enhance={after}>
 	<input type="hidden" name="titleId" value={titleId} />
 	<input type="hidden" name="channel" value={channel.slug} />
+	<input type="hidden" name="format" value={format.slug} />
 	<fieldset>
-		<legend class="mb-2 text-sm text-fg-muted">Status on {channel.displayName}</legend>
+		<legend class="mb-2 text-sm text-fg-muted">
+			{format.label} status on {channel.displayName}
+		</legend>
 		<div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
 			{#each LISTING_STATUSES as status (status)}
 				<button
@@ -57,14 +62,20 @@
 		action="{action}/remove"
 		class="mt-4"
 		use:enhance={({ cancel }) => {
-			if (!confirm(`Stop tracking “${bookTitle}” on ${channel.displayName}?`)) return cancel();
+			if (
+				!confirm(
+					`Stop tracking the ${format.label.toLowerCase()} of “${bookTitle}” on ${channel.displayName}?`
+				)
+			)
+				return cancel();
 			return after();
 		}}
 	>
 		<input type="hidden" name="titleId" value={titleId} />
 		<input type="hidden" name="channel" value={channel.slug} />
+		<input type="hidden" name="format" value={format.slug} />
 		<button type="submit" class="text-sm font-medium text-danger hover:underline">
-			Remove from {channel.displayName}
+			Remove {format.label.toLowerCase()} from {channel.displayName}
 		</button>
 	</form>
 {/if}

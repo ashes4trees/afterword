@@ -14,11 +14,12 @@
 		parseBookFilter
 	} from '$lib/shared/bookFilter';
 	import { organizeBooks } from '$lib/shared/bookList';
-	import { CHANNELS } from '$lib/shared/channels';
+	import { CHANNELS, FORMAT_LABELS } from '$lib/shared/channels';
 	import { formatDate } from '$lib/shared/dates';
 	import {
 		LISTING_STATUSES,
 		STATUS_META,
+		bookFormats,
 		matrixCells,
 		matrixChannels,
 		selectObligation,
@@ -53,13 +54,26 @@
 	const rows = $derived(
 		groups.map((g) => ({
 			...g,
-			books: g.books.map((book) => ({ book, cells: matrixCells(book.id, channels, data.listings) }))
+			books: g.books.map((book) => ({
+				book,
+				// One row per format the book is in (#72).
+				formats: bookFormats(book, data.listings).map((format) => ({
+					format,
+					cells: matrixCells(book.id, format, channels, data.listings)
+				}))
+			}))
 		}))
 	);
-	const counts = $derived(statusCounts(rows.flatMap((g) => g.books.flatMap((r) => r.cells))));
+	const counts = $derived(
+		statusCounts(rows.flatMap((g) => g.books.flatMap((r) => r.formats.flatMap((f) => f.cells))))
+	);
 
-	const cellHref = (titleId: string, channel: string) =>
-		resolve('/listings/[titleId]/[channel]', { titleId, channel });
+	const cellHref = (titleId: string, cell: MatrixCell) =>
+		resolve('/listings/[titleId]/[channel]/[format]', {
+			titleId,
+			channel: cell.channel.slug,
+			format: cell.format
+		});
 
 	// Quick edit: with JavaScript, a cell opens this dialog instead of the listing page.
 	let dialog: HTMLDialogElement | undefined = $state();
@@ -73,7 +87,7 @@
 	}
 
 	const cellLabel = (bookTitle: string, cell: MatrixCell) =>
-		`${bookTitle} on ${cell.channel.displayName}: ${STATUS_META[cell.status].label}`;
+		`${bookTitle}, ${FORMAT_LABELS[cell.format].toLowerCase()}, on ${cell.channel.displayName}: ${STATUS_META[cell.status].label}`;
 </script>
 
 {#snippet obligations(cell: MatrixCell)}
@@ -88,6 +102,33 @@
 			+{cell.extraMarkets}
 			{cell.extraMarkets === 1 ? 'market' : 'markets'}
 		</span>
+	{/if}
+{/snippet}
+
+{#snippet matrixCell(bookId: string, bookTitle: string, cell: MatrixCell)}
+	{#if cell.sold}
+		<a
+			href={cellHref(bookId, cell)}
+			onclick={(e) => open(e, bookId, bookTitle, cell)}
+			aria-label={cellLabel(bookTitle, cell)}
+			class="flex items-start gap-2 rounded-md px-2 py-2 hover:bg-surface-2"
+		>
+			<StatusIcon status={cell.status} />
+			<span>
+				<span class={cell.status === 'none' ? 'text-fg-muted/70' : 'font-medium'}>
+					{STATUS_META[cell.status].label}
+				</span>
+				{@render obligations(cell)}
+			</span>
+		</a>
+	{:else}
+		<span
+			class="block px-2 py-2 text-fg-muted/40"
+			title="{cell.channel.displayName} doesn't sell {FORMAT_LABELS[cell.format].toLowerCase()}s"
+			aria-label="{cell.channel.displayName} doesn't sell {FORMAT_LABELS[
+				cell.format
+			].toLowerCase()}s">—</span
+		>
 	{/if}
 {/snippet}
 
@@ -256,11 +297,12 @@
 								</th>
 							</tr>
 						{/if}
-						{#each group.books as { book, cells } (book.id)}
+						{#each group.books as { book, formats } (book.id)}
 							<tr class="border-t border-border">
 								<th
-									scope="row"
-									class="sticky left-0 z-10 bg-surface px-4 py-3 text-left font-normal"
+									scope="rowgroup"
+									colspan={channels.length + 1}
+									class="sticky left-0 bg-surface px-4 pt-3 pb-1 text-left font-normal"
 								>
 									<a
 										href={resolve('/books/[id]', { id: book.id })}
@@ -272,25 +314,22 @@
 									</a>
 									{@render bookMeta(book)}
 								</th>
-								{#each cells as cell (cell.channel.slug)}
-									<td class="p-1">
-										<a
-											href={cellHref(book.id, cell.channel.slug)}
-											onclick={(e) => open(e, book.id, book.workingTitle, cell)}
-											aria-label={cellLabel(book.workingTitle, cell)}
-											class="flex items-start gap-2 rounded-md px-2 py-2 hover:bg-surface-2"
-										>
-											<StatusIcon status={cell.status} />
-											<span>
-												<span class={cell.status === 'none' ? 'text-fg-muted/70' : 'font-medium'}>
-													{STATUS_META[cell.status].label}
-												</span>
-												{@render obligations(cell)}
-											</span>
-										</a>
-									</td>
-								{/each}
 							</tr>
+							{#each formats as { format, cells } (format)}
+								<tr>
+									<th
+										scope="row"
+										class="sticky left-0 z-10 bg-surface py-1 pr-4 pl-8 text-left text-sm font-normal text-fg-muted"
+									>
+										{FORMAT_LABELS[format]}
+									</th>
+									{#each cells as cell (cell.channel.slug)}
+										<td class="p-1">
+											{@render matrixCell(book.id, book.workingTitle, cell)}
+										</td>
+									{/each}
+								</tr>
+							{/each}
 						{/each}
 					{/each}
 				</tbody>
@@ -305,7 +344,7 @@
 						<h2 class="mb-2 font-display text-heading">{group.seriesTitle ?? 'Standalones'}</h2>
 					{/if}
 					<div class="space-y-3">
-						{#each group.books as { book, cells } (book.id)}
+						{#each group.books as { book, formats } (book.id)}
 							<article class="rounded-lg border border-border bg-surface">
 								<header class="border-b border-border px-4 py-3">
 									<a
@@ -318,33 +357,38 @@
 									</a>
 									{@render bookMeta(book)}
 								</header>
-								<ul class="divide-y divide-border">
-									{#each cells as cell (cell.channel.slug)}
-										<li>
-											<a
-												href={cellHref(book.id, cell.channel.slug)}
-												onclick={(e) => open(e, book.id, book.workingTitle, cell)}
-												aria-label={cellLabel(book.workingTitle, cell)}
-												class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2"
-											>
-												<span class="min-w-0 flex-1 truncate">{cell.channel.displayName}</span>
-												<span class="text-right">
-													<span class="flex items-center justify-end gap-1.5">
-														<StatusIcon status={cell.status} class="size-4" />
-														<span
-															class={cell.status === 'none'
-																? 'text-sm text-fg-muted/70'
-																: 'text-sm font-medium'}
-														>
-															{STATUS_META[cell.status].label}
+								{#each formats as { format, cells } (format)}
+									<h3 class="px-4 pt-3 text-sm font-medium text-fg-muted">
+										{FORMAT_LABELS[format]}
+									</h3>
+									<ul class="divide-y divide-border">
+										{#each cells.filter((c) => c.sold) as cell (cell.channel.slug)}
+											<li>
+												<a
+													href={cellHref(book.id, cell)}
+													onclick={(e) => open(e, book.id, book.workingTitle, cell)}
+													aria-label={cellLabel(book.workingTitle, cell)}
+													class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2"
+												>
+													<span class="min-w-0 flex-1 truncate">{cell.channel.displayName}</span>
+													<span class="text-right">
+														<span class="flex items-center justify-end gap-1.5">
+															<StatusIcon status={cell.status} class="size-4" />
+															<span
+																class={cell.status === 'none'
+																	? 'text-sm text-fg-muted/70'
+																	: 'text-sm font-medium'}
+															>
+																{STATUS_META[cell.status].label}
+															</span>
 														</span>
+														{@render obligations(cell)}
 													</span>
-													{@render obligations(cell)}
-												</span>
-											</a>
-										</li>
-									{/each}
-								</ul>
+												</a>
+											</li>
+										{/each}
+									</ul>
+								{/each}
 							</article>
 						{/each}
 					</div>
@@ -365,7 +409,9 @@
 		<div class="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
 			<div>
 				<h2 class="font-display text-heading">{editing.bookTitle}</h2>
-				<p class="text-sm text-fg-muted">{editing.cell.channel.displayName}</p>
+				<p class="text-sm text-fg-muted">
+					{FORMAT_LABELS[editing.cell.format]} · {editing.cell.channel.displayName}
+				</p>
 			</div>
 			<button
 				type="button"
@@ -380,6 +426,7 @@
 				titleId={editing.bookId}
 				bookTitle={editing.bookTitle}
 				channel={editing.cell.channel}
+				format={{ slug: editing.cell.format, label: FORMAT_LABELS[editing.cell.format] }}
 				current={editing.cell.status}
 				onDone={() => dialog?.close()}
 			/>
