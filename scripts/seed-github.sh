@@ -660,6 +660,8 @@ mk "Email delivery for reminders" \
 - A test sends a day with several milestones across several books and asserts exactly one email
 - A sent log, so the same reminder is never sent twice even if the job reruns
 - Unsubscribe is respected, and lead times come from the author's reminder preference (#46)
+- Settings → Notifications: email reminders on or off, and the time of day the digest arrives. Coming up on Home stays on regardless
+- Email is the only delivery channel in v1. Push and SMS are out of scope (spec §1.2)
 - No model call involved
 
 Spec: sections 3, 5"

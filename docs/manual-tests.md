@@ -24,6 +24,7 @@ server started. You're signed in automatically as the author in `DEV_AUTHOR_EMAI
 - [ ] "Choose different times" for key dates overrides the defaults just for them
 - [ ] Untick everything and save: Home says reminders are off
 - [ ] Leaving Settings with unsaved changes asks first
+- [ ] Opening Settings from Home's "Reminder settings" link and saving takes you back to Home. Opening it from the sidebar and saving stays on Settings and shows "Saved."
 
 ---
 
