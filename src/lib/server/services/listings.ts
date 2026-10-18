@@ -3,7 +3,7 @@ import type { Executor } from '$lib/server/db/types';
 import { getPreferences, updatePreferences, type SessionAuthor } from '$lib/server/repo/authors';
 import * as listings from '$lib/server/repo/listings';
 import * as works from '$lib/server/repo/works';
-import { syncTitleTasks } from './tasks';
+import { listingSetup, syncTitleTasks } from './tasks';
 import { PLAYBOOKS } from '$lib/server/content/playbooks';
 import { fieldAdvice } from '$lib/server/content/advice';
 import type { Playbook } from '$lib/server/content/schema';
@@ -104,6 +104,19 @@ export async function listingEditor(
 		const book = await works.getTitle(tx, author.id, titleId);
 		if (!book) return null;
 		const listing = await listings.getListing(tx, author.id, titleId, channel, format, market);
+		// Setup steps belong to the store's default listing, on every marketplace tab.
+		const main = market
+			? await listings.getListing(tx, author.id, titleId, channel, format, null)
+			: listing;
+		const setup = await listingSetup(
+			tx,
+			author.id,
+			book,
+			main ? { channel, format, externalId: main.externalId } : null,
+			channel,
+			format,
+			packs
+		);
 		const program = exclusiveProgram(channel, format);
 		const enrollment =
 			listing && program
@@ -123,6 +136,7 @@ export async function listingEditor(
 					}
 				: null,
 			advice: fieldAdvice(channel, format, packs),
+			setup,
 			defaultCurrency: currency
 		};
 	});

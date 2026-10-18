@@ -12,6 +12,7 @@ import { EMPTY_TITLE_FORM, TitleInputSchema } from '$lib/shared/titles';
 import { createBook } from './books';
 import { addMarketListing, deleteListing, listingEditor, saveListing } from './listings';
 import { comingUpFor } from './reminders';
+import { setTaskDone } from './tasks';
 
 const base: ListingInput = {
 	status: 'live',
@@ -192,6 +193,58 @@ describe.skipIf(!hasDatabase)('listing editor and decisions', () => {
 		expect(e.listing?.status).toBe('live');
 		expect(await deleteListing(app.db, me, book, 'kdp', 'ebook', 'GB')).toBe(true);
 		expect((await editor())!.markets).toEqual([]);
+	});
+
+	it('walks through store setup: readable before tracking, tickable after, on every tab', async () => {
+		const setupPack: Playbook = {
+			pack: 'print-setup',
+			channel: 'ingram',
+			kind: 'timeline',
+			title: 'Ingram',
+			version: 1,
+			as_of: '2026-10-01',
+			sources: [{ url: 'https://example.com' }],
+			steps: [
+				{ id: 'isbn', label: 'Get an ISBN', detail: 'One per format.', fields: ['external_id'] },
+				{ id: 'discount', label: 'Set the discount', preconditions: ['isbn_assigned'] },
+				{ id: 'ebook-only', label: 'Ebook thing', formats: ['ebook'] }
+			].map((s) => ({
+				fields: [],
+				gotchas: [],
+				links: [],
+				preconditions: [],
+				milestone: false,
+				repeatable: false,
+				...s
+			})) as Playbook['steps']
+		};
+		const setup = async (market: string | null = null) =>
+			(await listingEditor(app.db, me, book, 'ingram', 'paperback', market, [setupPack]))!.setup;
+
+		const before = await setup();
+		expect(before.asOf).toBe('2026-10-01');
+		expect(before.steps.map((s) => [s.label, s.id, s.waitingOn])).toEqual([
+			['Get an ISBN', null, []],
+			['Set the discount', null, ['an ISBN']]
+		]);
+
+		await saveListing(app.db, me, book, 'ingram', 'paperback', null, base);
+		const tracked = await setup();
+		expect(tracked.steps.every((s) => s.id)).toBe(true);
+		await setTaskDone(app.db, me, tracked.steps[0]!.id!, true);
+
+		await saveListing(app.db, me, book, 'ingram', 'paperback', null, {
+			...base,
+			externalId: '9780000000000'
+		});
+		await addMarketListing(app.db, me, book, 'ingram', 'paperback', 'AU');
+		const onMarketTab = await setup('AU');
+		expect(onMarketTab.steps.map((s) => [s.label, s.done, s.waitingOn])).toEqual([
+			['Get an ISBN', true, []],
+			['Set the discount', false, []]
+		]);
+		await deleteListing(app.db, me, book, 'ingram', 'paperback', 'AU');
+		await deleteListing(app.db, me, book, 'ingram', 'paperback', null);
 	});
 
 	it('deleting the account removes its decisions despite the append-only rule', async () => {
