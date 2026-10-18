@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { comingUp, reminderFor, remindersDue, type DatedItem } from './reminders';
+import { comingUp, reminderFor, reminderWindow, remindersDue, type DatedItem } from './reminders';
 
 const prefs = { lead_days: [7, 3], by_kind: {} };
 const TODAY = '2026-10-17';
@@ -67,6 +67,25 @@ describe('lists', () => {
 		expect(remindersDue(items, prefs, TODAY).map((r) => r.label)).toEqual([
 			'Cover reveal',
 			'Send ARCs'
+		]);
+	});
+});
+
+describe('reminderWindow', () => {
+	it.each([
+		['the longest default lead', { lead_days: [7, 3], by_kind: {} }, 7],
+		['a longer per-kind lead', { lead_days: [3], by_kind: { key_date: [30] } }, 30],
+		['custom times with the defaults off', { lead_days: [], by_kind: { key_date: [14] } }, 14],
+		['on the day only, which is on', { lead_days: [0], by_kind: {} }, 0],
+		['nothing ticked: off', { lead_days: [], by_kind: {} }, null]
+	])('%s', (_label, p, expected) => {
+		expect(reminderWindow(p)).toBe(expected);
+	});
+
+	it('keeps overdue items in Coming up with reminders off', () => {
+		const off = { lead_days: [], by_kind: {} };
+		expect(comingUp([item('2026-10-10'), item('2026-10-18')], off, TODAY)).toMatchObject([
+			{ date: '2026-10-10', overdue: true }
 		]);
 	});
 });
