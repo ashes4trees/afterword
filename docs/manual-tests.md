@@ -59,7 +59,9 @@ Open a book, then the **Launch timeline** tab, and scroll to **Ideas**.
 - [ ] With nothing due, Home says "Nothing in the next N days"
 - [ ] In **Settings → Reminders**, tick different times (for example 30 days before) and Save. "Saved." appears, and Coming up widens to match
 - [ ] "Choose different times" for key dates overrides the defaults just for them
-- [ ] Untick everything and save: Home says reminders are off
+- [ ] Untick everything and save: Home says reminders are off. Overdue key dates still show, under "Reminders are off. Overdue dates still show here."
+- [ ] Tick only "On the day": with nothing due today, Home says "Nothing due today", not that reminders are off
+- [ ] "Hide overdue" under Coming up hides overdue items and says "N overdue dates hidden. Show". The choice sticks after a refresh, and saving Settings doesn't undo it. Show brings them back. The timeline still shows them either way
 - [ ] Leaving Settings with unsaved changes asks first
 - [ ] Opening Settings from Home's "Reminder settings" link and saving takes you back to Home. Opening it from the sidebar and saving stays on Settings and shows "Saved."
 

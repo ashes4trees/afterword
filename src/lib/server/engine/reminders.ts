@@ -57,12 +57,24 @@ export function remindersDue(items: DatedItem[], prefs: ReminderPrefs, today: st
 		.sort(bySoonest);
 }
 
-/** The Coming up list: everything in a reminder window, plus anything overdue. */
+/**
+ * The Coming up list: everything in a reminder window, plus anything overdue. Overdue
+ * items show even with reminders off, since they're still on the author's timeline.
+ */
 export function comingUp(items: DatedItem[], prefs: ReminderPrefs, today: string): Reminder[] {
 	return items
 		.map((i) => reminderFor(i, prefs, today))
 		.filter((r): r is Reminder => r !== null)
 		.sort(bySoonest);
+}
+
+/**
+ * How many days ahead Coming up looks: the longest lead time of any kind. Null when
+ * reminders are off. Zero (reminders on the day only) is on.
+ */
+export function reminderWindow(prefs: ReminderPrefs): number | null {
+	const leads = [...prefs.lead_days, ...Object.values(prefs.by_kind).flat()];
+	return leads.length ? Math.max(...leads) : null;
 }
 
 const bySoonest = (a: Reminder, b: Reminder) =>

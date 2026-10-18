@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
 	import EmptyState from '$lib/components/EmptyState.svelte';
 	import PageHeader from '$lib/components/PageHeader.svelte';
@@ -6,7 +7,8 @@
 
 	let { data } = $props();
 
-	const windowDays = $derived(Math.max(0, ...data.leadDays));
+	const remindersOn = $derived(data.windowDays !== null);
+	const hasOverdue = $derived(data.items.some((i) => i.overdue));
 	const button =
 		'inline-block rounded-md bg-accent px-4 py-2 font-medium text-accent-fg hover:opacity-90';
 </script>
@@ -31,12 +33,18 @@
 			>
 		</div>
 
+		{#if !remindersOn && data.items.length > 0}
+			<p class="mt-2 text-sm text-fg-muted">Reminders are off. Overdue dates still show here.</p>
+		{/if}
+
 		{#if data.items.length === 0}
 			<p class="mt-2 text-fg-muted">
-				{#if windowDays > 0}
-					Nothing in the next {windowDays} days. Enjoy the quiet.
-				{:else}
+				{#if !remindersOn}
 					Reminders are off. You can turn them on in settings.
+				{:else if data.windowDays === 0}
+					Nothing due today. Enjoy the quiet.
+				{:else}
+					Nothing in the next {data.windowDays} days. Enjoy the quiet.
 				{/if}
 			</p>
 		{:else}
@@ -69,6 +77,18 @@
 					</li>
 				{/each}
 			</ul>
+		{/if}
+
+		{#if hasOverdue || data.overdueHidden > 0}
+			<form method="POST" action="?/overdue" use:enhance class="mt-2 text-sm text-fg-muted">
+				<input type="hidden" name="hide" value={hasOverdue ? 'true' : 'false'} />
+				{#if hasOverdue}
+					<button class="text-accent hover:underline">Hide overdue</button>
+				{:else}
+					{data.overdueHidden} overdue {data.overdueHidden === 1 ? 'date' : 'dates'} hidden.
+					<button class="text-accent hover:underline">Show</button>
+				{/if}
+			</form>
 		{/if}
 	</section>
 {/if}

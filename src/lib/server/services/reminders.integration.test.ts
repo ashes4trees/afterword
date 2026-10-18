@@ -7,7 +7,12 @@ import type { SessionAuthor } from '$lib/server/repo/authors';
 import { connect, connectOwner, hasDatabase, type TestDb } from '$lib/server/testing/db';
 import { EMPTY_TITLE_FORM, TitleInputSchema } from '$lib/shared/titles';
 import { createBook } from './books';
-import { comingUpFor, getReminderSettings, saveReminderSettings } from './reminders';
+import {
+	comingUpFor,
+	getReminderSettings,
+	saveReminderSettings,
+	setHideOverdue
+} from './reminders';
 import { bookTimeline, setTaskDone } from './tasks';
 
 const step = (s: Partial<Playbook['steps'][number]> & { id: string }) => ({
@@ -73,8 +78,8 @@ describe.skipIf(!hasDatabase)('reminders and Coming up', () => {
 	});
 
 	it('lists open key dates in the window and overdue ones, not plain steps or far dates', async () => {
-		const { items, leadDays } = await comingUpFor(app.db, me, TODAY, packs);
-		expect(leadDays).toEqual([7, 3]);
+		const { items, windowDays } = await comingUpFor(app.db, me, TODAY, packs);
+		expect(windowDays).toBe(7);
 		expect(items.map((i) => [i.label, i.daysUntil, i.overdue, i.lead])).toEqual([
 			['Overdue key date', -20, true, null],
 			['Soon key date', 5, false, 7]
@@ -83,6 +88,17 @@ describe.skipIf(!hasDatabase)('reminders and Coming up', () => {
 			subject: 'The Glass Archive',
 			link: { kind: 'timeline', titleId: book }
 		});
+	});
+
+	it('hides overdue items when the author asks, and counts them', async () => {
+		await setHideOverdue(app.db, me, true);
+		const hidden = await comingUpFor(app.db, me, TODAY, packs);
+		expect(hidden).toMatchObject({ hideOverdue: true, overdueHidden: 1 });
+		expect(hidden.items.map((i) => i.label)).toEqual(['Soon key date']);
+		await setHideOverdue(app.db, me, false);
+		const shown = await comingUpFor(app.db, me, TODAY, packs);
+		expect(shown.overdueHidden).toBe(0);
+		expect(shown.items.map((i) => i.label)).toEqual(['Overdue key date', 'Soon key date']);
 	});
 
 	it('drops a key date once it is done', async () => {

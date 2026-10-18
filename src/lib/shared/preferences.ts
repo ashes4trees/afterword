@@ -41,6 +41,8 @@ export const preferenceFields = {
 		lead_days: leadDays,
 		by_kind: z.partialRecord(z.enum(REMINDER_KINDS), leadDays).default({})
 	}),
+	/** Leave overdue items out of Coming up. They still show on each book's timeline. */
+	hide_overdue: z.boolean(),
 	/** Share of scheduled posts that are promotional, 0–1. */
 	cadence_ratio: z.number().min(0).max(1)
 };
@@ -60,6 +62,7 @@ export const DEFAULT_PREFERENCES: Readonly<Preferences> = Object.freeze({
 	default_channels: [],
 	hidden_channels: [],
 	reminders: { lead_days: [7, 3], by_kind: {} },
+	hide_overdue: false,
 	cadence_ratio: 0.2
 });
 

@@ -2,7 +2,7 @@ import { PLAYBOOKS } from '$lib/server/content/playbooks';
 import type { Playbook } from '$lib/server/content/schema';
 import { withAuthor } from '$lib/server/db/tenant';
 import type { Executor } from '$lib/server/db/types';
-import { comingUp, type DatedItem } from '$lib/server/engine/reminders';
+import { comingUp, reminderWindow, type DatedItem } from '$lib/server/engine/reminders';
 import { packRef } from '$lib/server/engine/tasks';
 import { getPreferences, updatePreferences, type SessionAuthor } from '$lib/server/repo/authors';
 import * as decisionsRepo from '$lib/server/repo/decisions';
@@ -68,7 +68,7 @@ export async function comingUpFor(
 	today: string,
 	packs: Playbook[] = PLAYBOOKS
 ) {
-	const { reminders } = await getPreferences(db, author.id);
+	const { reminders, hide_overdue } = await getPreferences(db, author.id);
 	return withAuthor(db, author.id, async (tx) => {
 		// Keep every book's tasks current, so a pack change or new book shows up here.
 		for (const book of await works.listTitles(tx, author.id)) {
@@ -79,19 +79,29 @@ export async function comingUpFor(
 			...(await commitmentItems(tx, author.id))
 		];
 		const linkFor = new Map(sources.map((s) => [s.item.key, s.link]));
+		const all = comingUp(
+			sources.map((s) => s.item),
+			reminders,
+			today
+		);
 		return {
-			leadDays: reminders.lead_days,
-			items: comingUp(
-				sources.map((s) => s.item),
-				reminders,
-				today
-			).map((r) => ({ ...r, link: linkFor.get(r.key)! }))
+			windowDays: reminderWindow(reminders),
+			hideOverdue: hide_overdue,
+			overdueHidden: hide_overdue ? all.filter((r) => r.overdue).length : 0,
+			items: all
+				.filter((r) => !(hide_overdue && r.overdue))
+				.map((r) => ({ ...r, link: linkFor.get(r.key)! }))
 		};
 	});
 }
 
 export async function getReminderSettings(db: Executor, author: SessionAuthor) {
 	return (await getPreferences(db, author.id)).reminders;
+}
+
+/** Shows or hides overdue items in Coming up. */
+export async function setHideOverdue(db: Executor, author: SessionAuthor, hide: boolean) {
+	await updatePreferences(db, author.id, { hide_overdue: hide });
 }
 
 /** Saves lead times. Throws a ZodError for invalid ones. */
