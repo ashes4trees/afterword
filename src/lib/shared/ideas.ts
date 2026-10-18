@@ -23,7 +23,9 @@ export function describeWindow(w: { from_days: number; to_days: number } | null)
 	if (to < 0) {
 		return from === to
 			? `Best ${amount(n(from), unit)} before release`
-			: `Best ${n(from)} to ${n(to)} ${unit}s before release`;
+			: n(to) === 1
+				? `Best ${amount(n(from), unit)} to ${amount(1, unit)} before release`
+				: `Best ${n(from)} to ${n(to)} ${unit}s before release`;
 	}
 	if (from > 0) return `Best ${n(from)} to ${n(to)} ${unit}s after release`;
 	if (from === 0)

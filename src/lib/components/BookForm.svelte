@@ -51,6 +51,8 @@
 		return null;
 	});
 
+	// Text fields use defaultValue, not value: a one-way value is re-applied whenever its
+	// render block re-runs (typing in Series re-ran it), wiping whatever the author typed.
 	const input =
 		'mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-fg placeholder:text-fg-muted/70';
 </script>
@@ -92,7 +94,7 @@
 				name="workingTitle"
 				required
 				maxlength="200"
-				value={values.workingTitle}
+				defaultValue={values.workingTitle}
 				aria-invalid={!!errors.workingTitle}
 				aria-describedby={errors.workingTitle ? 'workingTitle-error' : undefined}
 				class={input}
@@ -157,7 +159,7 @@
 				step="0.5"
 				min="0.5"
 				inputmode="decimal"
-				value={values.seriesPosition}
+				defaultValue={values.seriesPosition}
 				disabled={!seriesTitle.trim()}
 				class="{input} disabled:opacity-50"
 			/>
@@ -187,7 +189,7 @@
 
 		<label>
 			<span class="text-sm font-medium">Release date</span>
-			<input name="releaseDate" type="date" value={values.releaseDate} class={input} />
+			<input name="releaseDate" type="date" defaultValue={values.releaseDate} class={input} />
 			{@render hint('Planned or actual. The launch timeline counts from it.')}
 			{@render error('releaseDate')}
 		</label>
@@ -198,13 +200,13 @@
 
 		<label>
 			<span class="text-sm font-medium">Genre</span>
-			<input name="genre" maxlength="60" value={values.genre} class={input} />
+			<input name="genre" maxlength="60" defaultValue={values.genre} class={input} />
 			{@render error('genre')}
 		</label>
 
 		<label>
 			<span class="text-sm font-medium">Subgenre</span>
-			<input name="subgenre" maxlength="60" value={values.subgenre} class={input} />
+			<input name="subgenre" maxlength="60" defaultValue={values.subgenre} class={input} />
 			{@render error('subgenre')}
 		</label>
 
@@ -259,7 +261,7 @@
 				type="number"
 				min="1"
 				inputmode="numeric"
-				value={values.pageCount}
+				defaultValue={values.pageCount}
 				class={input}
 			/>
 			{@render error('pageCount')}
@@ -272,7 +274,7 @@
 				type="number"
 				min="1"
 				inputmode="numeric"
-				value={values.wordCount}
+				defaultValue={values.wordCount}
 				class={input}
 			/>
 			{@render error('wordCount')}
