@@ -18,7 +18,7 @@
 	let enrolled = $state(data.values.enrolled === 'on');
 	let saving = $state(false);
 	let formEl: HTMLFormElement | undefined = $state();
-	guardUnsavedChanges(
+	const unsaved = guardUnsavedChanges(
 		() => formEl,
 		'You have unsaved changes to this listing. Leave without saving?'
 	);
@@ -119,9 +119,10 @@
 	class="mt-6 max-w-2xl space-y-6"
 	use:enhance={() => {
 		saving = true;
-		return async ({ update }) => {
+		return async ({ update, result }) => {
 			await update({ reset: false, invalidateAll: true });
 			saving = false;
+			if (result.type === 'success') await unsaved.markSaved();
 		};
 	}}
 >

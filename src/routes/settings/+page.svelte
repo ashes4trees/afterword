@@ -31,7 +31,10 @@
 	);
 	let formEl: HTMLFormElement | undefined = $state();
 	let saving = $state(false);
-	guardUnsavedChanges(() => formEl, 'You have unsaved settings. Leave without saving?');
+	const unsaved = guardUnsavedChanges(
+		() => formEl,
+		'You have unsaved settings. Leave without saving?'
+	);
 </script>
 
 {#snippet checkboxes(name: string, saved: number[])}
@@ -60,9 +63,10 @@
 	class="mt-6 max-w-2xl space-y-6 rounded-lg border border-border bg-surface p-5"
 	use:enhance={() => {
 		saving = true;
-		return async ({ update }) => {
+		return async ({ update, result }) => {
 			await update({ reset: false, invalidateAll: true });
 			saving = false;
+			if (result.type === 'success') await unsaved.markSaved();
 		};
 	}}
 >

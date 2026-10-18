@@ -1,4 +1,4 @@
-import { onMount } from 'svelte';
+import { onMount, tick } from 'svelte';
 import { beforeNavigate } from '$app/navigation';
 
 /** Every field's current value, including hidden inputs such as the trope chips. */
@@ -37,4 +37,16 @@ export function guardUnsavedChanges(
 		if (willUnload) cancel();
 		else if (!confirm(message)) cancel();
 	});
+
+	return {
+		/**
+		 * Call after a successful save that keeps the author on the page, so what they just
+		 * saved stops counting as unsaved. Waits a tick for refreshed data to render first.
+		 */
+		async markSaved() {
+			await tick();
+			const form = getForm();
+			if (form) initial = formSnapshot(form);
+		}
+	};
 }

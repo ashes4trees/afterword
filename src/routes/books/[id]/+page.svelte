@@ -11,13 +11,16 @@
 <PageHeader title={data.title} />
 <BookTabs id={data.id} />
 
-<BookForm
-	values={form?.values ?? data.values}
-	errors={form?.errors}
-	options={data.options}
-	action="?/save"
-	submitLabel="Save changes"
-/>
+<!-- A fresh form per book, so moving between books never carries one book's state into another. -->
+{#key data.id}
+	<BookForm
+		values={form?.values ?? data.values}
+		errors={form?.errors}
+		options={data.options}
+		action="?/save"
+		submitLabel="Save changes"
+	/>
+{/key}
 
 <form
 	method="POST"

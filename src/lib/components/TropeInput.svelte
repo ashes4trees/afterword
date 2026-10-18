@@ -72,6 +72,8 @@
 <div
 	class={[
 		'mt-1 flex flex-wrap items-center gap-1.5 rounded-md border bg-surface px-2 py-1.5',
+		// The inner input drops its own outline, so the box shows the focus ring instead.
+		'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent',
 		invalid ? 'border-danger' : 'border-border'
 	]}
 >

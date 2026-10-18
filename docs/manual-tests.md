@@ -86,7 +86,7 @@ Open a book, then the **Launch timeline** tab.
 At http://localhost:5173/listings
 
 **The grid**
-- [ ] Books run down the side, grouped by series in reading order. Stores run across the top. With no listings yet, all 8 stores show
+- [ ] Books run down the side, grouped by series in reading order. Stores run across the top. With no stores hidden, all 11 show
 - [ ] Every cell shows an icon and a word. Each status reads without color: dashed circle, circle, pencil, arrow, hourglass, filled check, crossed circle
 - [ ] The legend counts what's in view, and the counts follow the filters
 - [ ] Scrolling sideways moves only the grid, with the book column fixed. The page itself never scrolls sideways
