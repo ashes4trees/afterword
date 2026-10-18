@@ -1,0 +1,160 @@
+# IngramSpark print setup (#15). Checked against IngramSpark's live help center on
+# 2026-10-18, read through its public API because the pages block scripted requests:
+# https://help.ingramspark.com/api/v2/help_center/en-us/articles/<id>.json
+# Written in the brand voice (CLAUDE.md): suggestions, no source attributions in the
+# text. Each step names its source in a comment. Research notes, for us only:
+# - Discount: 53-55% with returns in the US and Canada, 48-55% in the UK, Europe, and
+#   Australia. Under 53% in the US is "short discounted". 40% is the stated minimum,
+#   but the live minimum is on the title setup page and can change.
+# - Global distribution fee is 1.875% of list price (2026). Revisions are free (2026).
+# - Yes-Deliver is US and Canada only, at $3 a copy (US) or $20 (international) on top
+#   of the wholesale price. Yes-Destroy is everywhere except Global Connect and Sharjah.
+# - The app stores `returnable` as a boolean, so Deliver vs Destroy is advice only.
+pack: print-setup
+channel: ingram
+title: IngramSpark print setup
+version: 1
+as_of: 2026-10-18
+sources:
+  - url: https://help.ingramspark.com/hc/en-us/articles/20332045658509
+    title: IngramSpark Help, ISBN and EAN
+  - url: https://www.ingramspark.com/free-isbns
+    title: IngramSpark, Free ISBNs
+  - url: https://help.ingramspark.com/hc/en-us/articles/5281126384397
+    title: IngramSpark Help, Setting Up a Print Book with KDP and IngramSpark
+  - url: https://help.ingramspark.com/hc/en-us/articles/5281108644621
+    title: IngramSpark Help, Pricing Your Book for Global Distribution
+  - url: https://help.ingramspark.com/hc/en-us/articles/5338720329229
+    title: IngramSpark Help, Compensation Payments
+  - url: https://help.ingramspark.com/hc/en-us/articles/5338718331277
+    title: IngramSpark Help, Distribution Returns Information
+  - url: https://help.ingramspark.com/hc/en-us/articles/5341690578957
+    title: IngramSpark Help, eProofs and Printed Proofs
+  - url: https://help.ingramspark.com/hc/en-us/articles/5281082083085
+    title: IngramSpark Help, On-Sale Date, Publication Date and Pre-Orders
+  - url: https://help.ingramspark.com/hc/en-us/articles/7158926670989
+    title: IngramSpark Help, Updating, Correcting, or Revising Files
+  - url: https://help.ingramspark.com/hc/en-us/articles/5341631593485
+    title: IngramSpark Help, Book Editions
+steps:
+  # Sources: https://help.ingramspark.com/hc/en-us/articles/20332045658509,
+  # https://www.ingramspark.com/free-isbns
+  - id: isbn
+    label: Get an ISBN for each print format
+    formats: [paperback, hardcover]
+    fields: [external_id]
+    detail: >
+      IngramSpark needs an ISBN for every format, so a paperback and a hardcover need one
+      each. Consider buying your own if you want to use the same number on every store.
+      US authors can get a free one from IngramSpark instead, but it only works there.
+    gotchas:
+      - A free IngramSpark ISBN can't move to another account or store, and may list the
+        imprint as Indy Pub. Switching later means setting the book up again under a new
+        ISBN.
+      - KDP's free ISBN won't work on IngramSpark. To sell the same paperback through both,
+        use an ISBN you bought.
+      - Enter the publisher name exactly as it's registered with your ISBN, or setup shows
+        an error.
+
+  # Source: https://help.ingramspark.com/hc/en-us/articles/5281126384397
+  - id: kdp-expanded-distribution
+    label: Keep KDP Expanded Distribution off
+    formats: [paperback, hardcover]
+    detail: >
+      You can print with both: KDP for Amazon, and IngramSpark for bookstores, libraries,
+      and other stores. If you do, leave Expanded Distribution off for that book on KDP,
+      because an ISBN can only be distributed from one account.
+    gotchas:
+      - If Expanded Distribution is already on, turn it off and request a title transfer
+        before IngramSpark can take the book. KDP has to approve the transfer.
+
+  # Source: https://help.ingramspark.com/hc/en-us/articles/5281108644621
+  - id: list-price
+    label: Set a list price for each market
+    formats: [paperback, hardcover]
+    fields: [price_minor, currency]
+    detail: >
+      Consider pricing like similar books in your genre with the same size and binding,
+      ending in .99, .95, or .00 in every market. Stores in a market can only order the
+      book once it has a price there, so price every market you want to reach.
+    gotchas:
+      - You earn the list price minus the wholesale discount, the printing cost, and a
+        small distribution fee. Check that each copy still earns you something before you
+        publish.
+      - Canada pays the same as the US, because copies ship from the US.
+
+  # Sources: https://help.ingramspark.com/hc/en-us/articles/5281108644621,
+  # https://help.ingramspark.com/hc/en-us/articles/5338720329229
+  - id: wholesale-discount
+    label: Set the wholesale discount
+    formats: [paperback, hardcover]
+    fields: [wholesale_discount_pct]
+    preconditions: [isbn_assigned]
+    detail: >
+      If you want bookstores to stock the book, consider 55%. Stores expect about 55% in
+      the US and UK, and at least 48% in Europe and Australia, because wholesalers take
+      their share before the store gets its usual discount. A lower discount earns you
+      more per copy, but stores are much less likely to order it.
+    gotchas:
+      - Below 53% in the US, the book counts as short discounted, and many bookstores won't
+        order it.
+      - 40% is about the lowest IngramSpark accepts, and it's meant for academic books
+        rather than bookstore shelves.
+      - Changing the discount, price, or returns later can cut what you earn.
+
+  # Source: https://help.ingramspark.com/hc/en-us/articles/5338718331277
+  - id: returns
+    label: Decide whether stores can return copies
+    formats: [paperback, hardcover]
+    fields: [returnable]
+    preconditions: [isbn_assigned]
+    detail: >
+      Most bookstores won't stock a book they can't return, so consider making it
+      returnable if you want shelf space. If you do, consider Destroy rather than Deliver.
+      You pay the wholesale price of every return either way. Deliver adds $3 a copy in
+      the US for shipping, and returned copies may not be in sellable shape.
+    gotchas:
+      - Returns come out of your earnings. If they're more than you earned that month,
+        IngramSpark sends you a bill.
+      - Stores can return copies at any time, for any reason. Switching to returnable lets
+        them send back copies they bought before, too.
+      - A change to returns takes effect at the end of the week.
+
+  # Source: https://help.ingramspark.com/hc/en-us/articles/5341690578957
+  - id: proof
+    label: Approve the eProof, then order a printed copy
+    formats: [paperback, hardcover]
+    detail: >
+      IngramSpark sends an eProof once your files are processed, usually within a week.
+      Check for text running into the gutter, cut-off or blurry images, and fonts that look
+      wrong. Then approve it and order one printed copy before you turn on distribution.
+    gotchas:
+      - Don't enable distribution until you're happy with the printed copy. Stores can
+        order the book as soon as it's on.
+      - Screen colors won't match the printed book exactly. Only a printed copy shows the
+        real thing.
+
+  # Source: https://help.ingramspark.com/hc/en-us/articles/5281082083085
+  - id: dates
+    label: Set the publication and on-sale dates
+    formats: [paperback, hardcover]
+    preconditions: [release_date_set]
+    detail: >
+      For preorders, set the publication date and the on-sale date to the same day, at
+      least 30 days after you upload your files. That leaves time for a printed proof.
+      Aim to have final, approved files in about a month before publication.
+    gotchas:
+      - Different publication and on-sale dates can confuse the stock status on some store
+        sites.
+
+  # Sources: https://help.ingramspark.com/hc/en-us/articles/7158926670989,
+  # https://help.ingramspark.com/hc/en-us/articles/5341631593485
+  - id: revisions
+    label: Fix typos with a revised file
+    formats: [paperback, hardcover]
+    detail: >
+      Fixing typos or small mistakes is free. Upload the revised file and check the new
+      eProof. Consider ordering another printed copy whenever you revise.
+    gotchas:
+      - A new trim size, a noticeably different cover, or changing a fifth or more of the
+        content makes it a new edition, which needs its own ISBN.

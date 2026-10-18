@@ -21,6 +21,7 @@ import {
 	parseListingForm,
 	type ListingFormValues
 } from '$lib/shared/listingForm';
+import { setTaskDone, setTaskSkipped } from '$lib/server/services/tasks';
 import { fromMinor } from '$lib/shared/money';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -115,6 +116,20 @@ export const actions: Actions = {
 			303,
 			`${resolve('/listings/[titleId]/[channel]/[format]', { titleId: t.titleId, channel: t.channel, format: t.format })}?market=${code}`
 		);
+	},
+	/** Ticks, unticks, skips, or brings back a setup step (#14, #15). */
+	step: async ({ request, locals }) => {
+		const f = z
+			.object({ task: z.uuid(), change: z.enum(['done', 'undone', 'skip', 'unskip']) })
+			.safeParse(Object.fromEntries(await request.formData()));
+		if (!f.success) return fail(400, { stepError: 'That change could not be saved.' });
+		const author = requireAuthor(locals);
+		const { task, change } = f.data;
+		const ok =
+			change === 'done' || change === 'undone'
+				? await setTaskDone(db, author, task, change === 'done')
+				: await setTaskSkipped(db, author, task, change === 'skip');
+		if (!ok) return fail(404, { stepError: 'That step no longer exists. Refresh the page.' });
 	},
 	remove: async ({ locals, params, url }) => {
 		const t = target(params, url);

@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
 	import PageHeader from '$lib/components/PageHeader.svelte';
+	import SetupSteps from '$lib/components/SetupSteps.svelte';
 	import StatusIcon from '$lib/components/StatusIcon.svelte';
 	import { guardUnsavedChanges } from '$lib/components/unsavedChanges';
 	import { formatDate } from '$lib/shared/dates';
@@ -259,6 +260,20 @@
 		{#if form && 'saved' in form}<p class="text-sm text-ok" role="status">Saved.</p>{/if}
 	</div>
 </form>
+
+{#if form && 'stepError' in form}
+	<p class="mt-10 text-sm text-danger" role="alert">{form.stepError}</p>
+{/if}
+{#if data.setup.steps.length}
+	{#key `${data.book.id}/${data.channel.slug}/${data.format.slug}`}
+		<SetupSteps
+			steps={data.setup.steps}
+			asOf={data.setup.asOf}
+			store={data.channel.displayName}
+			tracked={data.setup.steps.some((s) => s.id)}
+		/>
+	{/key}
+{/if}
 
 {#if data.listing}
 	<form

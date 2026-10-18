@@ -29,7 +29,16 @@ From Listings, click a cell, then "Edit price, store ID, and more →" at the bo
 - [ ] "+ Add a marketplace" with a code like GB opens a GB tab with its own status and fields. Other tabs are unaffected
 - [ ] "Stop tracking this listing" asks first, then returns to the grid
 - [ ] Leaving with unsaved changes asks first
-- [ ] Advice under fields appears once the KDP and IngramSpark playbooks exist (#14, #15). Until then there's none
+- [ ] Advice appears under fields on Amazon KDP · Ebook (price, KDP Select, store ID) and IngramSpark · Paperback (store ID, price, wholesale discount, returnable), each with "Advice last reviewed"
+
+**Store setup steps (#14, #15)**
+- [ ] Below the form, "Setting up on Amazon KDP" lists seven steps for an ebook, and "Setting up on IngramSpark" eight for a paperback. Other stores and formats show none yet
+- [ ] Before you save the listing, the steps can be read but not ticked ("Save this listing to start ticking these off")
+- [ ] After saving, tick and untick steps, skip one and bring it back. The count follows, and a refresh keeps it all
+- [ ] Type in Store ID without saving, then tick a step. Your typing stays, and leaving still asks first
+- [ ] On IngramSpark, the discount and returns steps say "Waiting on: an ISBN" until a store ID is saved. Steps say "Waiting on: a release date" until the book has one
+- [ ] A marketplace tab shows the same steps, ticked the same way
+- [ ] "Advice" opens each step's walkthrough and pitfalls. Keywords offers Publisher Rocket as a popular option
 
 ---
 

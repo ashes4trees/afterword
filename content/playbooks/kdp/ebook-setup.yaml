@@ -1,0 +1,141 @@
+# Amazon KDP ebook setup (#14). Checked against KDP's live help pages on 2026-10-18.
+# Written in the brand voice (CLAUDE.md): suggestions, no source attributions in the
+# text. Each step names its source in a comment. Research notes, for us only:
+# - KDP changed several rules in 2026. The 70% band on Amazon.com is $2.99 to $12.99
+#   from 2026-07-07 (it was $9.99). Preorders created on or after 2026-09-02 can go
+#   18 months out, postpone twice within 6 months of the original date, and a second
+#   miss costs 6 months of preorders. Older preorders keep 12 months, one 30-day
+#   delay, and a year's penalty. Recheck all of these at every review.
+# - KDP's keyword page doesn't state a per-box character limit (guides say 50), so we
+#   don't give one.
+pack: ebook-setup
+channel: kdp
+title: Amazon KDP ebook setup
+version: 1
+as_of: 2026-10-18
+sources:
+  - url: https://kdp.amazon.com/en_US/help/topic/G201298500
+    title: KDP Help, Make Your Book More Discoverable with Keywords
+  - url: https://kdp.amazon.com/en_US/help/topic/G200652170
+    title: KDP Help, Choosing Categories
+  - url: https://kdp.amazon.com/help/topic/G200652410
+    title: KDP Help, Publishing Territories
+  - url: https://kdp.amazon.com/en_US/help/topic/G200644210
+    title: KDP Help, eBook Royalties
+  - url: https://kdp.amazon.com/en_US/help/topic/G200634500
+    title: KDP Help, Digital Pricing Page
+  - url: https://kdp.amazon.com/help?topicId=A301WJ6XCJ8KW0
+    title: KDP Help, List Price Requirements
+  - url: https://kdp.amazon.com/help/topic/GD9PMU58BV24QFZ7
+    title: KDP Help, KDP Select Enrollment
+  - url: https://kdp.amazon.com/en_US/help/topic/G201499380
+    title: KDP Help, Kindle eBook Pre-Order
+  - url: https://kdp.amazon.com/en_US/help/topic/G201499480
+    title: KDP Help, Changing a Pre-Order Release Date
+  - url: https://kdp.amazon.com/en_US/help/topic/G7DMSKCM9DVS65TC
+    title: KDP Help, ISBNs for Kindle eBooks
+steps:
+  # Source: https://kdp.amazon.com/en_US/help/topic/G201298500
+  - id: keywords
+    label: Fill in all seven keywords
+    formats: [ebook]
+    detail: >
+      Consider using each of the seven keyword boxes for a short phrase a reader might
+      actually type, like a trope, a setting, or the kind of hero. Skip words already in
+      your title, series name, or categories, since Amazon searches those anyway. You can
+      change keywords as often as you like, so treat them as something to try and adjust.
+    gotchas:
+      - Leave out other authors' names, brands you don't own, and Amazon program names like
+        Kindle Unlimited. KDP has zero tolerance for keywords that mislead, and can block
+        the book.
+    links:
+      - { label: Publisher Rocket, url: https://publisherrocket.com }
+
+  # Source: https://kdp.amazon.com/en_US/help/topic/G200652170
+  - id: categories
+    label: Choose three categories
+    formats: [ebook]
+    detail: >
+      Consider the three most specific categories that honestly fit. A narrow category
+      has fewer books to compete with, so yours is easier to find. You can change them
+      later, and a change takes up to three days to show.
+    gotchas:
+      - Pick only categories that match the book. KDP removes ones that don't, and
+        misleading categories break its content rules.
+
+  # Source: https://kdp.amazon.com/help/topic/G200652410
+  - id: territories
+    label: Choose where to sell
+    formats: [ebook]
+    detail: >
+      If the book is your own work and you haven't sold the rights to anyone, choose
+      worldwide rights so readers everywhere can buy it. Pick individual territories only
+      when a publisher holds the rights somewhere.
+    gotchas:
+      - Choosing worldwide after selling rights for a country, such as a UK deal, breaks
+        that contract.
+
+  # Sources: https://kdp.amazon.com/en_US/help/topic/G200644210,
+  # https://kdp.amazon.com/en_US/help/topic/G200634500,
+  # https://kdp.amazon.com/help?topicId=A301WJ6XCJ8KW0
+  - id: royalty-and-price
+    label: Pick a royalty option and set your price
+    formats: [ebook]
+    fields: [price_minor, currency]
+    detail: >
+      For the 70% royalty on Amazon.com, price the ebook between $2.99 and $12.99, and at
+      least 20% below your paperback on Amazon. Outside that, you earn 35%. Each 70% sale
+      also pays a small delivery fee, a few cents for most novels, which grows with file
+      size.
+    gotchas:
+      - For 70% on Amazon.com, stay between $2.99 and $12.99 and at least 20% under your
+        paperback. Outside that, sales earn 35%.
+      - Amazon may match a lower price from another store. If that takes the ebook under
+        $2.99, those sales earn 35%.
+
+  # Source: https://kdp.amazon.com/help/topic/GD9PMU58BV24QFZ7
+  - id: select-decision
+    label: Decide on KDP Select
+    formats: [ebook]
+    fields: [enrolled_in_select, exclusivity_start, exclusivity_end]
+    detail: >
+      KDP Select puts your ebook in Kindle Unlimited, where you're paid for pages read.
+      In return, the ebook is sold only through Amazon for 90 days. Paperbacks and
+      audiobooks can still go anywhere. Terms renew on their own, so think about whether
+      to stay before each one ends. Either choice is fine; it depends on where your
+      readers buy.
+    gotchas:
+      - While enrolled, the ebook can't be on any other store or site, including your own.
+        Take it down everywhere else before the term starts.
+      - You can cancel only in the first three days of a term. After that, turn off
+        auto-renew and the ebook leaves Select when the 90 days are up.
+
+  # Sources: https://kdp.amazon.com/en_US/help/topic/G201499380,
+  # https://kdp.amazon.com/en_US/help/topic/G201499480
+  - id: preorder
+    label: Set up a preorder
+    formats: [ebook]
+    preconditions: [release_date_set]
+    detail: >
+      Consider a preorder so readers can buy before launch. You can set one up to
+      18 months ahead, and you don't need the final file yet. Uploading a draft now gives
+      readers a sample to read.
+    gotchas:
+      - Upload the final file at least 72 hours before release. Miss it and KDP cancels the
+        preorder and every reader's order.
+      - A second missed deadline or cancelled preorder takes away preorders on all your
+        books for 6 months. The first one is forgiven.
+      - You can push the release date back twice, within 6 months of the date you first
+        chose. After that, the only way to move it is to cancel.
+
+  # Source: https://kdp.amazon.com/en_US/help/topic/G7DMSKCM9DVS65TC
+  - id: asin
+    label: Note the ASIN
+    formats: [ebook]
+    fields: [external_id]
+    detail: >
+      Kindle ebooks don't need an ISBN. Amazon gives the ebook an ASIN when you publish.
+      Consider saving it here, so it's easy to find when you set up ads or promotions.
+    gotchas:
+      - If you use your own ISBN for the ebook, give it a number of its own. The paperback
+        and hardcover each need a different one.

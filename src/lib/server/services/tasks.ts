@@ -323,6 +323,83 @@ export function setIdeaHidden(
 	});
 }
 
+export type SetupStep = {
+	stepId: string;
+	/** The task to tick, once the listing is tracked. */
+	id: string | null;
+	label: string;
+	detail: string | null;
+	gotchas: string[];
+	links: { label: string; url: string }[];
+	done: boolean;
+	skipped: boolean;
+	waitingOn: string[];
+};
+
+/**
+ * A store's setup walkthrough for one listing (#14, #15): its playbook steps in pack
+ * order, with the listing's tasks once it's tracked. Untracked listings still get the
+ * steps to read. Runs inside the caller's transaction.
+ */
+export async function listingSetup(
+	tx: Executor,
+	authorId: string,
+	book: { id: string; releaseDate: string | null; formats: BookFormat[] },
+	listing: { channel: string; format: BookFormat; externalId: string | null } | null,
+	channel: string,
+	format: BookFormat,
+	packs: Playbook[] = PLAYBOOKS
+): Promise<{ steps: SetupStep[]; asOf: string | null }> {
+	const storePacks = packs.filter((p) => p.channel === channel && p.kind === 'timeline');
+	if (listing) await syncTitleTasks(tx, authorId, book.id, packs);
+	const rows = listing
+		? (await tasksRepo.listTitleTasks(tx, authorId, book.id)).filter(
+				(t) => t.channelSlug === channel && t.format === format
+			)
+		: [];
+	const scope = rows.map((t) => ({
+		pack: t.pack ?? '',
+		stepId: t.stepId ?? '',
+		channel: t.channelSlug,
+		format: t.format,
+		done: t.doneAt !== null,
+		skipped: t.skippedAt !== null
+	}));
+	const facts = taskFacts(book, listing);
+	const steps = storePacks.flatMap((pack) =>
+		pack.steps
+			.filter((s) => !s.formats || s.formats.includes(format))
+			.map((step): SetupStep => {
+				const task = rows.find((t) => t.pack === packRef(pack) && t.stepId === step.id);
+				const unmet = blockedBy(
+					{ pack: packRef(pack), stepId: step.id, channel, format },
+					step.preconditions,
+					scope,
+					facts
+				);
+				return {
+					stepId: step.id,
+					id: task?.id ?? null,
+					label: step.label,
+					detail: step.detail ?? null,
+					gotchas: step.gotchas,
+					links: step.links,
+					done: task?.doneAt != null,
+					skipped: task?.skippedAt != null,
+					waitingOn: unmet.map(
+						(u) => FACT_LABELS[u] ?? pack.steps.find((s) => s.id === u)?.label ?? u
+					)
+				};
+			})
+	);
+	const asOf =
+		storePacks
+			.map((p) => p.as_of)
+			.sort()
+			.at(-1) ?? null;
+	return { steps, asOf };
+}
+
 /** Marks a task done or not done. Done and skipped are exclusive. */
 export function setTaskDone(db: Executor, author: SessionAuthor, id: string, done: boolean) {
 	return withAuthor(db, author.id, (tx) =>
