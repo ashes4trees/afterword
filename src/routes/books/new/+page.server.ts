@@ -3,7 +3,14 @@ import { z } from 'zod';
 import { resolve } from '$app/paths';
 import { requireAuthor } from '$lib/server/auth';
 import { db } from '$lib/server/db/client';
-import { bookFormOptions, createBook, listBooks } from '$lib/server/services/books';
+import {
+	bookFormOptions,
+	createBook,
+	listBooks,
+	newBookStoreOptions,
+	setDefaultStores
+} from '$lib/server/services/books';
+import { CHANNEL_SLUGS } from '$lib/shared/channels';
 import { nextSeriesPosition } from '$lib/shared/bookList';
 import { EMPTY_TITLE_FORM, TitleInputSchema, titleFormValues } from '$lib/shared/titles';
 import type { Actions, PageServerLoad } from './$types';
@@ -19,18 +26,25 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				seriesPosition: String(nextSeriesPosition(await listBooks(db, author), series))
 			}
 		: EMPTY_TITLE_FORM;
-	return { options: await bookFormOptions(db, author), initial };
+	return {
+		options: await bookFormOptions(db, author),
+		stores: await newBookStoreOptions(db, author),
+		initial
+	};
 };
 
 export const actions: Actions = {
 	default: async ({ request, locals }) => {
 		const author = requireAuthor(locals);
-		const values = titleFormValues(await request.formData());
+		const data = await request.formData();
+		const values = titleFormValues(data);
+		const stores = z.array(z.enum(CHANNEL_SLUGS)).catch([]).parse(data.getAll('stores'));
 		const parsed = TitleInputSchema.safeParse(values);
 		if (!parsed.success) {
-			return fail(400, { values, errors: z.flattenError(parsed.error).fieldErrors });
+			return fail(400, { values, stores, errors: z.flattenError(parsed.error).fieldErrors });
 		}
-		await createBook(db, author, parsed.data);
+		await createBook(db, author, parsed.data, stores);
+		if (data.get('saveDefaultStores') === 'on') await setDefaultStores(db, author, stores);
 		redirect(303, resolve('/books'));
 	}
 };

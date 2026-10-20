@@ -4,6 +4,7 @@ import type { Executor } from '$lib/server/db/types';
 import {
 	PreferencesPatchSchema,
 	resolvePreferences,
+	type PreferenceKey,
 	type Preferences
 } from '$lib/shared/preferences';
 
@@ -41,6 +42,15 @@ export async function getPreferences(db: Executor, authorId: string): Promise<Pr
 		.where(eq(authors.id, authorId));
 	if (!row) throw new Error(`author ${authorId} not found`);
 	return resolved(authorId, row.preferences);
+}
+
+/** Whether the author has set a preference themselves, rather than using the default. */
+export async function hasStoredPreference(db: Executor, authorId: string, key: PreferenceKey) {
+	const [row] = await db
+		.select({ set: sql<boolean>`${authors.preferences} ? ${key}` })
+		.from(authors)
+		.where(eq(authors.id, authorId));
+	return row?.set ?? false;
 }
 
 /**

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { BOOK_FORMATS, FORMAT_LABELS } from '$lib/shared/channels';
 	import TropeInput from './TropeInput.svelte';
@@ -21,13 +22,16 @@
 		errors = {},
 		options,
 		action,
-		submitLabel
+		submitLabel,
+		extra
 	}: {
 		values: TitleFormValues;
 		errors?: Partial<Record<keyof TitleFormValues, string[]>>;
 		options: Options;
 		action?: string;
 		submitLabel: string;
+		/** More fields before Save, given the pen name the book will have (series' if blank). */
+		extra?: Snippet<[{ penName: string }]>;
 	} = $props();
 
 	// svelte-ignore state_referenced_locally
@@ -280,6 +284,8 @@
 			{@render error('wordCount')}
 		</label>
 	</fieldset>
+
+	{@render extra?.({ penName: penName.trim() || series?.penName || '' })}
 
 	<div class="flex items-center gap-3">
 		<button
