@@ -42,6 +42,16 @@ From Listings, click a cell, then "Edit price, store ID, and more →" at the bo
 
 ---
 
+## Export your data (#17)
+
+From **Export your data** at the bottom of the sidebar.
+
+- [ ] "Download everything (JSON)" saves `afterword-export-<date>.json`. It opens in a text editor and holds your books, pen names, series, listings, decisions, tasks, your own ideas, ideas you set aside, and your settings
+- [ ] "Spreadsheets (CSV, zipped)" saves a zip that opens with one CSV per table plus `export.json` and `account.csv`. The CSVs open in a spreadsheet with titles, tropes, and dates intact
+- [ ] A title that starts with "=" shows as text in the spreadsheet, not a formula
+
+---
+
 ## Stores for a new book (#41)
 
 At http://localhost:5173/books/new
