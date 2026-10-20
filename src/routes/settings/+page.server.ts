@@ -1,7 +1,9 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
+import { resolve } from '$app/paths';
 import { requireAuthor } from '$lib/server/auth';
 import { db } from '$lib/server/db/client';
+import { deleteAccount } from '$lib/server/services/account';
 import { newBookStoreOptions, setDefaultStores } from '$lib/server/services/books';
 import { getReminderSettings, saveReminderSettings } from '$lib/server/services/reminders';
 import { CHANNELS } from '$lib/shared/channels';
@@ -13,6 +15,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const author = requireAuthor(locals);
 	const { defaults } = await newBookStoreOptions(db, author);
 	return {
+		email: author.email,
 		reminders: await getReminderSettings(db, author),
 		defaultStores:
 			defaults && CHANNELS.filter((c) => defaults.includes(c.slug)).map((c) => c.displayName)
@@ -22,6 +25,14 @@ export const load: PageServerLoad = async ({ locals }) => {
 const days = (values: FormDataEntryValue[]) => values.map((v) => Number(v));
 
 export const actions: Actions = {
+	/** Deletes the account and everything in it, once the author retypes their email (#40). */
+	deleteAccount: async ({ request, locals }) => {
+		const typed = String((await request.formData()).get('confirmEmail') ?? '');
+		if ((await deleteAccount(db, requireAuthor(locals), typed)) === 'mismatch') {
+			return fail(400, { deleteError: "That isn't your account's email. Nothing was deleted." });
+		}
+		redirect(303, resolve('/goodbye'));
+	},
 	/** Stops starting new books with fixed stores, so they're suggested from past books (#41). */
 	clearDefaultStores: async ({ locals }) => {
 		await setDefaultStores(db, requireAuthor(locals), null);
