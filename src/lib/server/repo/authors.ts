@@ -81,3 +81,15 @@ export async function updatePreferences(
 	if (!row) throw new Error(`author ${authorId} not found`);
 	return resolved(authorId, row.preferences);
 }
+
+/**
+ * Deletes the author and, by cascade, everything they own (#40). `authors` has no
+ * row-level security, so this must only ever be called with the signed-in author's id.
+ */
+export async function deleteAuthor(db: Executor, authorId: string) {
+	const rows = await db
+		.delete(authors)
+		.where(eq(authors.id, authorId))
+		.returning({ id: authors.id });
+	return rows.length > 0;
+}

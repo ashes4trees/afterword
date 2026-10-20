@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { BACKUP_RETENTION_DAYS } from '$lib/shared/account';
 	import { safeReturnPath } from '$lib/shared/returnTo';
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import { guardUnsavedChanges } from '$lib/components/unsavedChanges';
@@ -157,4 +159,52 @@
 			with the same stores, tick "Start every new book with these stores" when you add a book.
 		</p>
 	{/if}
+</section>
+
+<section
+	class="mt-6 mb-10 max-w-2xl rounded-lg border border-danger/40 bg-surface p-5"
+	aria-labelledby="delete-account"
+>
+	<h2 id="delete-account" class="font-display text-heading">Delete your account</h2>
+	<p class="mt-1 text-sm">
+		This deletes your account and everything in it: books, listings, decisions, timelines, and your
+		own ideas. It can't be undone.
+	</p>
+	<p class="mt-2 text-sm">
+		Consider
+		<a href={resolve('/export')} class="font-medium text-accent hover:underline"
+			>downloading your data</a
+		> first.
+	</p>
+	<p class="mt-2 text-sm text-fg-muted">
+		Deleted data stays in nightly backups until they rotate out, within {BACKUP_RETENTION_DAYS} days.
+	</p>
+	<form
+		method="POST"
+		action="?/deleteAccount"
+		class="mt-4 space-y-2"
+		use:enhance={({ cancel }) => {
+			if (!confirm('Delete your account and everything in it? This cannot be undone.')) cancel();
+		}}
+	>
+		<label class="block text-sm">
+			<span class="font-medium">Type your email, {data.email}, to confirm</span>
+			<input
+				name="confirmEmail"
+				type="email"
+				required
+				autocomplete="off"
+				class="mt-1 block w-full max-w-sm rounded-md border border-border bg-surface px-3 py-2"
+			/>
+		</label>
+		{#if form?.deleteError}
+			<p class="text-sm text-danger" role="alert">{form.deleteError}</p>
+		{/if}
+		<button
+			type="submit"
+			class="rounded-md bg-danger px-4 py-2 font-medium text-bg hover:opacity-90"
+		>
+			Delete my account
+		</button>
+	</form>
 </section>

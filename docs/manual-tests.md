@@ -42,6 +42,16 @@ From Listings, click a cell, then "Edit price, store ID, and more →" at the bo
 
 ---
 
+## Delete your account (#40)
+
+**Only as a throwaway author** (see docs/agent-qa.md): run a second server with `DEV_AUTHOR_EMAIL=probe-<n>@example.test npx vite dev --port 5198`. Never on your own account.
+
+- [ ] Settings → Delete your account explains what goes, links to "downloading your data", and says backups keep deleted data for up to 30 days
+- [ ] A wrong email says "That isn't your account's email. Nothing was deleted."
+- [ ] The right email (any case) asks once more, then shows "Your account is deleted", and the throwaway's books are gone. (The dev sign-in bypass then starts a fresh empty account with the same email. Delete that one by its exact email afterwards.)
+
+---
+
 ## Export your data (#17)
 
 From **Export your data** at the bottom of the sidebar.
