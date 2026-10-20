@@ -120,9 +120,12 @@ describe.skipIf(!hasDatabase)('full data export (#17)', () => {
 
 	it('zips the same data as CSV per table, plus the JSON', async () => {
 		const zip = Buffer.from(await exportAccountZip(app.db, me));
-		const names = [
-			...zip.toString('latin1').matchAll(/PK\x01\x02[\s\S]{42}([\w.]+\.(?:csv|json))/g)
-		].map((m) => m[1]);
+		// File names from the zip's central directory entries.
+		const names: string[] = [];
+		const entry = Buffer.from([0x50, 0x4b, 0x01, 0x02]);
+		for (let at = zip.indexOf(entry); at !== -1; at = zip.indexOf(entry, at + 46)) {
+			names.push(zip.toString('utf8', at + 46, at + 46 + zip.readUInt16LE(at + 28)));
+		}
 		expect(names).toEqual([
 			'export.json',
 			'account.csv',
