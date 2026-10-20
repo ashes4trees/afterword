@@ -12,10 +12,13 @@ import {
 	addIdea,
 	addOwnStep,
 	bookTimeline,
+	deleteMyIdea,
 	removeAddedStep,
+	saveMyIdea,
 	setIdeaHidden,
 	suggestedIdeaDate
 } from './tasks';
+import { MY_IDEAS_PACK } from '$lib/shared/ideas';
 
 const step = (s: Partial<Playbook['steps'][number]> & { id: string }) => ({
 	label: s.id,
@@ -196,5 +199,131 @@ describe.skipIf(!hasDatabase)('promo ideas on a timeline', () => {
 		await setIdeaHidden(app.db, me, book, { pack: IDEAS, stepId: 'mood-board' }, false);
 		t = await timeline();
 		expect(t.hiddenIdeas).toEqual([]);
+	});
+
+	describe('my ideas (#91)', () => {
+		let other: SessionAuthor;
+		let otherBook: string;
+		let myBook: string;
+		const myTimeline = async () => (await bookTimeline(app.db, me, myBook, TODAY, packs))!;
+		const mine = async () => (await myTimeline()).myIdeas;
+
+		beforeAll(async () => {
+			const [a] = await owner.db
+				.insert(authors)
+				.values({ email: `ideas-other-${tag}@example.test`, displayName: 'O' })
+				.returning({ id: authors.id, email: authors.email, displayName: authors.displayName });
+			other = a!;
+			otherBook = await createBook(app.db, other, TitleInputSchema.parse(input));
+			myBook = await createBook(
+				app.db,
+				me,
+				TitleInputSchema.parse({ ...input, workingTitle: 'The Salt Lantern' })
+			);
+		});
+
+		afterAll(async () => {
+			if (other) await owner.db.delete(authors).where(eq(authors.id, other.id));
+		});
+
+		it('saves an idea, offers it on every book, and adds it weekly like a shared one', async () => {
+			expect(
+				await saveMyIdea(app.db, me, null, {
+					label: 'Live read on my channel',
+					note: 'Twenty minutes, first chapter',
+					phase: 'prelaunch',
+					window: { from_days: -28, to_days: -7 },
+					repeatable: true
+				})
+			).toBe(true);
+			const [idea] = await mine();
+			expect(idea).toMatchObject({
+				pack: MY_IDEAS_PACK,
+				label: 'Live read on my channel',
+				detail: 'Twenty minutes, first chapter',
+				suggestedDate: '2026-11-17',
+				added: 0,
+				mine: { fromWeeks: '4', fromSide: 'before', toWeeks: '1', repeatable: 'on' }
+			});
+			const ref = { pack: MY_IDEAS_PACK, stepId: idea!.stepId };
+			expect(await addIdea(app.db, me, myBook, ref, '2026-11-17', 2, packs)).toBe(true);
+			const added = (await myTimeline()).steps.filter((s) => s.source === 'idea');
+			expect(added.map((s) => [s.label, s.dueOn])).toEqual([
+				['Live read on my channel (1 of 2)', '2026-11-17'],
+				['Live read on my channel (2 of 2)', '2026-11-24']
+			]);
+			expect((await mine())[0]!.added).toBe(2);
+		});
+
+		it('never shows or adds your ideas for another author', async () => {
+			const [idea] = await mine();
+			const theirs = (await bookTimeline(app.db, other, otherBook, TODAY, packs))!;
+			expect(theirs.myIdeas).toEqual([]);
+			expect(
+				await addIdea(
+					app.db,
+					other,
+					otherBook,
+					{ pack: MY_IDEAS_PACK, stepId: idea!.stepId },
+					TODAY,
+					1,
+					packs
+				)
+			).toBe(false);
+			expect(await deleteMyIdea(app.db, other, idea!.stepId)).toBe(false);
+		});
+
+		it('edits an idea without changing copies already added, and refuses repeats once one-off', async () => {
+			const [idea] = await mine();
+			await saveMyIdea(app.db, me, idea!.stepId, {
+				label: 'Live read',
+				note: null,
+				phase: 'launch',
+				window: null,
+				repeatable: false
+			});
+			const [edited] = await mine();
+			expect(edited).toMatchObject({ label: 'Live read', detail: null, window: null });
+			expect((await myTimeline()).steps.filter((s) => s.source === 'idea')[0]!.label).toBe(
+				'Live read on my channel (1 of 2)'
+			);
+			expect(
+				await addIdea(
+					app.db,
+					me,
+					book,
+					{ pack: MY_IDEAS_PACK, stepId: idea!.stepId },
+					TODAY,
+					2,
+					packs
+				)
+			).toBe(false);
+		});
+
+		it('hides one for this book, and deleting it keeps the copies on the timeline', async () => {
+			const [idea] = await mine();
+			const ref = { pack: MY_IDEAS_PACK, stepId: idea!.stepId };
+			await setIdeaHidden(app.db, me, myBook, ref, true);
+			let t = await myTimeline();
+			expect(t.myIdeas).toEqual([]);
+			expect(t.hiddenIdeas.map((i) => i.label)).toEqual(['Live read']);
+			expect(await deleteMyIdea(app.db, me, idea!.stepId)).toBe(true);
+			t = await myTimeline();
+			expect(t.hiddenIdeas).toEqual([]);
+			expect(t.steps.filter((s) => s.source === 'idea')).toHaveLength(2);
+		});
+
+		it('saves your own step to My ideas, timed the same distance from release', async () => {
+			await addOwnStep(app.db, me, myBook, 'Bookmark giveaway', '2026-12-01', {
+				phase: 'prelaunch'
+			});
+			expect(await mine()).toEqual([
+				expect.objectContaining({
+					label: 'Bookmark giveaway',
+					window: { from_days: -14, to_days: -14 },
+					repeatable: false
+				})
+			]);
+		});
 	});
 });

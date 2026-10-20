@@ -16,11 +16,20 @@ import {
 	taskFacts,
 	type ExistingTask
 } from '$lib/server/engine/tasks';
+import { z } from 'zod';
 import type { SessionAuthor } from '$lib/server/repo/authors';
+import * as ideasRepo from '$lib/server/repo/ideas';
 import * as listingsRepo from '$lib/server/repo/listings';
 import * as tasksRepo from '$lib/server/repo/tasks';
 import * as works from '$lib/server/repo/works';
 import type { BookFormat } from '$lib/shared/channels';
+import { daysBetween } from '$lib/shared/dates';
+import {
+	MY_IDEAS_PACK,
+	myIdeaFormValues,
+	type MyIdeaFormValues,
+	type MyIdeaInput
+} from '$lib/shared/ideas';
 
 // Keeps a book's playbook tasks in step with its formats, release date, and listings
 // (#16). Called inside the same transaction as any change to those.
@@ -98,6 +107,8 @@ export type IdeaView = {
 	suggestedDate: string;
 	/** How many times it's already on this book's timeline. */
 	added: number;
+	/** The author's own idea (#91), with its form values for editing. Null for shared ideas. */
+	mine: MyIdeaFormValues | null;
 };
 
 export type BookTimeline = {
@@ -105,7 +116,9 @@ export type BookTimeline = {
 	asOf: string | null;
 	steps: TimelineStep[];
 	ideas: { phase: IdeaPhase; items: IdeaView[] }[];
-	/** Ideas the author marked "Not for this book". */
+	/** The author's own ideas (#91), minus any hidden for this book. */
+	myIdeas: IdeaView[];
+	/** Ideas the author marked "Not for this book", shared and their own. */
 	hiddenIdeas: IdeaView[];
 	ideasAsOf: string | null;
 };
@@ -168,12 +181,17 @@ export function bookTimeline(
 			skipped: t.skippedAt !== null
 		}));
 
+		const savedIdeas = await ideasRepo.listMyIdeas(tx, author.id);
+		const notes = new Map(savedIdeas.map((i) => [i.id, i.note]));
+
 		const steps = rows
 			.filter((t) => t.channelSlug === null)
 			.flatMap((t): (TimelineStep & { order: number })[] => {
 				const found = t.pack ? stepFor.get(`${t.pack}|${t.stepId}`) : undefined;
 				// A playbook step that left its pack (and was never done) is cleaned up by sync.
-				if (t.source !== 'author' && !found) return [];
+				// The author's own ideas live in author_ideas, not a pack, and stay even if deleted.
+				const own = t.source === 'author' || t.pack === MY_IDEAS_PACK;
+				if (!own && !found) return [];
 				const step = found?.step;
 				const unmet =
 					t.source === 'playbook' && step
@@ -189,7 +207,8 @@ export function bookTimeline(
 						id: t.id,
 						source: t.source,
 						label: t.label,
-						detail: step?.detail ?? null,
+						detail:
+							step?.detail ?? (t.pack === MY_IDEAS_PACK ? (notes.get(t.stepId!) ?? null) : null),
 						gotchas: step?.gotchas ?? [],
 						links: step?.links ?? [],
 						milestone: step?.milestone ?? false,
@@ -234,10 +253,32 @@ export function bookTimeline(
 						suggestedDate: suggestedIdeaDate(s.window, book.releaseDate, today),
 						added: rows.filter(
 							(t) => t.source === 'idea' && t.pack === packRef(p) && t.stepId === s.id
-						).length
+						).length,
+						mine: null
 					} satisfies IdeaView
 				}))
 		);
+
+		const myIdeas = savedIdeas
+			.sort((a, b) => IDEA_PHASES.indexOf(a.phase) - IDEA_PHASES.indexOf(b.phase))
+			.map((idea) => ({
+				hidden: dismissed.has(`${MY_IDEAS_PACK}|${idea.id}`),
+				view: {
+					pack: MY_IDEAS_PACK,
+					stepId: idea.id,
+					label: idea.label,
+					detail: idea.note,
+					links: [],
+					repeatable: idea.repeatable,
+					milestone: false,
+					window: idea.window,
+					suggestedDate: suggestedIdeaDate(idea.window ?? undefined, book.releaseDate, today),
+					added: rows.filter(
+						(t) => t.source === 'idea' && t.pack === MY_IDEAS_PACK && t.stepId === idea.id
+					).length,
+					mine: myIdeaFormValues(idea)
+				} satisfies IdeaView
+			}));
 
 		const timelinePack = titlePacks.find((p) => p.kind === 'timeline');
 		return {
@@ -247,7 +288,8 @@ export function bookTimeline(
 				phase,
 				items: allIdeas.filter((i) => i.phase === phase && !i.hidden).map((i) => i.view)
 			})).filter((g) => g.items.length > 0),
-			hiddenIdeas: allIdeas.filter((i) => i.hidden).map((i) => i.view),
+			myIdeas: myIdeas.filter((i) => !i.hidden).map((i) => i.view),
+			hiddenIdeas: [...allIdeas, ...myIdeas].filter((i) => i.hidden).map((i) => i.view),
 			ideasAsOf: ideaPacks[0]?.as_of ?? null
 		};
 	});
@@ -266,39 +308,72 @@ export function addIdea(
 	times: number,
 	packs: Playbook[] = PLAYBOOKS
 ) {
-	const pack = packs.find((p) => p.kind === 'ideas' && packRef(p) === idea.pack);
-	const step = pack?.steps.find((s) => s.id === idea.stepId);
-	if (!pack || !step || times < 1 || times > 8 || (times > 1 && !step.repeatable)) {
-		return Promise.resolve(false);
-	}
+	if (times < 1 || times > 8) return Promise.resolve(false);
 	return withAuthor(db, author.id, async (tx) => {
 		if (!(await works.getTitle(tx, author.id, titleId))) return false;
+		const found = await findIdea(tx, author.id, idea, packs);
+		if (!found || (times > 1 && !found.repeatable)) return false;
 		const entries = Array.from({ length: times }, (_, i) => ({
-			label: times > 1 ? `${step.label} (${i + 1} of ${times})` : step.label,
+			label: times > 1 ? `${found.label} (${i + 1} of ${times})` : found.label,
 			dueOn: addDays(start, 7 * i)
 		}));
 		await tasksRepo.insertIdeaTasks(
 			tx,
 			author.id,
 			titleId,
-			{ pack: idea.pack, packVersion: pack.version, stepId: step.id },
+			{ pack: idea.pack, packVersion: found.version, stepId: idea.stepId },
 			entries
 		);
 		return true;
 	});
 }
 
-/** Adds the author's own step. Returns false if the book doesn't exist. */
+/** A shared idea from an ideas pack, or one of the author's own (versioned as 1). */
+async function findIdea(
+	tx: Executor,
+	authorId: string,
+	idea: { pack: string; stepId: string },
+	packs: Playbook[]
+) {
+	if (idea.pack === MY_IDEAS_PACK) {
+		if (!z.uuid().safeParse(idea.stepId).success) return null;
+		const mine = await ideasRepo.getMyIdea(tx, authorId, idea.stepId);
+		return mine && { label: mine.label, repeatable: mine.repeatable, version: 1 };
+	}
+	const pack = packs.find((p) => p.kind === 'ideas' && packRef(p) === idea.pack);
+	const step = pack?.steps.find((s) => s.id === idea.stepId);
+	return pack && step
+		? { label: step.label, repeatable: step.repeatable, version: pack.version }
+		: null;
+}
+
+/**
+ * Adds the author's own step, and optionally saves it to My ideas (#91) in the phase
+ * they chose, timed to the same distance from release. False if the book doesn't exist.
+ */
 export function addOwnStep(
 	db: Executor,
 	author: SessionAuthor,
 	titleId: string,
 	label: string,
-	dueOn: string | null
+	dueOn: string | null,
+	saveToMyIdeas: { phase: IdeaPhase } | null = null
 ) {
 	return withAuthor(db, author.id, async (tx) => {
-		if (!(await works.getTitle(tx, author.id, titleId))) return false;
+		const book = await works.getTitle(tx, author.id, titleId);
+		if (!book) return false;
 		await tasksRepo.insertAuthorTask(tx, author.id, titleId, label, dueOn);
+		if (saveToMyIdeas) {
+			const offset = dueOn && book.releaseDate ? daysBetween(book.releaseDate, dueOn) : null;
+			const inRange = offset !== null && Math.abs(offset) <= 730;
+			await ideasRepo.insertMyIdea(tx, author.id, {
+				label,
+				note: null,
+				phase: saveToMyIdeas.phase,
+				window: inRange ? { from_days: offset, to_days: offset } : null,
+				repeatable: false
+			});
+		}
 		return true;
 	});
 }
@@ -445,4 +520,23 @@ export function setTaskDue(
 		if (ok && !dueOn) await syncTitleTasks(tx, author.id, titleId);
 		return ok;
 	});
+}
+
+/** Saves one of the author's own ideas (#91): a new one, or changes to theirs. */
+export function saveMyIdea(
+	db: Executor,
+	author: SessionAuthor,
+	id: string | null,
+	idea: MyIdeaInput
+) {
+	return withAuthor(db, author.id, async (tx) =>
+		id
+			? ideasRepo.updateMyIdea(tx, author.id, id, idea)
+			: !!(await ideasRepo.insertMyIdea(tx, author.id, idea))
+	);
+}
+
+/** Deletes one of the author's own ideas. Copies already on a timeline stay. */
+export function deleteMyIdea(db: Executor, author: SessionAuthor, id: string) {
+	return withAuthor(db, author.id, (tx) => ideasRepo.deleteMyIdea(tx, author.id, id));
 }
