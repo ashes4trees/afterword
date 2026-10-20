@@ -134,3 +134,27 @@
 		{saving ? 'Saving…' : 'Save'}
 	</button>
 </form>
+
+<section class="mt-6 max-w-2xl rounded-lg border border-border bg-surface p-5">
+	<h2 class="font-display text-heading">Stores for new books</h2>
+	{#if data.defaultStores}
+		<p class="mt-1 text-sm">
+			New books start with {data.defaultStores.length
+				? data.defaultStores.join(', ')
+				: 'no stores ticked'}.
+		</p>
+		<form method="POST" action="?/clearDefaultStores" use:enhance class="mt-3">
+			<button
+				type="submit"
+				class="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-surface-2"
+			>
+				Suggest stores from my latest book instead
+			</button>
+		</form>
+	{:else}
+		<p class="mt-1 text-sm text-fg-muted">
+			New books start with the stores of your latest book under the same pen name. To always start
+			with the same stores, tick "Start every new book with these stores" when you add a book.
+		</p>
+	{/if}
+</section>

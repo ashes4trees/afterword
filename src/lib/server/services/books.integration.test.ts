@@ -11,9 +11,13 @@ import {
 	deleteBook,
 	getBook,
 	listBooks,
+	newBookStoreOptions,
+	setDefaultStores,
 	toFormValues,
 	updateBook
 } from './books';
+import { listingMatrix } from './listings';
+import { suggestStores } from '$lib/shared/storeSuggestion';
 
 const input = (fields: Partial<TitleFormValues>) =>
 	TitleInputSchema.parse({ ...EMPTY_TITLE_FORM, ...fields });
@@ -151,5 +155,38 @@ describe.skipIf(!hasDatabase)('books service', () => {
 		const id = await createBook(app.db, me, input({ workingTitle: 'Doomed' }));
 		expect(await deleteBook(app.db, me, id)).toBe(true);
 		expect(await getBook(app.db, me, id)).toBeUndefined();
+	});
+
+	it('adds listings on the chosen stores for the formats each sells, and suggests them next time', async () => {
+		const empty = await newBookStoreOptions(app.db, other);
+		expect(empty).toEqual({ defaults: null, history: [] });
+
+		const id = await createBook(
+			app.db,
+			other,
+			input({ workingTitle: 'Salt Lantern', penName: 'A. Vale', formats: 'ebook,audiobook' }),
+			['kdp', 'acx']
+		);
+		const { listings } = await listingMatrix(app.db, other);
+		expect(
+			listings
+				.filter((l) => l.titleId === id)
+				.map((l) => [l.channelSlug, l.format, l.status])
+				.sort()
+		).toEqual([
+			['acx', 'audiobook', 'not_started'],
+			['kdp', 'ebook', 'not_started']
+		]);
+
+		const options = await newBookStoreOptions(app.db, other);
+		expect(suggestStores({ ...options, penName: 'a. vale' })).toEqual({
+			stores: ['kdp', 'acx'],
+			source: { kind: 'book', title: 'Salt Lantern' }
+		});
+
+		await setDefaultStores(app.db, other, []);
+		expect((await newBookStoreOptions(app.db, other)).defaults).toEqual([]);
+		await setDefaultStores(app.db, other, null);
+		expect((await newBookStoreOptions(app.db, other)).defaults).toBeNull();
 	});
 });

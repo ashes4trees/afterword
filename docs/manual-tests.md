@@ -42,6 +42,20 @@ From Listings, click a cell, then "Edit price, store ID, and more →" at the bo
 
 ---
 
+## Stores for a new book (#41)
+
+At http://localhost:5173/books/new
+
+- [ ] Your first book has a Stores section with nothing ticked
+- [ ] Tick some stores and add the book. Listings shows "Not started" on each, for the formats each store sells (an ebook-only book gets nothing on ACX)
+- [ ] Add another book: the same stores are ticked, with "Same as “<your last book>”"
+- [ ] With books under two pen names, typing a pen name ticks the stores of your latest book under that pen name. A new pen name falls back to your latest book overall
+- [ ] Once you tick or untick a store yourself, changing the pen name leaves your choice alone
+- [ ] Tick "Start every new book with these stores": later books say "Your default stores", and Settings → Stores for new books lists them. "Suggest stores from my latest book instead" goes back
+- [ ] Nothing is created until you click Add book, and no step anywhere asks which stores you use before you've added a book
+
+---
+
 ## My ideas (#91)
 
 Open a book's **Launch timeline** tab and scroll to **Ideas → My ideas**.

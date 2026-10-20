@@ -1,7 +1,15 @@
 import { withAuthor } from '$lib/server/db/tenant';
 import type { Executor } from '$lib/server/db/types';
-import type { SessionAuthor } from '$lib/server/repo/authors';
+import {
+	getPreferences,
+	hasStoredPreference,
+	updatePreferences,
+	type SessionAuthor
+} from '$lib/server/repo/authors';
+import * as listingsRepo from '$lib/server/repo/listings';
 import * as works from '$lib/server/repo/works';
+import { CHANNELS, sellsFormat, type ChannelSlug } from '$lib/shared/channels';
+import type { StoreHistory } from '$lib/shared/storeSuggestion';
 import type { TitleFormValues, TitleInput } from '$lib/shared/titles';
 import { syncTitleTasks } from './tasks';
 
@@ -67,12 +75,59 @@ async function resolve(
 	};
 }
 
-export function createBook(db: Executor, author: SessionAuthor, input: TitleInput) {
+/**
+ * Adds a book, and a not-started listing on each chosen store for every format of the
+ * book that store sells (#41).
+ */
+export function createBook(
+	db: Executor,
+	author: SessionAuthor,
+	input: TitleInput,
+	stores: ChannelSlug[] = []
+) {
 	return withAuthor(db, author.id, async (tx) => {
 		const id = await works.insertTitle(tx, author.id, await resolve(tx, author.id, input));
+		for (const store of stores) {
+			for (const format of input.formats.filter((f) => sellsFormat(store, f))) {
+				await listingsRepo.upsertListing(tx, author.id, id, store, format, null, {
+					status: 'not_started'
+				});
+			}
+		}
 		await syncTitleTasks(tx, author.id, id);
 		return id;
 	});
+}
+
+/**
+ * What the add-book form needs to suggest stores (#41): the author's default stores if
+ * they've chosen some, and which stores each of their books is listed on.
+ */
+export async function newBookStoreOptions(db: Executor, author: SessionAuthor) {
+	const defaults = (await hasStoredPreference(db, author.id, 'default_channels'))
+		? ((await getPreferences(db, author.id)).default_channels as string[])
+		: null;
+	const history = await withAuthor(db, author.id, async (tx) => {
+		const listings = await listingsRepo.listListings(tx, author.id);
+		return (await works.listTitles(tx, author.id)).map((t) => ({
+			title: t.workingTitle,
+			penName: t.penName,
+			addedAt: t.createdAt.toISOString(),
+			stores: CHANNELS.map((c) => c.slug).filter((slug) =>
+				listings.some((l) => l.titleId === t.id && l.channelSlug === slug)
+			)
+		}));
+	});
+	return { defaults, history: history satisfies StoreHistory };
+}
+
+/** Sets the stores new books start with, or null to suggest them from past books again. */
+export async function setDefaultStores(
+	db: Executor,
+	author: SessionAuthor,
+	stores: ChannelSlug[] | null
+) {
+	await updatePreferences(db, author.id, { default_channels: stores });
 }
 
 /** Returns false if the book doesn't exist for this author. */
