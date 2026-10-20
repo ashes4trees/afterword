@@ -21,6 +21,36 @@ page, and resize the window.
   make Back a full page change, which behaves differently from in-app Back.
 - Snapshots land in `.playwright-mcp/`, which git ignores.
 
+## Tips from the second pass
+
+- Never `page.goto()` away from a form you've changed. The page's "Leave site?" prompt
+  takes over the browser tool, and every later step fails until it's answered, sometimes
+  several times. Navigate in-app instead, with `window.confirm` stubbed:
+
+  ```js
+  const go = async (p) => {
+    await page.evaluate((path) => {
+      window.confirm = () => true;
+      const a = document.createElement('a');
+      a.href = path;
+      document.body.append(a);
+      a.click();
+      a.remove();
+    }, p);
+    await page.waitForURL((u) => u.pathname + u.search === p);
+    await page.waitForLoadState('networkidle');
+  };
+  ```
+
+- Start each script with `page.setDefaultTimeout(8000)`. A step with no timeout once hung
+  the tool for an hour.
+- If the tool gets stuck on a dialog, `browser_close` and navigate again. It's quicker
+  than answering prompts one by one.
+- Keep scripts short and return results often. A failed step loses everything the
+  script collected.
+- `getByLabel` matches `aria-label` on buttons too (setup steps' "Mark … done"). Prefer
+  `input[name=…]` for form fields.
+
 ## Never test as the owner
 
 The dev server on port 5173 is the owner's, with their real books. Always test against
@@ -59,9 +89,14 @@ Don't tick boxes in `manual-tests.md`. That file is the owner's own record.
 
 ## Clean up
 
-Stop the throwaway server, then delete the throwaway author. That cascades to everything
-it created:
+Stop the throwaway server, then delete the throwaway author **by its exact email**, never
+by a pattern (CLAUDE.md: never delete by a broad filter). That cascades to everything it
+created:
 
 ```sh
-psql afterword -c "delete from authors where email like 'agent-qa-%@example.test'"
+echo "delete from authors where email = 'agent-qa-<n>@example.test' returning id, email;" \
+  | psql -v ON_ERROR_STOP=1 afterword
 ```
+
+Delete-account testing (#40) leaves one more: the dev bypass recreates an empty author
+with the same email on the next request. Delete that one too, the same way.

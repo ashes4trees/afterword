@@ -179,4 +179,9 @@ describe('blockedBy', () => {
 		expect(taskFacts({ releaseDate: null, formats: [] }, kdpPaper).isbn_assigned).toBe(true);
 		expect(taskFacts({ releaseDate: null, formats: [] }, kdpEbook).isbn_assigned).toBe(false);
 	});
+
+	it("ignores a step that doesn't apply, such as the ebook preorder on a print-only book", () => {
+		const ready = taskFacts({ releaseDate: '2027-01-01', formats: ['paperback'] }, null);
+		expect(blockedBy(reviews, ['cover-reveal'], [], ready)).toEqual([]);
+	});
 });
