@@ -138,7 +138,8 @@ export function syncTasks(planned: PlannedTask[], existing: ExistingTask[]): Tas
 
 /**
  * Why a task can't be acted on yet: preconditions that are other steps not yet done or
- * skipped (in the same pack and listing), or facts that aren't true. Empty means ready.
+ * skipped (in the same pack and listing), or facts that aren't true. A step that doesn't
+ * apply to this book or listing never blocks. Empty means ready.
  */
 export function blockedBy(
 	task: TaskScope,
@@ -155,7 +156,9 @@ export function blockedBy(
 				t.channel === task.channel &&
 				t.format === task.format
 		);
-		return !prior || !(prior.done || prior.skipped);
+		// No task means the step doesn't apply here, such as an ebook-only step on a print
+		// book, so there's nothing to wait for.
+		return !!prior && !(prior.done || prior.skipped);
 	});
 }
 
