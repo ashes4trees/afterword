@@ -25,6 +25,7 @@ export const NAV_GROUPS: NavGroup[] = [
 ];
 
 export const SETTINGS: NavItem = { href: resolve('/settings'), label: 'Settings' };
+export const EXPORT: NavItem = { href: resolve('/export'), label: 'Export your data' };
 
 /** `href` is the resolved path, so this stays correct under a base path. */
 export function isCurrent(href: string, pathname: string, exact = false): boolean {

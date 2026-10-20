@@ -4,7 +4,7 @@
 	import { afterNavigate } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { NAV_GROUPS, SETTINGS, isCurrent, type NavItem } from '$lib/nav';
+	import { EXPORT, NAV_GROUPS, SETTINGS, isCurrent, type NavItem } from '$lib/nav';
 
 	let { data, children } = $props();
 	let menuOpen = $state(false);
@@ -98,6 +98,7 @@
 
 		<div class="mt-4 border-t border-border pt-4 md:mt-auto">
 			{@render link(SETTINGS)}
+			{@render link(EXPORT)}
 			{#if data.author}
 				<p class="px-3 pt-2 text-sm text-fg-muted">Signed in as {data.author.displayName}</p>
 			{/if}
