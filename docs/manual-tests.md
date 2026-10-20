@@ -42,6 +42,21 @@ From Listings, click a cell, then "Edit price, store ID, and more →" at the bo
 
 ---
 
+## My ideas (#91)
+
+Open a book's **Launch timeline** tab and scroll to **Ideas → My ideas**.
+
+- [ ] "+ Save a new idea" takes a name, an optional short note, when it fits, "Can repeat weekly", and optional timing in weeks before or after release. Saved ideas show under My ideas with their timing ("Best 4 weeks to 1 week before release")
+- [ ] Timing with only one end, or an end before its start, shows a plain error and keeps what you typed
+- [ ] Your ideas show on every one of your books, and add to the timeline like shared ones: a suggested date, "Weekly, N times" if repeatable, and the "Idea" tag
+- [ ] "Edit" changes the idea. Copies already on a timeline keep their old name
+- [ ] "Not for this book" moves it to "Ideas you've set aside", and "Bring back" restores it
+- [ ] "Delete from My ideas" asks first. Copies already on a timeline stay until you remove them
+- [ ] "+ Add your own step" with "Also save to My ideas" adds the step and saves the idea, timed the same distance from release when the step has a date
+- [ ] A second author (another DEV_AUTHOR_EMAIL) never sees your ideas
+
+---
+
 ## Promo ideas (#84)
 
 Open a book, then the **Launch timeline** tab, and scroll to **Ideas**.

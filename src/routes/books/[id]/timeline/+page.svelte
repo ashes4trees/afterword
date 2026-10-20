@@ -2,9 +2,10 @@
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
 	import BookTabs from '$lib/components/BookTabs.svelte';
+	import MyIdeaForm from '$lib/components/MyIdeaForm.svelte';
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import { daysBetween, dueDistance, formatDate } from '$lib/shared/dates';
-	import { PHASE_LABELS, describeWindow } from '$lib/shared/ideas';
+	import { EMPTY_MY_IDEA, IDEA_PHASES, PHASE_LABELS, describeWindow } from '$lib/shared/ideas';
 	import { SUGGEST_IDEA_URL } from '$lib/shared/links';
 
 	let { data, form } = $props();
@@ -32,6 +33,10 @@
 
 	const SOURCE_TAG = { idea: 'Idea', author: 'Your step' } as const;
 	const timesLabel = (n: number) => (n === 1 ? 'Once' : `Weekly, ${n} times`);
+
+	/** A My ideas form that failed to save, so it can show the error and stay open. */
+	const failedIdea = $derived(form && 'myIdea' in form ? form.myIdea : null);
+	const failedNew = $derived(failedIdea && !failedIdea.id ? failedIdea : null);
 
 	const field = 'rounded-md border border-border bg-surface px-2 py-1';
 	const smallButton = 'rounded-md border border-border px-2 py-1 hover:bg-surface-2';
@@ -208,6 +213,17 @@
 			<input type="date" name="dueOn" class="mt-1 block {field} py-2" />
 		</label>
 		<button type="submit" class="{smallButton} py-2">Add</button>
+		<div class="flex w-full flex-wrap items-center gap-2 text-sm">
+			<label class="flex items-center gap-2">
+				<input type="checkbox" name="save" class="size-4 accent-(--color-accent)" />
+				Also save to My ideas, for other books
+			</label>
+			<select name="phase" aria-label="Which part of a launch it fits" class={field}>
+				{#each IDEA_PHASES as p (p)}
+					<option value={p} selected={p === 'prelaunch'}>{PHASE_LABELS[p]}</option>
+				{/each}
+			</select>
+		</div>
 	</form>
 </details>
 
@@ -305,6 +321,35 @@
 						>Not for this book</button
 					>
 				</form>
+				{#if item.mine}
+					{@const failed = failedIdea?.id === item.stepId ? failedIdea : null}
+					<details class="w-full" open={!!failed}>
+						<summary class="cursor-pointer text-fg-muted hover:text-fg">Edit</summary>
+						<MyIdeaForm
+							id={item.stepId}
+							values={failed?.values ?? item.mine}
+							error={failed?.error}
+						/>
+						<form
+							method="POST"
+							action="?/deleteMyIdea"
+							class="mt-3"
+							use:enhance={({ cancel }) => {
+								if (
+									!confirm(
+										`Delete “${item.label}” from My ideas? Any copies on your timelines stay.`
+									)
+								)
+									cancel();
+								return keep();
+							}}
+						>
+							<input type="hidden" name="id" value={item.stepId} />
+							<button type="submit" class="text-danger hover:underline">Delete from My ideas</button
+							>
+						</form>
+					</details>
+				{/if}
 			{/if}
 		</div>
 	</li>
@@ -325,6 +370,25 @@
 				{/each}
 			</ul>
 		{/each}
+
+		<h3 class="mt-6 font-display text-heading">My ideas</h3>
+		<p class="mt-1 text-sm text-fg-muted">
+			Ideas you've saved for yourself, ready for any book. Only you see them.
+		</p>
+		{#if data.timeline.myIdeas.length}
+			<ul class="mt-3 space-y-3">
+				{#each data.timeline.myIdeas as item (item.stepId)}
+					{@render idea(item, false)}
+				{/each}
+			</ul>
+		{/if}
+		<details
+			class="mt-3 rounded-lg border border-dashed border-border px-4 py-3"
+			open={!!failedNew}
+		>
+			<summary class="cursor-pointer text-sm font-medium text-accent">+ Save a new idea</summary>
+			<MyIdeaForm values={failedNew?.values ?? EMPTY_MY_IDEA} error={failedNew?.error} />
+		</details>
 
 		{#if data.timeline.hiddenIdeas.length}
 			<details class="mt-6">

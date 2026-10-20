@@ -382,6 +382,43 @@ export const ideaDismissals = pgTable(
 	]
 );
 
+export const ideaPhase = pgEnum('idea_phase', ['writing', 'prelaunch', 'launch', 'after']);
+
+/**
+ * The author's own promo ideas (#91), private to them and reusable on any book. Added to
+ * a timeline like a shared idea: tasks with source 'idea', pack 'mine', and this row's id
+ * as the step. Short, bounded text only (C2): a label and a note, never post content.
+ */
+export const authorIdeas = pgTable(
+	'author_ideas',
+	{
+		id: uuid('id')
+			.primaryKey()
+			.default(sql`uuidv7()`),
+		authorId: authorId(),
+		label: varchar('label', { length: 120 }).notNull(),
+		note: varchar('note', { length: 280 }),
+		phase: ideaPhase('phase').notNull(),
+		/** When it works best, in days relative to release. Both set, or neither. */
+		windowFromDays: smallint('window_from_days'),
+		windowToDays: smallint('window_to_days'),
+		repeatable: boolean('repeatable').notNull().default(false),
+		...timestamps
+	},
+	(t) => [
+		tenantPolicy(),
+		unique('author_ideas_author_id_id_key').on(t.authorId, t.id),
+		check(
+			'author_ideas_window_complete',
+			sql`(${t.windowFromDays} is null) = (${t.windowToDays} is null)`
+		),
+		check(
+			'author_ideas_window_order',
+			sql`${t.windowFromDays} is null or (${t.windowFromDays} <= ${t.windowToDays} and ${t.windowFromDays} >= -730 and ${t.windowToDays} <= 730)`
+		)
+	]
+);
+
 // ---------------------------------------------------------------- decisions (#12, #26)
 
 export const decisionKind = pgEnum('decision_kind', [

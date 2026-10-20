@@ -7,13 +7,16 @@ import {
 	addIdea,
 	addOwnStep,
 	bookTimeline,
+	deleteMyIdea,
 	removeAddedStep,
+	saveMyIdea,
 	setIdeaHidden,
 	setTaskDone,
 	setTaskDue,
 	setTaskSkipped
 } from '$lib/server/services/tasks';
 import { localToday } from '$lib/shared/bookList';
+import { IDEA_PHASES, MyIdeaSchema, type MyIdeaFormValues } from '$lib/shared/ideas';
 import type { Actions, PageServerLoad } from './$types';
 
 const bookId = (id: string) => {
@@ -40,6 +43,19 @@ async function form(request: Request) {
 const notFound = () => fail(404, { taskError: 'That step no longer exists. Refresh the page.' });
 const invalid = (message = 'That change could not be saved.') => fail(400, { taskError: message });
 const Idea = z.object({ pack: z.string().max(80), stepId: z.string().max(60) });
+
+const MY_IDEA_FIELDS = [
+	'label',
+	'note',
+	'phase',
+	'fromWeeks',
+	'fromSide',
+	'toWeeks',
+	'toSide',
+	'repeatable'
+] as const;
+const myIdeaValues = (f: Record<string, FormDataEntryValue>) =>
+	Object.fromEntries(MY_IDEA_FIELDS.map((k) => [k, String(f[k] ?? '')])) as MyIdeaFormValues;
 
 export const actions: Actions = {
 	done: async ({ request, locals }) => {
@@ -97,7 +113,9 @@ export const actions: Actions = {
 					.trim()
 					.min(1, 'Give your step a name.')
 					.max(120, 'Keep it under 120 characters.'),
-				dueOn: z.union([z.iso.date(), z.literal('')])
+				dueOn: z.union([z.iso.date(), z.literal('')]),
+				save: z.literal('on').optional(),
+				phase: z.enum(IDEA_PHASES).default('prelaunch')
 			})
 			.safeParse(await form(request));
 		if (!f.success) return invalid(f.error.issues[0]?.message);
@@ -107,7 +125,8 @@ export const actions: Actions = {
 				requireAuthor(locals),
 				bookId(params.id),
 				f.data.label,
-				f.data.dueOn || null
+				f.data.dueOn || null,
+				f.data.save ? { phase: f.data.phase } : null
 			))
 		) {
 			return notFound();
@@ -125,5 +144,26 @@ export const actions: Actions = {
 			{ pack, stepId },
 			hide === '1'
 		);
+	},
+	/** Adds or edits one of the author's own ideas (#91). */
+	saveMyIdea: async ({ request, locals }) => {
+		const raw = await form(request);
+		const values = myIdeaValues(raw);
+		const id = z.uuid().safeParse(raw.id);
+		const parsed = MyIdeaSchema.safeParse(values);
+		if (!parsed.success) {
+			return fail(400, {
+				myIdea: { id: id.success ? id.data : null, values, error: parsed.error.issues[0]!.message }
+			});
+		}
+		if (!(await saveMyIdea(db, requireAuthor(locals), id.success ? id.data : null, parsed.data))) {
+			return notFound();
+		}
+		return { myIdeaSaved: id.success ? id.data : 'new' };
+	},
+	deleteMyIdea: async ({ request, locals }) => {
+		const f = z.object({ id: z.uuid() }).safeParse(await form(request));
+		if (!f.success) return invalid();
+		if (!(await deleteMyIdea(db, requireAuthor(locals), f.data.id))) return notFound();
 	}
 };
