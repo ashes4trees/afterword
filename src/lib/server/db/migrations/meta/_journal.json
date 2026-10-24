@@ -120,6 +120,13 @@
 			"when": 1792874123752,
 			"tag": "0016_observations_and_imports",
 			"breakpoints": true
+		},
+		{
+			"idx": 17,
+			"version": "7",
+			"when": 1792875260346,
+			"tag": "0017_observation_campaigns",
+			"breakpoints": true
 		}
 	]
 }

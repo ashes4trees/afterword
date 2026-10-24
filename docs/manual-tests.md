@@ -95,6 +95,22 @@ At http://localhost:5173/books/new
 
 ---
 
+## Ads (#122)
+
+From **Ads** in the sidebar.
+
+- [ ] With no campaigns, Ads explains itself and offers "Add a campaign"
+- [ ] Add a campaign for a book: name, store, marketplace, type, targeting, optional daily budget and currency, start date. It opens the campaign's page
+- [ ] "+ Record results" takes a period, spend, and sales (impressions and clicks optional). "abc" shows "Use an amount like 12.50." Recording the same dates again replaces them, and Remove deletes a period
+- [ ] Review now gives a verdict with plain advice. Early on it's "Too early to judge" and says what it still needs. A campaign with plenty spent and few sales says "Stop"
+- [ ] "The numbers behind it" lists days live, spend, sales, ACOS, your target, and the limits used, with the rule that decided
+- [ ] Change your target ACOS in Settings… (there's no setting for it yet, so this waits for a Settings field) and Review now moves the verdict
+- [ ] Earlier reviews stay listed below the latest
+- [ ] Ads lists campaigns by book with their latest verdict and explanation
+- [ ] Delete this campaign asks first, then removes it with its results and reviews
+
+---
+
 ## Decisions (#26)
 
 From **Decisions** in the sidebar, and each book's **Decisions** tab.

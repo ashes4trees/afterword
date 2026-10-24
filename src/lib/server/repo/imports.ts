@@ -40,6 +40,50 @@ export type ObservationValues = Omit<
 	'id' | 'authorId' | 'importId' | 'createdAt'
 >;
 
+/** Results typed in by hand for a campaign (#122): no import, linked to the campaign. */
+export async function insertCampaignObservations(
+	tx: Executor,
+	authorId: string,
+	campaignId: string,
+	rows: ObservationValues[]
+) {
+	if (rows.length === 0) return;
+	await tx
+		.insert(observations)
+		.values(rows.map((r) => ({ authorId, importId: null, ...r, campaignId })));
+}
+
+/** A campaign's observations, oldest period first. */
+export function listCampaignObservations(tx: Executor, authorId: string, campaignId: string) {
+	return tx
+		.select()
+		.from(observations)
+		.where(and(eq(observations.authorId, authorId), eq(observations.campaignId, campaignId)))
+		.orderBy(asc(observations.periodStart), asc(observations.id));
+}
+
+/** Removes one period of a campaign's results. */
+export async function deleteCampaignPeriod(
+	tx: Executor,
+	authorId: string,
+	campaignId: string,
+	periodStart: string,
+	periodEnd: string
+) {
+	const rows = await tx
+		.delete(observations)
+		.where(
+			and(
+				eq(observations.authorId, authorId),
+				eq(observations.campaignId, campaignId),
+				eq(observations.periodStart, periodStart),
+				eq(observations.periodEnd, periodEnd)
+			)
+		)
+		.returning({ id: observations.id });
+	return rows.length > 0;
+}
+
 export async function insertObservations(
 	tx: Executor,
 	authorId: string,

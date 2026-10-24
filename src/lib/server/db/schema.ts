@@ -612,7 +612,10 @@ export const observations = pgTable(
 			.primaryKey()
 			.default(sql`uuidv7()`),
 		authorId: authorId(),
-		importId: uuid('import_id').notNull(),
+		/** The report it came from. Null for results typed in by hand, which have a campaign. */
+		importId: uuid('import_id'),
+		/** The ad campaign these results belong to (#122). */
+		campaignId: uuid('campaign_id'),
 		titleId: uuid('title_id'),
 		/** The report's identifier for the book (ASIN, ISBN), kept for matching later. */
 		externalId: varchar('external_id', { length: 64 }),
@@ -637,6 +640,12 @@ export const observations = pgTable(
 			columns: [t.authorId, t.importId],
 			foreignColumns: [imports.authorId, imports.id]
 		}).onDelete('cascade'),
+		foreignKey({
+			name: 'observations_campaign_fk',
+			columns: [t.authorId, t.campaignId],
+			foreignColumns: [campaigns.authorId, campaigns.id]
+		}).onDelete('cascade'),
+		check('observations_has_origin', sql`${t.importId} is not null or ${t.campaignId} is not null`),
 		// Optional, so it has its own key (docs/data-conventions.md).
 		foreignKey({
 			name: 'observations_title_fk',
