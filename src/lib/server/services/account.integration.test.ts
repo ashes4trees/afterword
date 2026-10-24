@@ -9,6 +9,7 @@ import { EMPTY_TITLE_FORM, TitleInputSchema } from '$lib/shared/titles';
 import { deleteAccount } from './account';
 import { createBook } from './books';
 import { saveListing } from './listings';
+import { addMetricFixtures } from '$lib/server/testing/fixtures';
 import { addOwnStep, saveMyIdea, setIdeaHidden } from './tasks';
 
 describe.skipIf(!hasDatabase)('account deletion (#40)', () => {
@@ -91,6 +92,7 @@ describe.skipIf(!hasDatabase)('account deletion (#40)', () => {
 				{ pack: 'mine', stepId: crypto.randomUUID() },
 				true
 			);
+			await addMetricFixtures(app.db, author.id, book);
 		}
 	});
 

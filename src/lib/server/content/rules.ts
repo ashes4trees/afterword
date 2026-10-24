@@ -1,5 +1,6 @@
 import { parse as parseYaml } from 'yaml';
 import { z } from 'zod';
+import { CAMPAIGN_VERDICTS } from '$lib/shared/campaigns';
 import { DEFAULT_PREFERENCES, type PreferenceKey } from '$lib/shared/preferences';
 
 // Rule packs (spec §6.2, #18): decision rules as dated, versioned data. Pure: the loader
@@ -57,7 +58,8 @@ const Rule = z.strictObject({
 		z.strictObject({ all: z.array(Comparison).min(1) }),
 		z.strictObject({ any: z.array(Comparison).min(1) })
 	]),
-	verdict: name,
+	/** One of the campaign verdicts in spec §5, stored on campaign_reviews. */
+	verdict: z.enum(CAMPAIGN_VERDICTS),
 	/** Plain-language template with {name} placeholders. The fallback when AI is off. */
 	explain: z.string().min(1).max(500)
 });

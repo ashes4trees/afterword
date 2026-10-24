@@ -1,5 +1,11 @@
 import { sql } from 'drizzle-orm';
 import {
+	CAMPAIGN_STATUSES,
+	CAMPAIGN_TYPES,
+	CAMPAIGN_VERDICTS,
+	TARGETING_KINDS
+} from '$lib/shared/campaigns';
+import {
 	boolean,
 	check,
 	date,
@@ -470,5 +476,95 @@ export const decisions = pgTable(
 			columns: [t.authorId, t.supersededBy],
 			foreignColumns: [t.authorId, t.id]
 		})
+	]
+);
+
+// ---------------------------------------------------------------- advertising (#19)
+
+export const campaignType = pgEnum('campaign_type', CAMPAIGN_TYPES);
+export const targetingKind = pgEnum('targeting_kind', TARGETING_KINDS);
+export const campaignStatus = pgEnum('campaign_status', CAMPAIGN_STATUSES);
+export const campaignVerdict = pgEnum('campaign_verdict', CAMPAIGN_VERDICTS);
+
+/** An ad campaign for one book, on one store and marketplace. */
+export const campaigns = pgTable(
+	'campaigns',
+	{
+		id: uuid('id')
+			.primaryKey()
+			.default(sql`uuidv7()`),
+		authorId: authorId(),
+		titleId: uuid('title_id').notNull(),
+		channelSlug: varchar('channel_slug', { length: 40 })
+			.notNull()
+			.references(() => channels.slug),
+		/** ISO 3166-1 alpha-2. Ads run per marketplace. */
+		marketplace: varchar('marketplace', { length: 2 }).notNull(),
+		/** The store's own campaign id, from an import. */
+		externalId: varchar('external_id', { length: 64 }),
+		name: varchar('name', { length: 200 }).notNull(),
+		campaignType: campaignType('campaign_type').notNull(),
+		targetingKind: targetingKind('targeting_kind').notNull(),
+		status: campaignStatus('status').notNull().default('enabled'),
+		dailyBudgetMinor: integer('daily_budget_minor'),
+		currency: varchar('currency', { length: 3 }).notNull(),
+		startedAt: date('started_at').notNull(),
+		endedAt: date('ended_at'),
+		...timestamps
+	},
+	(t) => [
+		tenantPolicy(),
+		unique('campaigns_author_id_id_key').on(t.authorId, t.id),
+		foreignKey({
+			name: 'campaigns_title_fk',
+			columns: [t.authorId, t.titleId],
+			foreignColumns: [titles.authorId, titles.id]
+		}).onDelete('cascade'),
+		uniqueIndex('campaigns_external_id_idx')
+			.on(t.authorId, t.channelSlug, t.marketplace, t.externalId)
+			.where(sql`${t.externalId} is not null`),
+		check('campaigns_marketplace_code', sql`${t.marketplace} ~ '^[A-Z]{2}$'`),
+		check('campaigns_currency_code', sql`${t.currency} ~ '^[A-Z]{3}$'`),
+		check('campaigns_budget_positive', sql`${t.dailyBudgetMinor} > 0`),
+		check('campaigns_dates_order', sql`${t.endedAt} >= ${t.startedAt}`)
+	]
+);
+
+/**
+ * The engine's verdict on a campaign, with the rule and inputs that produced it: the
+ * traceability record for C5. Complete without narration, which is optional enrichment
+ * added later by the AI layer (M3).
+ */
+export const campaignReviews = pgTable(
+	'campaign_reviews',
+	{
+		id: uuid('id')
+			.primaryKey()
+			.default(sql`uuidv7()`),
+		authorId: authorId(),
+		campaignId: uuid('campaign_id').notNull(),
+		evaluatedAt: timestamp('evaluated_at', { withTimezone: true }).notNull().defaultNow(),
+		verdict: campaignVerdict('verdict').notNull(),
+		/** The rule pack rule and its version, such as ad.kill.underperforming v1. */
+		ruleId: varchar('rule_id', { length: 120 }).notNull(),
+		ruleVersion: integer('rule_version').notNull(),
+		/** Every input, derived value, and threshold the engine used. */
+		inputs: jsonb('inputs').notNull(),
+		/** The rule's filled-in explain template: the narration when AI is off. */
+		explanation: varchar('explanation', { length: 1000 }).notNull(),
+		narration: varchar('narration', { length: 2000 }),
+		narrationModel: varchar('narration_model', { length: 80 })
+	},
+	(t) => [
+		tenantPolicy(),
+		foreignKey({
+			name: 'campaign_reviews_campaign_fk',
+			columns: [t.authorId, t.campaignId],
+			foreignColumns: [campaigns.authorId, campaigns.id]
+		}).onDelete('cascade'),
+		check(
+			'campaign_reviews_narration_has_model',
+			sql`(${t.narration} is null) = (${t.narrationModel} is null)`
+		)
 	]
 );
