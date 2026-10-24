@@ -1,0 +1,19 @@
+# Not enough data yet to judge. A real verdict, not silence: the author needs to know a
+# campaign isn't judgeable yet, and what it still needs.
+id: ad.too_young
+applies_to: campaign
+version: 1
+as_of: 2026-10-24
+priority: 10
+requires: [ad_spend_minor, ad_sales_minor, days_live]
+thresholds:
+  min_days: { config: min_ad_eval_days, default: 30 }
+  min_spend_minor: { config: min_ad_eval_spend_minor, default: 5000 }
+when:
+  any:
+    - [days_live, lt, min_days]
+    - [ad_spend_minor, lt, min_spend_minor]
+verdict: too_young
+explain: >
+  Too early to judge: {days_live} days and {ad_spend_minor} spent so far. Give it at
+  least {min_days} days and {min_spend_minor} before deciding.

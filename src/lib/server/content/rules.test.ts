@@ -8,6 +8,7 @@ id: ad.kill.test
 applies_to: campaign
 version: 1
 as_of: 2026-10-01
+priority: 1
 requires: [ad_spend_minor, ad_sales_minor, days_live]
 derive:
   acos: { ratio: [ad_spend_minor, ad_sales_minor], format: percent }

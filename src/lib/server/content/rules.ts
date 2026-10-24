@@ -49,6 +49,8 @@ const Rule = z.strictObject({
 			z.strictObject({
 				config: z.enum(NUMERIC_PREFERENCES as [PreferenceKey, ...PreferenceKey[]]).optional(),
 				default: z.number(),
+				/** A multiple of the setting, such as 2 for "double your target ACOS". */
+				times: z.number().positive().optional(),
 				format: z.enum(VALUE_FORMATS).optional()
 			})
 		)
@@ -56,8 +58,12 @@ const Rule = z.strictObject({
 	/** The verdict applies when every (`all`) or any (`any`) comparison holds. */
 	when: z.union([
 		z.strictObject({ all: z.array(Comparison).min(1) }),
-		z.strictObject({ any: z.array(Comparison).min(1) })
+		z.strictObject({ any: z.array(Comparison).min(1) }),
+		/** A catch-all, such as "keep" when nothing else applies. */
+		z.strictObject({ always: z.literal(true) })
 	]),
+	/** Rules for the same subject are tried in priority order, lowest first; the first that applies wins. */
+	priority: z.int().min(0),
 	/** One of the campaign verdicts in spec §5, stored on campaign_reviews. */
 	verdict: z.enum(CAMPAIGN_VERDICTS),
 	/** Plain-language template with {name} placeholders. The fallback when AI is off. */
@@ -101,7 +107,7 @@ function crossCheck(rule: RuleDef): string[] {
 	for (const k of Object.keys(rule.thresholds)) {
 		if (inputs.has(k)) problems.push(`"${k}" is declared twice`);
 	}
-	const comparisons = 'all' in rule.when ? rule.when.all : rule.when.any;
+	const comparisons = 'all' in rule.when ? rule.when.all : 'any' in rule.when ? rule.when.any : [];
 	for (const [left, , right] of comparisons) {
 		for (const operand of [left, right]) {
 			if (typeof operand === 'string' && !known.has(operand)) {

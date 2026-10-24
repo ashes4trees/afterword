@@ -17,7 +17,7 @@ export function resolveThresholds(
 	return Object.fromEntries(
 		Object.entries(rule.thresholds).map(([key, t]) => {
 			const own = t.config ? stored[t.config] : undefined;
-			return [key, typeof own === 'number' ? own : t.default];
+			return [key, (typeof own === 'number' ? own : t.default) * (t.times ?? 1)];
 		})
 	);
 }
@@ -89,7 +89,12 @@ export function evaluateRule(
 	const value = (operand: string | number) =>
 		typeof operand === 'number' ? operand : (values[operand] ?? null);
 	const holds = (c: [string, Operator, string | number]) => compare(value(c[0]), c[1], value(c[2]));
-	const applies = 'all' in rule.when ? rule.when.all.every(holds) : rule.when.any.some(holds);
+	const applies =
+		'all' in rule.when
+			? rule.when.all.every(holds)
+			: 'any' in rule.when
+				? rule.when.any.some(holds)
+				: true;
 	const explanation = rule.explain
 		.trim()
 		.replace(/\s+/g, ' ')

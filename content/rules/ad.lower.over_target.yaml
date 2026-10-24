@@ -1,0 +1,18 @@
+# A little over target: trim bids or budget rather than stopping.
+id: ad.lower.over_target
+applies_to: campaign
+version: 1
+as_of: 2026-10-24
+priority: 40
+requires: [ad_spend_minor, ad_sales_minor, days_live]
+derive:
+  acos: { ratio: [ad_spend_minor, ad_sales_minor], format: percent }
+thresholds:
+  acos_ceiling: { config: target_acos, default: 0.7, format: percent }
+when:
+  all:
+    - [acos, gt, acos_ceiling]
+verdict: lower
+explain: >
+  Consider lowering bids a little. ACOS {acos} is just over your {acos_ceiling} target
+  after {days_live} days.

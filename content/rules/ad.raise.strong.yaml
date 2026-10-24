@@ -1,0 +1,19 @@
+# Far under target: it's earning well and may be held back by its budget.
+id: ad.raise.strong
+applies_to: campaign
+version: 1
+as_of: 2026-10-24
+priority: 50
+requires: [ad_spend_minor, ad_sales_minor, days_live]
+derive:
+  acos: { ratio: [ad_spend_minor, ad_sales_minor], format: percent }
+thresholds:
+  acos_ceiling: { config: target_acos, default: 0.7, format: percent }
+  raise_acos: { config: target_acos, default: 0.7, times: 0.5, format: percent }
+when:
+  all:
+    - [acos, lt, raise_acos]
+verdict: raise
+explain: >
+  Consider raising the budget. ACOS {acos} is well under your {acos_ceiling} target,
+  with {ad_sales_minor} in sales from {ad_spend_minor} spent.
