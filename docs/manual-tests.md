@@ -58,6 +58,7 @@ From Listings, click a cell, then "Edit price, store ID, and more →" at the bo
 - [ ] On IngramSpark, the discount and returns steps say "Waiting on: an ISBN" until a store ID is saved. Steps say "Waiting on: a release date" until the book has one
 - [ ] A marketplace tab shows the same steps, ticked the same way
 - [ ] "Advice" opens each step's walkthrough and pitfalls. Keywords offers Publisher Rocket as a popular option
+- [ ] Direct sales · Ebook shows "Setting up on Direct sales" with seven steps (KDP Select check, storefront, wallet payments, delivery, a how-to-read page, VAT, and a test purchase), and the KDP Select warning sits beside Price
 
 ---
 

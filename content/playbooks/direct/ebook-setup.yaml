@@ -1,0 +1,127 @@
+# Selling the ebook direct (#103). Checked against the live pages on 2026-10-24.
+# Written in the brand voice (CLAUDE.md): suggestions, no source attributions in the
+# text. Each step names its source in a comment. Research notes, for us only:
+# - Payhip pricing page: Free Forever $0/mo + 5% per sale, Plus $29/mo + 2%, Pro $99/mo
+#   + 0%; Stripe and PayPal fees on top. "Payhip automatically collects, reports and
+#   remits digital EU/UK VAT as well as US/Canadian sales tax on your behalf." It
+#   doesn't mention Apple Pay or Google Pay, so wallet advice stays general.
+#   payhip.com answers scripted curl with 403 but loads in a browser and via fetch.
+# - BookFunnel pricing (after the Feb 2026 change): Direct Sales Delivery is on the
+#   Mid-List ($200/yr) and Bestseller ($300/yr) plans, not First-Time Author. It
+#   integrates with Payhip, Shopify, WooCommerce, Gumroad, Square, Stripe, and more,
+#   emails a unique download link (14 days), and its support helps readers.
+# - Shopify: Shop Pay is part of Shopify Payments and is activated by the merchant.
+#   Shopify only collects VAT in countries where the merchant is registered.
+# - KDP Select: the ebook "can only be distributed through KDP and public libraries"
+#   during enrollment. Recheck fees at every review and bump version.
+pack: ebook-setup
+channel: direct
+title: Selling your ebook direct
+version: 1
+as_of: 2026-10-24
+sources:
+  - url: https://payhip.com/pricing
+    title: Payhip, Pricing
+  - url: https://payhip.com/blog/meet-your-new-payhip-store/
+    title: Payhip, Meet Your New Payhip Store
+  - url: https://bookfunnel.com/pricing/
+    title: BookFunnel, Pricing
+  - url: https://authors.bookfunnel.com/help/delivery-actions/
+    title: BookFunnel Help, Deliver Ebook and Audiobook Sales
+  - url: https://authors.bookfunnel.com/help/the-bookfunnel-app
+    title: BookFunnel Help, The BookFunnel App
+  - url: https://help.shopify.com/en/manual/payments/shop-pay
+    title: Shopify Help, Shop Pay
+  - url: https://help.shopify.com/en/manual/taxes/eu/eu-tax-reference
+    title: Shopify Help, EU Tax Reference
+  - url: https://kdp.amazon.com/help/topic/GD9PMU58BV24QFZ7
+    title: KDP Help, KDP Select Enrollment
+steps:
+  # Source: https://kdp.amazon.com/help/topic/GD9PMU58BV24QFZ7
+  - id: check-select
+    label: Make sure the ebook isn't in KDP Select
+    formats: [ebook]
+    fields: [price_minor, currency]
+    detail: >
+      Selling direct and KDP Select don't mix for the same ebook. If it's enrolled, turn off
+      auto-renew and plan your direct launch for the day after the term ends. Paperbacks
+      and audiobooks can be sold direct either way.
+    gotchas:
+      - Enrolled in KDP Select? You can't sell this ebook direct while the enrollment lasts.
+
+  # Sources: https://payhip.com/pricing, https://help.shopify.com/en/manual/payments/shop-pay
+  - id: storefront
+    label: Choose a storefront
+    formats: [ebook]
+    detail: >
+      Consider a storefront built for digital books, so readers can buy in a couple of
+      taps. Payhip is the quickest start: free to open, and it takes about 5% of each sale
+      until a paid plan makes sense. Shopify costs a monthly fee but grows with you if you
+      sell signed paperbacks or merch too. Either way, card fees come on top.
+    links:
+      - { label: Payhip, url: https://payhip.com }
+      - { label: Shopify, url: https://www.shopify.com }
+
+  # Sources: https://help.shopify.com/en/manual/payments/shop-pay, https://payhip.com/pricing
+  - id: wallet-payments
+    label: Turn on wallet payments
+    formats: [ebook]
+    detail: >
+      Consider turning on Apple Pay, Google Pay, or Shop Pay wherever your storefront and
+      payment provider offer them. A reader can then pay with a tap, with no new account and
+      no card number to type. That's often the difference between a sale and a reader who
+      gives up and buys on Amazon.
+    gotchas:
+      - On Shopify, Shop Pay has to be switched on in your payment settings before readers
+        see it.
+
+  # Sources: https://authors.bookfunnel.com/help/delivery-actions/,
+  # https://authors.bookfunnel.com/help/the-bookfunnel-app, https://bookfunnel.com/pricing/
+  - id: delivery
+    label: Choose how the ebook reaches readers
+    formats: [ebook]
+    detail: >
+      Consider a delivery service that gets the book onto whatever the reader uses, from a
+      Kindle or Kobo to a phone app, and answers their "how do I open this?" questions for
+      you. BookFunnel connects to Payhip, Shopify, and most other storefronts, and emails
+      each buyer their own download link. Its plans with sales delivery cost about $200 a
+      year.
+    gotchas:
+      - Delivery isn't on BookFunnel's cheapest plan. Check that yours includes sales
+        delivery before you connect your store.
+      - Download links expire after 14 days, so remind readers to grab the book soon.
+    links:
+      - { label: BookFunnel, url: https://bookfunnel.com }
+
+  # Source: https://authors.bookfunnel.com/help/the-bookfunnel-app
+  - id: how-to-read
+    label: Add a "how to read this" page
+    formats: [ebook]
+    detail: >
+      Consider a short page on your site, linked from the receipt, that shows how to get the
+      ebook onto a Kindle, a Kobo, and a phone. Most readers who've only bought on Amazon have
+      never moved a file to their device, and a clear page saves them the worry and you the
+      emails.
+
+  # Sources: https://payhip.com/pricing, https://help.shopify.com/en/manual/taxes/eu/eu-tax-reference
+  - id: tax
+    label: Sort out VAT and sales tax
+    formats: [ebook]
+    detail: >
+      Ebook sales to readers in the EU and UK carry VAT at the reader's own country's rate,
+      and some US states and Canadian provinces charge sales tax on digital books. Payhip
+      collects and pays these for you. On Shopify, it only collects tax where you've
+      registered, so registering and filing is your job.
+    gotchas:
+      - Selling to EU readers without the right VAT set up can mean back taxes and penalties
+        later. Check before your first sale, not after.
+
+  # Source: https://authors.bookfunnel.com/help/delivery-actions/
+  - id: test-purchase
+    label: Buy it yourself on a phone
+    formats: [ebook]
+    preconditions: [storefront, delivery]
+    detail: >
+      Before launch, buy the ebook on your phone, the way a reader would: tap through the
+      checkout, open the receipt, follow the download link, and get it into a reading app.
+      Anything confusing for you will be confusing for them. Refund yourself afterwards.
