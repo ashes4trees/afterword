@@ -118,6 +118,44 @@ describe('syncTasks', () => {
 		expect(second).toEqual({ create: [], update: [], remove: [] });
 	});
 
+	it('skips key dates already past when the book was added, but not plain steps', () => {
+		const launchOnly = plannedTasks(
+			{ releaseDate: '2027-02-07', formats: ['ebook'] },
+			[],
+			[launch]
+		);
+		const late = syncTasks(launchOnly, [], '2026-12-20');
+		expect(late.create.map((t) => [t.stepId, t.dueOn, t.passedOnAdd])).toEqual([
+			['arc-recruit', '2026-11-09', false],
+			['cover-reveal', '2026-12-09', true],
+			['reviews', null, false]
+		]);
+		expect(syncTasks(launchOnly, [], '2026-12-01').create.every((t) => !t.passedOnAdd)).toBe(true);
+	});
+
+	it('skips a key date whose first date is already past the day the book was added', () => {
+		const undated = plannedTasks({ releaseDate: null, formats: ['ebook'] }, [], [launch]);
+		const dated = plannedTasks({ releaseDate: '2027-02-07', formats: ['ebook'] }, [], [launch]);
+		const { update } = syncTasks(
+			dated,
+			undated.map((p) => stored(p)),
+			'2026-12-20'
+		);
+		expect(update.find((u) => u.id.startsWith('cover-reveal'))).toMatchObject({
+			dueOn: '2026-12-09',
+			passedOnAdd: true
+		});
+		expect(update.find((u) => u.id.startsWith('arc-recruit'))).not.toHaveProperty('passedOnAdd');
+		// A date that moves into the past later is just overdue, not skipped.
+		const moved = plannedTasks({ releaseDate: '2027-01-07', formats: ['ebook'] }, [], [launch]);
+		const again = syncTasks(
+			moved,
+			dated.map((p) => stored(p, { dueOn: p.dueOn })),
+			'2026-12-20'
+		);
+		expect(again.update.some((u) => u.passedOnAdd)).toBe(false);
+	});
+
 	it('moves open tasks when the release date moves, but not pinned dates', () => {
 		const moved = plannedTasks({ releaseDate: '2027-03-07', formats: ['ebook'] }, [], [launch]);
 		const existing = plan

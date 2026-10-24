@@ -130,6 +130,7 @@ Open a book, then the **Launch timeline** tab, and scroll to **Ideas**.
 Open a book, then the **Launch timeline** tab.
 
 - [ ] A book with a release date shows 11 dated steps counting back from it, with a "Key date" label on the big moments. Steps already in the past are outlined in amber as overdue
+- [ ] Add a book releasing in a week or two: key dates that had already passed show as "Skipped: this date had passed when you added the book", and stay out of Coming up. "Bring back" puts one back as overdue. Plain steps that have passed still show as overdue
 - [ ] A book without a release date shows the steps undated, with a link to add a release date
 - [ ] Ticking a step marks it done and strikes it through. Ticking again undoes it. A step waiting on it ("Waiting on: …") stops waiting
 - [ ] "Skip for this book" greys a step out, and "Bring back" restores it

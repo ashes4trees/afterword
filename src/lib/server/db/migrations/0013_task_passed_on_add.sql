@@ -1,0 +1,1 @@
+ALTER TABLE "tasks" ADD COLUMN "passed_on_add" boolean DEFAULT false NOT NULL;
