@@ -96,6 +96,20 @@ At http://localhost:5173/books/new
 
 ---
 
+## Select or wide (#25)
+
+Open a book, then its **Select or wide** tab.
+
+- [ ] Three options side by side, KDP Select, Wide, and Wide + your own store, each with a monthly figure and "How this adds up" showing the arithmetic
+- [ ] With no sales history, a note says everything starts at zero. Enter your Amazon sales, pages read, and what other stores might earn, then Update: the figures follow, and the address keeps your numbers
+- [ ] Every assumption is listed with where it came from (your history, a default, or you set this). The editable ones have an input, and "Back to your numbers" clears your changes
+- [ ] "Highest on these numbers" marks the top option only when there's a clear winner
+- [ ] Enrolled in KDP Select on the ebook listing? A note shows when the term ends, and the wide options say "From" the day after
+- [ ] "Choose this" (with an optional reason) logs a decision in the book's Decisions tab with the figures and assumptions behind it. Choosing Select keeps the term end date as the commitment
+- [ ] Bad input like "cheap" for the KU rate shows a plain message and doesn't change the figures
+
+---
+
 ## Ads (#122)
 
 From **Ads** in the sidebar.

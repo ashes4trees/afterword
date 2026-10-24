@@ -13,6 +13,11 @@
 			label: 'Launch timeline'
 		},
 		{
+			route: '/books/[id]/select-or-wide',
+			href: resolve('/books/[id]/select-or-wide', { id }),
+			label: 'Select or wide'
+		},
+		{
 			route: '/books/[id]/decisions',
 			href: resolve('/books/[id]/decisions', { id }),
 			label: 'Decisions'

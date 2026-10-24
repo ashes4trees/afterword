@@ -72,11 +72,13 @@ describe('modelExclusivity', () => {
 		expect(byKey.kenp_rate!.value).toContain('one blended rate for USD');
 		expect(byKey.wide_monthly!.value).toBe('$0.00 a month (no history, so likely understated)');
 		expect(byKey.ad_spend).toMatchObject({ value: '$60.00 a month', editable: false });
-		expect(byKey.amazon_sales!.value).toBe('$300.00 a month');
+		expect(byKey.amazon_sales).toMatchObject({ value: '$300.00 a month', basis: 'history' });
+		expect(byKey.kenp_pages!.value).toBe('100,000 a month');
 		expect(Object.keys(byKey)).toEqual([
 			'period',
 			'kenp_rate',
 			'amazon_sales',
+			'kenp_pages',
 			'ku_readers_who_buy',
 			'wide_monthly',
 			'direct_monthly',
@@ -113,5 +115,16 @@ describe('modelExclusivity', () => {
 			kuReadersWhoBuy: { value: 0, basis: 'author' }
 		});
 		expect(monthly(m)).toEqual({ select: 70000, wide: 30000, wide_direct: 30000 });
+	});
+
+	it("uses the author's own sales and pages for a book with no history yet", () => {
+		const m = modelExclusivity({
+			...base,
+			history: [],
+			estimates: { amazonMinor: 20000, kenpPages: 50000 }
+		});
+		// Select: $200 + 50k pages at 0.45¢ ($225). Wide: $200 + 10% of $225.
+		expect(monthly(m)).toEqual({ select: 42500, wide: 22250, wide_direct: 22250 });
+		expect(m.assumptions.find((a) => a.key === 'kenp_pages')).toMatchObject({ basis: 'author' });
 	});
 });

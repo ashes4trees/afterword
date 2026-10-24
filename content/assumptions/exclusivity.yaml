@@ -1,0 +1,20 @@
+# Defaults for the Select vs wide comparison (#24, #25). Every one is shown to the author
+# as an assumption they can change. Research notes, for us only:
+# - Amazon publishes the KDP Select Global Fund each month, not a per-page rate. Trackers
+#   put the 2026 US per-page rate between about $0.0042 and $0.0050 (May 2026 ~$0.0049,
+#   January ~$0.0042), with a 12-month average near $0.0045. Rates differ by marketplace,
+#   so only USD has a default; other currencies ask the author for theirs.
+# - Nobody publishes how many KU readers would buy a book that leaves KU. 0% is the
+#   cautious default, stated plainly, for the author to change.
+version: 1
+as_of: 2026-10-24
+sources:
+  - url: https://www.kenpiq.com/kenp
+    title: Kenpiq, KENP rate history
+  - url: https://wroteabook.org/kindle-unlimited-payouts-2026/
+    title: Kindle Unlimited payouts 2026
+history_months: 3
+# Minor units per page read, by currency.
+kenp_rate_per_page_minor:
+  USD: 0.45
+ku_readers_who_buy: 0
