@@ -4,6 +4,10 @@ import { resolve } from '$app/paths';
 import { requireAuthor } from '$lib/server/auth';
 import { db } from '$lib/server/db/client';
 import { deleteAccount } from '$lib/server/services/account';
+import { adSettings, saveAdSettings } from '$lib/server/services/ads';
+import { adSettingsSchema } from '$lib/shared/adForms';
+import { fromMinor } from '$lib/shared/money';
+import { DEFAULT_PREFERENCES } from '$lib/shared/preferences';
 import { newBookStoreOptions, setDefaultStores } from '$lib/server/services/books';
 import { getReminderSettings, saveReminderSettings } from '$lib/server/services/reminders';
 import { CHANNELS } from '$lib/shared/channels';
@@ -14,8 +18,22 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ locals }) => {
 	const author = requireAuthor(locals);
 	const { defaults } = await newBookStoreOptions(db, author);
+	const ads = await adSettings(db, author);
 	return {
 		email: author.email,
+		ads: {
+			currency: ads.currency,
+			values: {
+				targetAcos: ads.targetAcos === null ? '' : String(Math.round(ads.targetAcos * 1000) / 10),
+				evalDays: ads.evalDays === null ? '' : String(ads.evalDays),
+				evalSpend: ads.evalSpendMinor === null ? '' : fromMinor(ads.evalSpendMinor, ads.currency)
+			},
+			defaults: {
+				targetAcos: String(DEFAULT_PREFERENCES.target_acos * 100),
+				evalDays: String(DEFAULT_PREFERENCES.min_ad_eval_days),
+				evalSpend: fromMinor(DEFAULT_PREFERENCES.min_ad_eval_spend_minor, ads.currency)
+			}
+		},
 		reminders: await getReminderSettings(db, author),
 		defaultStores:
 			defaults && CHANNELS.filter((c) => defaults.includes(c.slug)).map((c) => c.displayName)
@@ -25,6 +43,18 @@ export const load: PageServerLoad = async ({ locals }) => {
 const days = (values: FormDataEntryValue[]) => values.map((v) => Number(v));
 
 export const actions: Actions = {
+	/** Target ACOS and when to judge a campaign (#126). Blank fields use the defaults. */
+	ads: async ({ request, locals }) => {
+		const author = requireAuthor(locals);
+		const values = Object.fromEntries(await request.formData()) as Record<string, string>;
+		const { currency } = await adSettings(db, author);
+		const parsed = adSettingsSchema(currency).safeParse(values);
+		if (!parsed.success) {
+			return fail(400, { adsValues: values, adsError: parsed.error.issues[0]!.message });
+		}
+		await saveAdSettings(db, author, parsed.data);
+		return { adsSaved: true };
+	},
 	/** Deletes the account and everything in it, once the author retypes their email (#40). */
 	deleteAccount: async ({ request, locals }) => {
 		const typed = String((await request.formData()).get('confirmEmail') ?? '');

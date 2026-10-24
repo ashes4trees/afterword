@@ -3,7 +3,12 @@ import type { RuleDef } from '$lib/server/content/rules';
 import { withAuthor } from '$lib/server/db/tenant';
 import type { Executor } from '$lib/server/db/types';
 import { reviewCampaign } from '$lib/server/engine/campaigns';
-import { getPreferences, getStoredPreferences, type SessionAuthor } from '$lib/server/repo/authors';
+import {
+	getPreferences,
+	getStoredPreferences,
+	updatePreferences,
+	type SessionAuthor
+} from '$lib/server/repo/authors';
 import * as campaignsRepo from '$lib/server/repo/campaigns';
 import * as importsRepo from '$lib/server/repo/imports';
 import * as works from '$lib/server/repo/works';
@@ -168,4 +173,31 @@ export async function reviewNow(
 		await campaignsRepo.insertReview(tx, author.id, { campaignId, ...review });
 		return review;
 	});
+}
+
+/** Settings → Ads (#126): what the author has set, and their currency for the spend. */
+export async function adSettings(db: Executor, author: SessionAuthor) {
+	const [{ currency }, stored] = await Promise.all([
+		getPreferences(db, author.id),
+		getStoredPreferences(db, author.id)
+	]);
+	return {
+		currency,
+		targetAcos: stored.target_acos ?? null,
+		evalDays: stored.min_ad_eval_days ?? null,
+		evalSpendMinor: stored.min_ad_eval_spend_minor ?? null
+	};
+}
+
+/** Saves the ad thresholds. Null clears one, so the rule's own default applies. */
+export async function saveAdSettings(
+	db: Executor,
+	author: SessionAuthor,
+	patch: {
+		target_acos: number | null;
+		min_ad_eval_days: number | null;
+		min_ad_eval_spend_minor: number | null;
+	}
+) {
+	await updatePreferences(db, author.id, patch);
 }

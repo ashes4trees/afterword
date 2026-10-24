@@ -31,6 +31,8 @@
 			boolean
 		>
 	);
+	const adsValues = $derived(form?.adsValues ?? data.ads.values);
+	const adsField = 'mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2';
 	let formEl: HTMLFormElement | undefined = $state();
 	let saving = $state(false);
 	const unsaved = guardUnsavedChanges(
@@ -136,6 +138,69 @@
 		{saving ? 'Saving…' : 'Save'}
 	</button>
 </form>
+
+<section
+	class="mt-6 max-w-2xl rounded-lg border border-border bg-surface p-5"
+	aria-labelledby="ads-settings"
+>
+	<h2 id="ads-settings" class="font-display text-heading">Ads</h2>
+	<p class="mt-1 text-sm text-fg-muted">
+		What a campaign has to beat, and when it has run long enough to judge. Leave a field blank to
+		use the default.
+	</p>
+	<form
+		method="POST"
+		action="?/ads"
+		class="mt-4 grid gap-4 text-sm sm:grid-cols-3"
+		use:enhance={() =>
+			async ({ update }) =>
+				update({ reset: false })}
+	>
+		<label>
+			<span class="font-medium">Target ACOS (%)</span>
+			<input
+				name="targetAcos"
+				inputmode="decimal"
+				placeholder={data.ads.defaults.targetAcos}
+				defaultValue={adsValues.targetAcos}
+				class={adsField}
+			/>
+			<span class="mt-1 block text-xs text-fg-muted"
+				>Over 100% is fine if KU read-through pays for it.</span
+			>
+		</label>
+		<label>
+			<span class="font-medium">Judge after (days)</span>
+			<input
+				name="evalDays"
+				inputmode="numeric"
+				placeholder={data.ads.defaults.evalDays}
+				defaultValue={adsValues.evalDays}
+				class={adsField}
+			/>
+		</label>
+		<label>
+			<span class="font-medium">…and spending ({data.ads.currency})</span>
+			<input
+				name="evalSpend"
+				inputmode="decimal"
+				placeholder={data.ads.defaults.evalSpend}
+				defaultValue={adsValues.evalSpend}
+				class={adsField}
+			/>
+		</label>
+		{#if form?.adsError}
+			<p class="text-danger sm:col-span-3" role="alert">{form.adsError}</p>
+		{:else if form?.adsSaved}
+			<p class="text-ok sm:col-span-3" role="status">Saved.</p>
+		{/if}
+		<div class="sm:col-span-3">
+			<button type="submit" class="rounded-md border border-border px-3 py-1.5 hover:bg-surface-2"
+				>Save</button
+			>
+		</div>
+	</form>
+</section>
 
 <section class="mt-6 max-w-2xl rounded-lg border border-border bg-surface p-5">
 	<h2 class="font-display text-heading">Stores for new books</h2>
