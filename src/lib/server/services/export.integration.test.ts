@@ -10,6 +10,7 @@ import { EMPTY_TITLE_FORM, TitleInputSchema } from '$lib/shared/titles';
 import { createBook } from './books';
 import { exportAccount, exportAccountZip } from './export';
 import { saveListing } from './listings';
+import { addMetricFixtures } from '$lib/server/testing/fixtures';
 import { updatePreferences } from '$lib/server/repo/authors';
 import { addOwnStep, saveMyIdea, setIdeaHidden } from './tasks';
 
@@ -85,6 +86,7 @@ describe.skipIf(!hasDatabase)('full data export (#17)', () => {
 			{ pack: 'title/promo-ideas', stepId: 'mood-board' },
 			true
 		);
+		await addMetricFixtures(app.db, me.id, book);
 		await createBook(
 			app.db,
 			other,
