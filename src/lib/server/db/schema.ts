@@ -5,6 +5,7 @@ import {
 	CAMPAIGN_VERDICTS,
 	TARGETING_KINDS
 } from '$lib/shared/campaigns';
+import { DECISION_KINDS } from '$lib/shared/decisions';
 import { IMPORT_KINDS, IMPORT_STATUSES, METRICS } from '$lib/shared/observations';
 import {
 	bigint,
@@ -437,13 +438,7 @@ export const authorIdeas = pgTable(
 
 // ---------------------------------------------------------------- decisions (#12, #26)
 
-export const decisionKind = pgEnum('decision_kind', [
-	'enrollment',
-	'pricing',
-	'distribution',
-	'promo',
-	'ads'
-]);
+export const decisionKind = pgEnum('decision_kind', DECISION_KINDS);
 export const decisionSource = pgEnum('decision_source', ['author', 'engine', 'agent']);
 
 /**

@@ -11,6 +11,11 @@
 			route: '/books/[id]/timeline',
 			href: resolve('/books/[id]/timeline', { id }),
 			label: 'Launch timeline'
+		},
+		{
+			route: '/books/[id]/decisions',
+			href: resolve('/books/[id]/decisions', { id }),
+			label: 'Decisions'
 		}
 	]);
 </script>
