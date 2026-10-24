@@ -4,6 +4,7 @@
 import { withAuthor } from '$lib/server/db/tenant';
 import type { Executor } from '$lib/server/db/types';
 import { insertCampaign, insertReview } from '$lib/server/repo/campaigns';
+import { createImport, finishImport, insertObservations } from '$lib/server/repo/imports';
 
 export async function addMetricFixtures(db: Executor, authorId: string, titleId: string) {
 	await withAuthor(db, authorId, async (tx) => {
@@ -27,5 +28,25 @@ export async function addMetricFixtures(db: Executor, authorId: string, titleId:
 			explanation:
 				'Live 35 days, $120.00 spent, $90.00 attributed, ACOS 133% against your 70% target.'
 		});
+		const report = await createImport(tx, authorId, {
+			channelSlug: 'kdp',
+			kind: 'kdp_report',
+			filename: 'KDP_Royalties_2026-09.xlsx'
+		});
+		await insertObservations(tx, authorId, report, [
+			{
+				titleId,
+				externalId: 'B0FIXTURE1',
+				format: 'ebook',
+				channelSlug: 'kdp',
+				marketplace: 'US',
+				currency: 'USD',
+				metric: 'royalty_minor',
+				value: 4180,
+				periodStart: '2026-09-01',
+				periodEnd: '2026-09-30'
+			}
+		]);
+		await finishImport(tx, authorId, report, { rowCount: 1 });
 	});
 }
