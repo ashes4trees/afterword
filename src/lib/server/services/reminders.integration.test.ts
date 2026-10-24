@@ -2,18 +2,20 @@ import { eq } from 'drizzle-orm';
 import type postgres from 'postgres';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Playbook } from '$lib/server/content/schema';
-import { authors } from '$lib/server/db/schema';
+import { authors, titles } from '$lib/server/db/schema';
 import type { SessionAuthor } from '$lib/server/repo/authors';
 import { connect, connectOwner, hasDatabase, type TestDb } from '$lib/server/testing/db';
+import { addDays } from '$lib/server/engine/tasks';
+import { localToday } from '$lib/shared/bookList';
 import { EMPTY_TITLE_FORM, TitleInputSchema } from '$lib/shared/titles';
-import { createBook } from './books';
+import { createBook, updateBook } from './books';
 import {
 	comingUpFor,
 	getReminderSettings,
 	saveReminderSettings,
 	setHideOverdue
 } from './reminders';
-import { bookTimeline, setTaskDone } from './tasks';
+import { bookTimeline, setTaskDone, setTaskSkipped } from './tasks';
 
 const step = (s: Partial<Playbook['steps'][number]> & { id: string }) => ({
 	label: s.id,
@@ -60,14 +62,18 @@ describe.skipIf(!hasDatabase)('reminders and Coming up', () => {
 			.values({ email: `rem-${tag}@example.test`, displayName: 'R' })
 			.returning({ id: authors.id, email: authors.email, displayName: authors.displayName });
 		me = a!;
-		book = await createBook(
+		// Added on 2026-10-01, before its overdue key date, so that date still applies.
+		const input = { ...EMPTY_TITLE_FORM, workingTitle: 'The Glass Archive' };
+		book = await createBook(app.db, me, TitleInputSchema.parse(input));
+		await owner.db
+			.update(titles)
+			.set({ createdAt: new Date('2026-10-01T12:00:00Z') })
+			.where(eq(titles.id, book));
+		await updateBook(
 			app.db,
 			me,
-			TitleInputSchema.parse({
-				...EMPTY_TITLE_FORM,
-				workingTitle: 'The Glass Archive',
-				releaseDate: '2026-11-11'
-			})
+			book,
+			TitleInputSchema.parse({ ...input, releaseDate: '2026-11-11' })
 		);
 	});
 
@@ -135,5 +141,31 @@ describe.skipIf(!hasDatabase)('reminders and Coming up', () => {
 		await expect(
 			saveReminderSettings(app.db, me, { lead_days: [1, 2, 3, 4, 5, 6], by_kind: {} })
 		).rejects.toThrow();
+	});
+
+	it('skips key dates that had passed when a book was added, until the author brings one back', async () => {
+		// Added today, releasing in a week: last month's key date doesn't apply.
+		const soon = await createBook(
+			app.db,
+			me,
+			TitleInputSchema.parse({
+				...EMPTY_TITLE_FORM,
+				workingTitle: 'The Salt Lantern',
+				releaseDate: addDays(localToday(), 7)
+			})
+		);
+		const timeline = (await bookTimeline(app.db, me, soon, localToday(), packs))!;
+		const overdue = timeline.steps.find((s) => s.label === 'Overdue key date')!;
+		expect(overdue).toMatchObject({ skipped: true, passedOnAdd: true });
+		const coming = await comingUpFor(app.db, me, localToday(), packs);
+		const labels = coming.items.filter((i) => i.subject === 'The Salt Lantern').map((i) => i.label);
+		expect(labels).toContain('Soon key date');
+		expect(labels).not.toContain('Overdue key date');
+
+		await setTaskSkipped(app.db, me, overdue.id, false);
+		const back = (await bookTimeline(app.db, me, soon, localToday(), packs))!.steps.find(
+			(s) => s.id === overdue.id
+		);
+		expect(back).toMatchObject({ skipped: false, passedOnAdd: false });
 	});
 });

@@ -23,6 +23,7 @@ import * as listingsRepo from '$lib/server/repo/listings';
 import * as tasksRepo from '$lib/server/repo/tasks';
 import * as works from '$lib/server/repo/works';
 import type { BookFormat } from '$lib/shared/channels';
+import { localToday } from '$lib/shared/bookList';
 import { daysBetween } from '$lib/shared/dates';
 import {
 	MY_IDEAS_PACK,
@@ -66,9 +67,14 @@ export async function syncTitleTasks(
 			skipped: t.skippedAt !== null
 		}));
 
-	const changes = syncTasks(planned, existing);
+	const changes = syncTasks(planned, existing, localToday(book.createdAt));
 	await tasksRepo.insertPlaybookTasks(tx, authorId, titleId, changes.create);
-	for (const u of changes.update) await tasksRepo.updateTask(tx, authorId, u.id, u);
+	for (const { passedOnAdd, ...u } of changes.update) {
+		await tasksRepo.updateTask(tx, authorId, u.id, {
+			...u,
+			...(passedOnAdd ? { skippedAt: new Date(), passedOnAdd } : {})
+		});
+	}
 	await tasksRepo.deleteTasks(tx, authorId, changes.remove);
 	return changes;
 }
@@ -90,6 +96,8 @@ export type TimelineStep = {
 	duePinned: boolean;
 	done: boolean;
 	skipped: boolean;
+	/** Skipped for the author: a key date already past when the book was added. */
+	passedOnAdd: boolean;
 	/** Labels of unmet preconditions; empty means the step can be done now. */
 	waitingOn: string[];
 };
@@ -216,6 +224,7 @@ export function bookTimeline(
 						duePinned: t.duePinned,
 						done: t.doneAt !== null,
 						skipped: t.skippedAt !== null,
+						passedOnAdd: t.passedOnAdd,
 						waitingOn: unmet.map(
 							(u) => FACT_LABELS[u] ?? found!.pack.steps.find((s) => s.id === u)?.label ?? u
 						),
@@ -482,7 +491,7 @@ export function setTaskDone(db: Executor, author: SessionAuthor, id: string, don
 			tx,
 			author.id,
 			id,
-			done ? { doneAt: new Date(), skippedAt: null } : { doneAt: null }
+			done ? { doneAt: new Date(), skippedAt: null, passedOnAdd: false } : { doneAt: null }
 		)
 	);
 }
@@ -494,7 +503,9 @@ export function setTaskSkipped(db: Executor, author: SessionAuthor, id: string, 
 			tx,
 			author.id,
 			id,
-			skipped ? { skippedAt: new Date(), doneAt: null } : { skippedAt: null }
+			skipped
+				? { skippedAt: new Date(), doneAt: null, passedOnAdd: false }
+				: { skippedAt: null, passedOnAdd: false }
 		)
 	);
 }

@@ -17,9 +17,10 @@ export async function insertPlaybookTasks(
 	tx: Executor,
 	authorId: string,
 	titleId: string,
-	planned: PlannedTask[]
+	planned: (PlannedTask & { passedOnAdd?: boolean })[]
 ) {
 	if (planned.length === 0) return;
+	const now = new Date();
 	await tx.insert(tasks).values(
 		planned.map((p) => ({
 			authorId,
@@ -31,7 +32,8 @@ export async function insertPlaybookTasks(
 			channelSlug: p.channel,
 			format: p.format,
 			label: p.label,
-			dueOn: p.dueOn
+			dueOn: p.dueOn,
+			...(p.passedOnAdd ? { skippedAt: now, passedOnAdd: true } : {})
 		}))
 	);
 }
@@ -43,7 +45,7 @@ export async function updateTask(
 	values: Partial<
 		Pick<
 			typeof tasks.$inferInsert,
-			'label' | 'packVersion' | 'dueOn' | 'duePinned' | 'doneAt' | 'skippedAt'
+			'label' | 'packVersion' | 'dueOn' | 'duePinned' | 'doneAt' | 'skippedAt' | 'passedOnAdd'
 		>
 	>
 ) {

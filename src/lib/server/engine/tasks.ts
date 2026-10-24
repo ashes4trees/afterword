@@ -13,7 +13,13 @@ export type TaskScope = {
 	format: BookFormat | null;
 };
 
-export type PlannedTask = TaskScope & { packVersion: number; label: string; dueOn: string | null };
+export type PlannedTask = TaskScope & {
+	packVersion: number;
+	label: string;
+	dueOn: string | null;
+	/** A key date, worth a reminder. */
+	milestone: boolean;
+};
 
 export type ExistingTask = TaskScope & {
 	id: string;
@@ -70,7 +76,8 @@ export function plannedTasks(
 					channel: null,
 					format: null,
 					label: step.label,
-					dueOn: dueOn(step, book)
+					dueOn: dueOn(step, book),
+					milestone: step.milestone
 				});
 			}
 			continue;
@@ -84,7 +91,8 @@ export function plannedTasks(
 					channel: listing.channel,
 					format: listing.format,
 					label: step.label,
-					dueOn: dueOn(step, book)
+					dueOn: dueOn(step, book),
+					milestone: step.milestone
 				});
 			}
 		}
@@ -93,8 +101,16 @@ export function plannedTasks(
 }
 
 export type TaskChanges = {
-	create: PlannedTask[];
-	update: { id: string; label: string; packVersion: number; dueOn: string | null }[];
+	/** `passedOnAdd`: a key date already past when the book was added, so it starts skipped. */
+	create: (PlannedTask & { passedOnAdd: boolean })[];
+	update: {
+		id: string;
+		label: string;
+		packVersion: number;
+		dueOn: string | null;
+		/** Its first date is already past the day the book was added, so skip it. */
+		passedOnAdd?: true;
+	}[];
 	remove: string[];
 };
 
@@ -103,8 +119,18 @@ export type TaskChanges = {
  * second time. Done and skipped tasks are never changed, removed, or recreated. Open tasks
  * follow the plan's label and date, except a date the author pinned. Open tasks the plan
  * no longer calls for (a removed listing or step) are removed.
+ *
+ * A key date that had already passed on `addedOn` (the day the book was added) doesn't
+ * apply, so it starts skipped. That covers a task created with a past date, and an undated
+ * one getting its first date (a release date set later). The author can bring it back.
  */
-export function syncTasks(planned: PlannedTask[], existing: ExistingTask[]): TaskChanges {
+export function syncTasks(
+	planned: PlannedTask[],
+	existing: ExistingTask[],
+	addedOn: string | null = null
+): TaskChanges {
+	const passed = (plan: PlannedTask, due: string | null) =>
+		plan.milestone && !!due && !!addedOn && due < addedOn;
 	const stored = new Map(existing.map((t) => [scopeKey(t), t]));
 	const wanted = new Set(planned.map(scopeKey));
 	const changes: TaskChanges = { create: [], update: [], remove: [] };
@@ -112,7 +138,7 @@ export function syncTasks(planned: PlannedTask[], existing: ExistingTask[]): Tas
 	for (const plan of planned) {
 		const task = stored.get(scopeKey(plan));
 		if (!task) {
-			changes.create.push(plan);
+			changes.create.push({ ...plan, passedOnAdd: passed(plan, plan.dueOn) });
 			continue;
 		}
 		if (task.done || task.skipped) continue;
@@ -126,7 +152,8 @@ export function syncTasks(planned: PlannedTask[], existing: ExistingTask[]): Tas
 				id: task.id,
 				label: plan.label,
 				packVersion: plan.packVersion,
-				dueOn: nextDue
+				dueOn: nextDue,
+				...(task.dueOn === null && passed(plan, nextDue) ? { passedOnAdd: true as const } : {})
 			});
 		}
 	}

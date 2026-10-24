@@ -331,6 +331,8 @@ export const tasks = pgTable(
 		duePinned: boolean('due_pinned').notNull().default(false),
 		doneAt: timestamp('done_at', { withTimezone: true }),
 		skippedAt: timestamp('skipped_at', { withTimezone: true }),
+		/** Skipped because it was a key date already past when the book was added. */
+		passedOnAdd: boolean('passed_on_add').notNull().default(false),
 		...timestamps
 	},
 	(t) => [

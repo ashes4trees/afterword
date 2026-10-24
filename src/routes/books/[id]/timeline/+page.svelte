@@ -106,7 +106,9 @@
 					</p>
 					<p class="mt-0.5 text-sm text-fg-muted">
 						{#if step.skipped}
-							Skipped for this book
+							{step.passedOnAdd
+								? 'Skipped: this date had passed when you added the book'
+								: 'Skipped for this book'}
 						{:else if step.dueOn}
 							<span class={overdue(step) ? 'font-medium text-warn' : ''}>
 								{formatDate(step.dueOn)} · {overdue(step) ? 'overdue, ' : ''}{dueDistance(
