@@ -2,12 +2,14 @@ import { eq } from 'drizzle-orm';
 import type postgres from 'postgres';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { authors } from '$lib/server/db/schema';
-import { updatePreferences, type SessionAuthor } from '$lib/server/repo/authors';
+import type { SessionAuthor } from '$lib/server/repo/authors';
 import { connect, connectOwner, hasDatabase, type TestDb } from '$lib/server/testing/db';
 import { CampaignInputSchema, resultsSchema } from '$lib/shared/adForms';
 import { EMPTY_TITLE_FORM, TitleInputSchema } from '$lib/shared/titles';
 import {
+	adSettings,
 	adsOverview,
+	saveAdSettings,
 	campaignDetail,
 	deleteCampaign,
 	deleteResults,
@@ -115,10 +117,21 @@ describe.skipIf(!hasDatabase)('Ads page (#122)', () => {
 		expect((await adsOverview(app.db, me))[0]!.verdict).toBe('kill');
 	});
 
-	it("uses the author's own target ACOS when they've set one", async () => {
-		await updatePreferences(app.db, me.id, { target_acos: 3 });
+	it("uses the author's own target ACOS from Settings, and the default again once cleared", async () => {
+		await saveAdSettings(app.db, me, {
+			target_acos: 3,
+			min_ad_eval_days: null,
+			min_ad_eval_spend_minor: null
+		});
+		expect(await adSettings(app.db, me)).toMatchObject({ targetAcos: 3, evalDays: null });
 		expect((await reviewNow(app.db, me, campaign, TODAY))!.verdict).toBe('lower');
-		await updatePreferences(app.db, me.id, { target_acos: null });
+		await saveAdSettings(app.db, me, {
+			target_acos: null,
+			min_ad_eval_days: null,
+			min_ad_eval_spend_minor: null
+		});
+		expect((await adSettings(app.db, me)).targetAcos).toBeNull();
+		expect((await reviewNow(app.db, me, campaign, TODAY))!.verdict).toBe('kill');
 	});
 
 	it('replaces a period recorded twice, and removes one on request', async () => {

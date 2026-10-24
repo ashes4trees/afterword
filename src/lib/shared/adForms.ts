@@ -82,3 +82,40 @@ export const resultsSchema = (currency: string) =>
 			};
 		});
 export type ResultsInput = z.output<ReturnType<typeof resultsSchema>>;
+
+/**
+ * Settings → Ads (#126). Each field is optional: blank clears the stored setting so the
+ * rule's own default applies. Target ACOS is a percentage and may exceed 100.
+ */
+export const adSettingsSchema = (currency: string) =>
+	z
+		.object({
+			targetAcos: z.string().trim(),
+			evalDays: z.string().trim(),
+			evalSpend: z.string().trim()
+		})
+		.transform((v, ctx) => {
+			let ok = true;
+			const issue = (path: string, message: string) => {
+				ok = false;
+				ctx.addIssue({ code: 'custom', path: [path], message });
+			};
+			const pct = v.targetAcos ? Number(v.targetAcos.replace(/%$/, '')) : null;
+			if (pct !== null && !(Number.isFinite(pct) && pct > 0 && pct <= 500)) {
+				issue('targetAcos', 'Use a percentage like 70.');
+			}
+			const days = v.evalDays ? Number(v.evalDays) : null;
+			if (days !== null && !(Number.isInteger(days) && days >= 1 && days <= 365)) {
+				issue('evalDays', 'Use whole days, 1 to 365.');
+			}
+			const spend = v.evalSpend ? toMinor(v.evalSpend, currency) : null;
+			if (v.evalSpend && spend === null) {
+				issue('evalSpend', 'Use an amount like 50.00.');
+			}
+			if (!ok) return z.NEVER;
+			return {
+				target_acos: pct === null ? null : Math.round(pct * 10) / 1000,
+				min_ad_eval_days: days,
+				min_ad_eval_spend_minor: spend
+			};
+		});

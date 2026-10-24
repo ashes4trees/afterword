@@ -104,7 +104,7 @@ From **Ads** in the sidebar.
 - [ ] "+ Record results" takes a period, spend, and sales (impressions and clicks optional). "abc" shows "Use an amount like 12.50." Recording the same dates again replaces them, and Remove deletes a period
 - [ ] Review now gives a verdict with plain advice. Early on it's "Too early to judge" and says what it still needs. A campaign with plenty spent and few sales says "Stop"
 - [ ] "The numbers behind it" lists days live, spend, sales, ACOS, your target, and the limits used, with the rule that decided
-- [ ] Change your target ACOS in Settings… (there's no setting for it yet, so this waits for a Settings field) and Review now moves the verdict
+- [ ] In Settings → Ads, set a target ACOS, judge-after days, and spend. "abc" says "Use a percentage like 70." Saving shows "Saved.", and blank fields show the defaults as placeholders. Review now on a campaign then uses your numbers, and clearing them goes back to the defaults
 - [ ] Earlier reviews stay listed below the latest
 - [ ] Ads lists campaigns by book with their latest verdict and explanation
 - [ ] Delete this campaign asks first, then removes it with its results and reviews
