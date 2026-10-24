@@ -11,7 +11,8 @@ const columns = (idea: MyIdeaInput) => ({
 	phase: idea.phase,
 	windowFromDays: idea.window?.from_days ?? null,
 	windowToDays: idea.window?.to_days ?? null,
-	repeatable: idea.repeatable
+	repeatable: idea.repeatable,
+	sharedAt: idea.shared ? new Date() : null
 });
 
 export type MyIdeaRow = MyIdeaInput & { id: string };
@@ -25,7 +26,8 @@ const toIdea = (r: typeof authorIdeas.$inferSelect): MyIdeaRow => ({
 		r.windowFromDays !== null && r.windowToDays !== null
 			? { from_days: r.windowFromDays, to_days: r.windowToDays }
 			: null,
-	repeatable: r.repeatable
+	repeatable: r.repeatable,
+	shared: r.sharedAt !== null
 });
 
 export async function listMyIdeas(tx: Executor, authorId: string) {

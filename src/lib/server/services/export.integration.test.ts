@@ -75,7 +75,8 @@ describe.skipIf(!hasDatabase)('full data export (#17)', () => {
 			note: 'First chapter, = twenty minutes',
 			phase: 'launch',
 			window: { from_days: 0, to_days: 7 },
-			repeatable: true
+			repeatable: true,
+			shared: true
 		});
 		await setIdeaHidden(
 			app.db,

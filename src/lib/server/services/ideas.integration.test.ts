@@ -233,7 +233,8 @@ describe.skipIf(!hasDatabase)('promo ideas on a timeline', () => {
 					note: 'Twenty minutes, first chapter',
 					phase: 'prelaunch',
 					window: { from_days: -28, to_days: -7 },
-					repeatable: true
+					repeatable: true,
+					shared: false
 				})
 			).toBe(true);
 			const [idea] = await mine();
@@ -280,7 +281,8 @@ describe.skipIf(!hasDatabase)('promo ideas on a timeline', () => {
 				note: null,
 				phase: 'launch',
 				window: null,
-				repeatable: false
+				repeatable: false,
+				shared: false
 			});
 			const [edited] = await mine();
 			expect(edited).toMatchObject({ label: 'Live read', detail: null, window: null });
@@ -311,6 +313,29 @@ describe.skipIf(!hasDatabase)('promo ideas on a timeline', () => {
 			t = await myTimeline();
 			expect(t.hiddenIdeas).toEqual([]);
 			expect(t.steps.filter((s) => s.source === 'idea')).toHaveLength(2);
+		});
+
+		it('shares an idea for review, and unshares it', async () => {
+			await saveMyIdea(app.db, me, null, {
+				label: 'Bookmark swap',
+				note: null,
+				phase: 'after',
+				window: null,
+				repeatable: false,
+				shared: true
+			});
+			const idea = (await mine()).find((i) => i.label === 'Bookmark swap')!;
+			expect(idea.mine?.share).toBe('on');
+			await saveMyIdea(app.db, me, idea.stepId, {
+				label: 'Bookmark swap',
+				note: null,
+				phase: 'after',
+				window: null,
+				repeatable: false,
+				shared: false
+			});
+			expect((await mine()).find((i) => i.stepId === idea.stepId)?.mine?.share).toBe('');
+			await deleteMyIdea(app.db, me, idea.stepId);
 		});
 
 		it('saves your own step to My ideas, timed the same distance from release', async () => {

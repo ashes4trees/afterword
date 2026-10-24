@@ -52,7 +52,8 @@ const MY_IDEA_FIELDS = [
 	'fromSide',
 	'toWeeks',
 	'toSide',
-	'repeatable'
+	'repeatable',
+	'share'
 ] as const;
 const myIdeaValues = (f: Record<string, FormDataEntryValue>) =>
 	Object.fromEntries(MY_IDEA_FIELDS.map((k) => [k, String(f[k] ?? '')])) as MyIdeaFormValues;
@@ -115,6 +116,7 @@ export const actions: Actions = {
 					.max(120, 'Keep it under 120 characters.'),
 				dueOn: z.union([z.iso.date(), z.literal('')]),
 				save: z.literal('on').optional(),
+				share: z.literal('on').optional(),
 				phase: z.enum(IDEA_PHASES).default('prelaunch')
 			})
 			.safeParse(await form(request));
@@ -126,7 +128,7 @@ export const actions: Actions = {
 				bookId(params.id),
 				f.data.label,
 				f.data.dueOn || null,
-				f.data.save ? { phase: f.data.phase } : null
+				f.data.save ? { phase: f.data.phase, shared: !!f.data.share } : null
 			))
 		) {
 			return notFound();

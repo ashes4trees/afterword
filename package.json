@@ -20,7 +20,8 @@
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
 		"test:coverage": "vitest run --coverage",
-		"db:setup": "node scripts/db-setup.ts"
+		"db:setup": "node scripts/db-setup.ts",
+		"ideas:shared": "node scripts/shared-ideas.ts"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

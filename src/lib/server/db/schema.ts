@@ -405,6 +405,11 @@ export const authorIdeas = pgTable(
 		windowFromDays: smallint('window_from_days'),
 		windowToDays: smallint('window_to_days'),
 		repeatable: boolean('repeatable').notNull().default(false),
+		/**
+		 * When the author offered it to other authors, or null. The maintainer reviews shared
+		 * ideas (`npm run ideas:shared`) before any reaches the shared ideas pack.
+		 */
+		sharedAt: timestamp('shared_at', { withTimezone: true }),
 		...timestamps
 	},
 	(t) => [

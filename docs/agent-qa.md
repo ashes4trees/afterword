@@ -48,6 +48,15 @@ page, and resize the window.
   than answering prompts one by one.
 - Keep scripts short and return results often. A failed step loses everything the
   script collected.
+- Never use Playwright's `dragTo()`. Native drag and drop stalls it in this headless
+  browser and hangs the tool. Fire the events the page listens for instead:
+
+  ```js
+  const dt = await page.evaluateHandle(() => new DataTransfer());
+  for (const [el, type] of [[source, 'dragstart'], [target, 'dragover'], [target, 'drop'], [source, 'dragend']])
+    await el.dispatchEvent(type, { dataTransfer: dt });
+  ```
+
 - `getByLabel` matches `aria-label` on buttons too (setup steps' "Mark … done"). Prefer
   `input[name=…]` for form fields.
 

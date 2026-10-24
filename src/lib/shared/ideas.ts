@@ -51,6 +51,8 @@ export type MyIdeaFormValues = {
 	toWeeks: string;
 	toSide: string;
 	repeatable: string;
+	/** "on" to offer it to other authors, after the maintainer reviews it. */
+	share: string;
 };
 
 export const EMPTY_MY_IDEA: MyIdeaFormValues = {
@@ -61,7 +63,8 @@ export const EMPTY_MY_IDEA: MyIdeaFormValues = {
 	fromSide: 'before',
 	toWeeks: '',
 	toSide: 'before',
-	repeatable: ''
+	repeatable: '',
+	share: ''
 };
 
 /** Whole weeks, or blank. */
@@ -89,7 +92,11 @@ export const MyIdeaSchema = z
 		fromSide: z.enum(SIDES),
 		toWeeks: weeks,
 		toSide: z.enum(SIDES),
-		repeatable: z.string().transform((v) => v === 'on')
+		repeatable: z.string().transform((v) => v === 'on'),
+		share: z
+			.string()
+			.optional()
+			.transform((v) => v === 'on')
 	})
 	.transform((v, ctx) => {
 		const days = (n: number, side: Side) => (side === 'before' ? -n : n) * 7;
@@ -116,7 +123,14 @@ export const MyIdeaSchema = z
 			});
 			return z.NEVER;
 		}
-		return { label: v.label, note: v.note, phase: v.phase, window, repeatable: v.repeatable };
+		return {
+			label: v.label,
+			note: v.note,
+			phase: v.phase,
+			window,
+			repeatable: v.repeatable,
+			shared: v.share
+		};
 	});
 export type MyIdeaInput = z.output<typeof MyIdeaSchema>;
 
@@ -136,6 +150,7 @@ export function myIdeaFormValues(idea: MyIdeaInput): MyIdeaFormValues {
 		fromSide: from?.side ?? 'before',
 		toWeeks: to?.weeks ?? '',
 		toSide: to?.side ?? 'before',
-		repeatable: idea.repeatable ? 'on' : ''
+		repeatable: idea.repeatable ? 'on' : '',
+		share: idea.shared ? 'on' : ''
 	};
 }
