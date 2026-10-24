@@ -29,7 +29,12 @@ export type ExclusivityInputs = {
 	/** Minor units per page read, in `currency`, with where it came from. */
 	kenpRate: { value: number; basis: AssumptionBasis };
 	/** The author's own monthly estimates, used instead of history when set. */
-	estimates?: { wideMinor?: number; directMinor?: number };
+	estimates?: {
+		amazonMinor?: number;
+		kenpPages?: number;
+		wideMinor?: number;
+		directMinor?: number;
+	};
 	/** Share of KU income that would become ebook sales if the book left Select, 0–1. */
 	kuReadersWhoBuy: { value: number; basis: AssumptionBasis };
 	/** The current Select term, when enrolled. */
@@ -79,8 +84,10 @@ export function modelExclusivity(input: ExclusivityInputs): ExclusivityModel {
 	const monthly = (keep: (r: HistoryRow) => boolean) =>
 		Math.round(rows.filter(keep).reduce((sum, r) => sum + r.value, 0) / months);
 
-	const amazonSales = monthly((r) => r.channel === AMAZON && r.metric === 'royalty_minor');
-	const kenpPages = monthly((r) => r.channel === AMAZON && r.metric === 'kenp_pages');
+	const amazonHistory = monthly((r) => r.channel === AMAZON && r.metric === 'royalty_minor');
+	const pagesHistory = monthly((r) => r.channel === AMAZON && r.metric === 'kenp_pages');
+	const amazonSales = input.estimates?.amazonMinor ?? amazonHistory;
+	const kenpPages = input.estimates?.kenpPages ?? pagesHistory;
 	const ku = Math.round(kenpPages * input.kenpRate.value);
 	const wideHistory = monthly(
 		(r) => r.channel !== AMAZON && r.channel !== DIRECT && r.metric === 'royalty_minor'
@@ -127,16 +134,23 @@ export function modelExclusivity(input: ExclusivityInputs): ExclusivityModel {
 		{
 			key: 'kenp_rate',
 			label: 'KU pays per page read',
-			value: `${input.kenpRate.value.toFixed(2)} minor units (${money(Math.round(input.kenpRate.value * 1000))} per 1,000 pages), one blended rate for ${currency}`,
+			value: `${money(Math.round(input.kenpRate.value * 1000))} per 1,000 pages, one blended rate for ${currency}`,
 			basis: input.kenpRate.basis,
 			editable: true
 		},
 		{
 			key: 'amazon_sales',
-			label: 'Amazon ebook sales stay the same under every option',
+			label: 'Amazon ebook sales, the same under every option',
 			value: `${money(amazonSales)} a month`,
-			basis: 'history',
-			editable: false
+			basis: input.estimates?.amazonMinor !== undefined ? 'author' : 'history',
+			editable: true
+		},
+		{
+			key: 'kenp_pages',
+			label: 'Kindle Unlimited pages read',
+			value: `${kenpPages.toLocaleString('en')} a month`,
+			basis: input.estimates?.kenpPages !== undefined ? 'author' : 'history',
+			editable: true
 		},
 		{
 			key: 'ku_readers_who_buy',

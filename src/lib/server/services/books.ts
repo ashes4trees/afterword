@@ -121,6 +121,11 @@ export async function newBookStoreOptions(db: Executor, author: SessionAuthor) {
 	return { defaults, history: history satisfies StoreHistory };
 }
 
+/** The author's currency, for forms that take amounts. */
+export async function getAuthorCurrency(db: Executor, author: SessionAuthor) {
+	return (await getPreferences(db, author.id)).currency;
+}
+
 /** Sets the stores new books start with, or null to suggest them from past books again. */
 export async function setDefaultStores(
 	db: Executor,
