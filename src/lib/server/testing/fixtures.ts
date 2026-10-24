@@ -4,7 +4,12 @@
 import { withAuthor } from '$lib/server/db/tenant';
 import type { Executor } from '$lib/server/db/types';
 import { insertCampaign, insertReview } from '$lib/server/repo/campaigns';
-import { createImport, finishImport, insertObservations } from '$lib/server/repo/imports';
+import {
+	createImport,
+	finishImport,
+	insertCampaignObservations,
+	insertObservations
+} from '$lib/server/repo/imports';
 
 export async function addMetricFixtures(db: Executor, authorId: string, titleId: string) {
 	await withAuthor(db, authorId, async (tx) => {
@@ -48,5 +53,17 @@ export async function addMetricFixtures(db: Executor, authorId: string, titleId:
 			}
 		]);
 		await finishImport(tx, authorId, report, { rowCount: 1 });
+		await insertCampaignObservations(tx, authorId, campaign, [
+			{
+				titleId,
+				channelSlug: 'kdp',
+				marketplace: 'US',
+				currency: 'USD',
+				metric: 'ad_spend_minor',
+				value: 12000,
+				periodStart: '2026-09-01',
+				periodEnd: '2026-09-30'
+			}
+		]);
 	});
 }

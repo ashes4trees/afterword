@@ -44,6 +44,26 @@ export async function getPreferences(db: Executor, authorId: string): Promise<Pr
 	return resolved(authorId, row.preferences);
 }
 
+/**
+ * Only the preferences the author has set themselves, validated. Rule thresholds use
+ * these, so a setting the author never chose falls back to the rule's own default (#18).
+ */
+export async function getStoredPreferences(
+	db: Executor,
+	authorId: string
+): Promise<Partial<Preferences>> {
+	const [row] = await db
+		.select({ preferences: authors.preferences })
+		.from(authors)
+		.where(eq(authors.id, authorId));
+	if (!row) throw new Error(`author ${authorId} not found`);
+	const raw = row.preferences as Record<string, unknown>;
+	const { preferences, invalid } = resolvePreferences(raw);
+	return Object.fromEntries(
+		Object.entries(preferences).filter(([k]) => k in raw && !invalid.includes(k as PreferenceKey))
+	) as Partial<Preferences>;
+}
+
 /** Whether the author has set a preference themselves, rather than using the default. */
 export async function hasStoredPreference(db: Executor, authorId: string, key: PreferenceKey) {
 	const [row] = await db

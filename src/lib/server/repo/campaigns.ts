@@ -1,5 +1,5 @@
 import { and, desc, eq } from 'drizzle-orm';
-import { campaignReviews, campaigns } from '$lib/server/db/schema';
+import { campaignReviews, campaigns, titles } from '$lib/server/db/schema';
 import type { Executor } from '$lib/server/db/types';
 
 // Ad campaigns and the engine's reviews of them (#19). Call only with a transaction from
@@ -47,4 +47,63 @@ export function listReviews(tx: Executor, authorId: string, campaignId: string) 
 		.from(campaignReviews)
 		.where(and(eq(campaignReviews.authorId, authorId), eq(campaignReviews.campaignId, campaignId)))
 		.orderBy(desc(campaignReviews.evaluatedAt), desc(campaignReviews.id));
+}
+
+/** Campaigns with their book's title and latest review, newest start first. */
+export function listCampaignsWithLatestReview(tx: Executor, authorId: string) {
+	const latest = tx
+		.selectDistinctOn([campaignReviews.campaignId])
+		.from(campaignReviews)
+		.where(eq(campaignReviews.authorId, authorId))
+		.orderBy(
+			campaignReviews.campaignId,
+			desc(campaignReviews.evaluatedAt),
+			desc(campaignReviews.id)
+		)
+		.as('latest');
+	return tx
+		.select({
+			campaign: campaigns,
+			bookTitle: titles.workingTitle,
+			verdict: latest.verdict,
+			explanation: latest.explanation,
+			evaluatedAt: latest.evaluatedAt
+		})
+		.from(campaigns)
+		.innerJoin(titles, eq(titles.id, campaigns.titleId))
+		.leftJoin(latest, eq(latest.campaignId, campaigns.id))
+		.where(eq(campaigns.authorId, authorId))
+		.orderBy(titles.workingTitle, desc(campaigns.startedAt), campaigns.name);
+}
+
+export async function getCampaign(tx: Executor, authorId: string, id: string) {
+	const [row] = await tx
+		.select({ campaign: campaigns, bookTitle: titles.workingTitle })
+		.from(campaigns)
+		.innerJoin(titles, eq(titles.id, campaigns.titleId))
+		.where(and(eq(campaigns.authorId, authorId), eq(campaigns.id, id)));
+	return row;
+}
+
+export async function updateCampaign(
+	tx: Executor,
+	authorId: string,
+	id: string,
+	values: CampaignValues
+) {
+	const rows = await tx
+		.update(campaigns)
+		.set(values)
+		.where(and(eq(campaigns.authorId, authorId), eq(campaigns.id, id)))
+		.returning({ id: campaigns.id });
+	return rows.length > 0;
+}
+
+/** Deletes a campaign with its results and reviews. */
+export async function deleteCampaign(tx: Executor, authorId: string, id: string) {
+	const rows = await tx
+		.delete(campaigns)
+		.where(and(eq(campaigns.authorId, authorId), eq(campaigns.id, id)))
+		.returning({ id: campaigns.id });
+	return rows.length > 0;
 }
