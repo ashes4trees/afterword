@@ -366,7 +366,7 @@ export function addOwnStep(
 	titleId: string,
 	label: string,
 	dueOn: string | null,
-	saveToMyIdeas: { phase: IdeaPhase } | null = null
+	saveToMyIdeas: { phase: IdeaPhase; shared?: boolean } | null = null
 ) {
 	return withAuthor(db, author.id, async (tx) => {
 		const book = await works.getTitle(tx, author.id, titleId);
@@ -380,7 +380,8 @@ export function addOwnStep(
 				note: null,
 				phase: saveToMyIdeas.phase,
 				window: inRange ? { from_days: offset, to_days: offset } : null,
-				repeatable: false
+				repeatable: false,
+				shared: saveToMyIdeas.shared ?? false
 			});
 		}
 		return true;

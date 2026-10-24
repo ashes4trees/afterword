@@ -58,9 +58,9 @@ Issues labeled `constraint` enforce one of these and must ship with a test that 
 
 ## Idea suggestions
 
-Users suggest shared promo ideas through the GitHub issue form (`.github/ISSUE_TEMPLATE/promo-idea.yml`, label `idea-suggestion`, #92). To triage one:
-- Close it if it describes post content rather than a kind of post, or if it's off-topic or a duplicate. Leave a kind note.
-- If it's worth adding, rewrite it in the brand voice, give it a `phase` and a `window` (and `repeatable` if it fits), add it to `content/playbooks/title/promo-ideas.yaml`, bump `version`, and reference the issue in the PR.
+Authors share their own ideas from the app: "Share with other authors" when saving to My ideas, or "and share it" on an own step (#112). That sets `author_ideas.shared_at`. Review them with `npm run ideas:shared` (add `-- --since YYYY-MM-DD` to see only new ones). It's read-only and prints only the idea, never who shared it. The GitHub issue form (`.github/ISSUE_TEMPLATE/promo-idea.yml`, label `idea-suggestion`, #92) still works, but the app no longer links to it. To triage either kind:
+- Pass over it if it describes post content rather than a kind of post, or if it's off-topic or a duplicate. Close GitHub ones with a kind note.
+- If it's worth adding, rewrite it in the brand voice, give it a `phase` and a `window` (and `repeatable` if it fits), add it to `content/playbooks/title/promo-ideas.yaml`, bump `version`, and reference the issue (if any) in the PR.
 - Nothing a user submits reaches the app unreviewed.
 
 ## Brand voice
@@ -94,6 +94,9 @@ Applies to playbook advice and all UI copy (hints, empty states, errors).
 ## Decisions log
 
 Record decisions that aren't in the spec here, newest first, with a date.
+
+- 2026-10-24: Dropdowns share one style in `src/routes/layout.css`: `appearance: none`, a drawn chevron (`--select-arrow`, light and dark), and `field-sizing: content`, so a select without a set width fits its chosen option. A native select was as wide as its longest option, leaving a gap before its arrow. The right padding is `!important` so a component's `px-*` can't run text under the arrow. Browsers without `field-sizing` (older Safari) keep the native width but still get the arrow.
+- 2026-10-24: Timeline calendar (#112): `?view=calendar` on the Launch timeline tab. One row per week from release day (week 0 starts on release day; `src/lib/shared/calendar.ts`). Steps and ideas move by HTML drag and drop, or by a week picker that lists this week onwards. `guessDropDate()` picks the day: an idea's window inside the week, else a step's weekday, else the release weekday, never before today in the current week. A dropped idea waits for the author to confirm its date and repeats. Front end only: it posts to the page's existing `due` and `addIdea` actions. Authors share ideas with a checkbox (`author_ideas.shared_at`, migration 0014). See Idea suggestions.
 
 - 2026-10-24: Key dates already past when a book is added don't apply (owner's call). `syncTasks()` takes the day the book was added (`localToday(createdAt)`) and creates such milestone tasks skipped, with `tasks.passed_on_add` (migration 0013), so the timeline says why and "Bring back" works as for any skip. It also applies when an undated key date gets its first date (a release date set later). A date that moves into the past afterwards is just overdue. Plain steps are never auto-skipped, since most still help late. Existing tasks weren't changed retroactively.
 

@@ -49,7 +49,8 @@ describe('MyIdeaSchema', () => {
 			note: null,
 			phase: 'prelaunch',
 			window: null,
-			repeatable: true
+			repeatable: true,
+			shared: false
 		});
 		expect(MyIdeaSchema.safeParse(form({ note: 'x'.repeat(281) })).success).toBe(false);
 		expect(MyIdeaSchema.safeParse(form({ label: '' })).success).toBe(false);
@@ -64,8 +65,15 @@ describe('MyIdeaSchema', () => {
 		expect(r.error?.issues[0]?.message).toBe(message);
 	});
 
+	it('reads the share checkbox', () => {
+		expect(MyIdeaSchema.parse(form({ share: 'on' })).shared).toBe(true);
+		expect(MyIdeaSchema.parse(form()).shared).toBe(false);
+	});
+
 	it('round-trips through the edit form', () => {
-		const idea = MyIdeaSchema.parse(form({ fromWeeks: '2', toWeeks: '3', toSide: 'after' }));
+		const idea = MyIdeaSchema.parse(
+			form({ fromWeeks: '2', toWeeks: '3', toSide: 'after', share: 'on' })
+		);
 		expect(MyIdeaSchema.parse(myIdeaFormValues(idea))).toEqual(idea);
 	});
 });

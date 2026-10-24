@@ -13,4 +13,30 @@
 	:focus-visible {
 		@apply outline-2 outline-offset-2 outline-accent;
 	}
+
+	/*
+	 * Every dropdown, one look: our own arrow a fixed distance from the right edge, and a
+	 * width that fits the chosen option unless a class sets one. A native select is as
+	 * wide as its longest option, which left a gap between the text and the arrow. The
+	 * right padding is !important so a component's px-* can't slide text under the arrow.
+	 */
+	select {
+		appearance: none;
+		field-sizing: content;
+		background-image: var(--select-arrow);
+		background-repeat: no-repeat;
+		background-position: right 0.5rem center;
+		background-size: 0.875rem;
+		padding-right: 1.75rem !important;
+	}
+
+	:root {
+		--select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%23635e56' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%23a39e96' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+		}
+	}
 }

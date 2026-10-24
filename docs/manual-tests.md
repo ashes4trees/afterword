@@ -76,6 +76,23 @@ At http://localhost:5173/books/new
 
 ---
 
+## Timeline calendar (#112)
+
+Open a book with a release date, then **Launch timeline → Calendar**.
+
+- [ ] One row per week, "N weeks out", "★ Release week", "N weeks after", with dates. "This week" is marked. Empty weeks are slim rows
+- [ ] Drag a step to another week: it moves, keeps its weekday, and the List view shows "date set by you"
+- [ ] Drag an idea from "Ideas to drag in" onto a week: a bar asks to confirm the date (inside the idea's best timing when it overlaps) and, for repeatable ideas, how often. Add puts it on the calendar
+- [ ] "Move" on a step and "Add to a week" on an idea do the same without dragging, offering this week onwards
+- [ ] Done and skipped steps can't be dragged
+- [ ] A book without a release date says the calendar needs one, with a link
+- [ ] On your phone: the tray sits above the weeks, and the pickers work by tapping
+
+**Dropdowns everywhere**
+- [ ] Every dropdown (stage, content ratings, status, currency, returnable, filters, idea timing, how often) has the same arrow, close to its text, in light and dark mode
+
+---
+
 ## My ideas (#91)
 
 Open a book's **Launch timeline** tab and scroll to **Ideas → My ideas**.
@@ -88,6 +105,7 @@ Open a book's **Launch timeline** tab and scroll to **Ideas → My ideas**.
 - [ ] "Delete from My ideas" asks first. Copies already on a timeline stay until you remove them
 - [ ] "+ Add your own step" with "Also save to My ideas" adds the step and saves the idea, timed the same distance from release when the step has a date
 - [ ] A second author (another DEV_AUTHOR_EMAIL) never sees your ideas
+- [ ] "Share with other authors" when saving an idea, or "and share it" on an own step, shows a "Shared" badge. Unticking it on Edit removes the badge. There's no "Suggest it" link any more
 
 ---
 
@@ -106,7 +124,6 @@ Open a book, then the **Launch timeline** tab, and scroll to **Ideas**.
 - [ ] The "Reveal your tropes" idea is a key date: once added, it shows in Coming up when it's near
 - [ ] Unboxing only appears for books with a print format
 - [ ] Moving the release date doesn't move or remove added ideas or your own steps
-- [ ] "Have an idea other authors would love? Suggest it" at the end of Ideas opens GitHub's "Suggest a promo idea" form in a new tab, asking for the idea, when it fits, timing, why it works, and sharing consent
 
 ---
 

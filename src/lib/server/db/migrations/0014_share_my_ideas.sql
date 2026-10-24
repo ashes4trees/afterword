@@ -1,0 +1,1 @@
+ALTER TABLE "author_ideas" ADD COLUMN "shared_at" timestamp with time zone;

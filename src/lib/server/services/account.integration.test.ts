@@ -81,7 +81,8 @@ describe.skipIf(!hasDatabase)('account deletion (#40)', () => {
 				note: null,
 				phase: 'launch',
 				window: null,
-				repeatable: false
+				repeatable: false,
+				shared: false
 			});
 			await setIdeaHidden(
 				app.db,

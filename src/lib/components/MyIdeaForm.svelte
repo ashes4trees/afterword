@@ -97,6 +97,21 @@
 			<span>release</span>
 		</div>
 	</fieldset>
+	<label class="flex items-start gap-2">
+		<input
+			type="checkbox"
+			name="share"
+			checked={values.share === 'on'}
+			aria-describedby="{prefix}-share-hint"
+			class="mt-0.5 size-4 accent-(--color-accent)"
+		/>
+		<span>
+			Share with other authors
+			<span id="{prefix}-share-hint" class="block text-xs text-fg-muted">
+				It's reviewed first, and only the idea goes out, never your name or books.
+			</span>
+		</span>
+	</label>
 	{#if error}<p id="{prefix}-error" class="text-danger" role="alert">{error}</p>{/if}
 	<button type="submit" class="rounded-md border border-border px-3 py-1.5 hover:bg-surface-2">
 		{id ? 'Save changes' : 'Save idea'}
