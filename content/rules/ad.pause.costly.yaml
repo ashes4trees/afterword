@@ -1,0 +1,19 @@
+# Well over target, but not hopeless: pause, fix what's costing money, try again.
+id: ad.pause.costly
+applies_to: campaign
+version: 1
+as_of: 2026-10-24
+priority: 30
+requires: [ad_spend_minor, ad_sales_minor, days_live]
+derive:
+  acos: { ratio: [ad_spend_minor, ad_sales_minor], format: percent }
+thresholds:
+  acos_ceiling: { config: target_acos, default: 0.7, format: percent }
+  pause_acos: { config: target_acos, default: 0.7, times: 1.25, format: percent }
+when:
+  all:
+    - [acos, gt, pause_acos]
+verdict: pause
+explain: >
+  Consider pausing it. ACOS {acos} on {ad_spend_minor} spent is well above your
+  {acos_ceiling} target. Rework the targeting or the book's page, then try again.

@@ -1,0 +1,17 @@
+# Within target: leave it alone.
+id: ad.keep.on_target
+applies_to: campaign
+version: 1
+as_of: 2026-10-24
+priority: 60
+requires: [ad_spend_minor, ad_sales_minor, days_live]
+derive:
+  acos: { ratio: [ad_spend_minor, ad_sales_minor], format: percent }
+thresholds:
+  acos_ceiling: { config: target_acos, default: 0.7, format: percent }
+when:
+  always: true
+verdict: keep
+explain: >
+  Keep it running. ACOS {acos} is within your {acos_ceiling} target after
+  {days_live} days.

@@ -7,27 +7,30 @@ const [rule] = parseRules({ '/content/rules/ad.kill.underperforming.yaml': spec 
 const kill = rule!;
 
 describe('resolveThresholds', () => {
-	it("uses the author's own settings, and the rule's defaults for the rest", () => {
+	it("uses the author's own settings, the rule's defaults for the rest, and multiples", () => {
 		expect(resolveThresholds(kill, {})).toEqual({
 			min_days: 30,
 			min_spend_minor: 5000,
-			acos_ceiling: 0.7
+			acos_ceiling: 0.7,
+			kill_acos: 1.4
 		});
 		expect(resolveThresholds(kill, { target_acos: 1.2, min_ad_eval_days: 14 })).toEqual({
 			min_days: 14,
 			min_spend_minor: 5000,
-			acos_ceiling: 1.2
+			acos_ceiling: 1.2,
+			kill_acos: 2.4
 		});
 	});
 });
 
 describe('evaluateRule', () => {
-	const campaign = { ad_spend_minor: 12000, ad_sales_minor: 9000, days_live: 35 };
+	// $120 spent, $50 in sales: ACOS 240%.
+	const campaign = { ad_spend_minor: 12000, ad_sales_minor: 5000, days_live: 35 };
 
 	it('serves a $5-a-day author and an $80-a-day one with the same rule', () => {
-		const small = { min_ad_eval_spend_minor: 10000, target_acos: 0.7 };
-		const big = { min_ad_eval_spend_minor: 200000, target_acos: 0.7 };
-		// $120 spent at 133% ACOS: enough data for the small budget, not for the big one.
+		const small = { min_ad_eval_spend_minor: 10000 };
+		const big = { min_ad_eval_spend_minor: 200000 };
+		// Enough data for the small budget, not for the big one.
 		expect(evaluateRule(kill, campaign, small, 'USD').applies).toBe(true);
 		expect(evaluateRule(kill, campaign, big, 'USD').applies).toBe(false);
 	});
@@ -40,7 +43,7 @@ describe('evaluateRule', () => {
 			applies: true
 		});
 		expect(result.explanation).toBe(
-			'Live 35 days, $120.00 spent, $90.00 attributed, ACOS 133% against your 70% target.'
+			'Consider stopping it. Live 35 days, $120.00 spent, $50.00 in sales: ACOS 240%, more than double your 70% target.'
 		);
 		expect(evaluateRule(kill, campaign, {}, 'USD')).toEqual(result);
 		expect(evaluateRule(kill, campaign, {}, 'GBP').explanation).toContain('£120.00 spent');
@@ -57,7 +60,7 @@ describe('evaluateRule', () => {
 	it('kills spend with no sales at all, showing ACOS as a dash', () => {
 		const result = evaluateRule(kill, { ...campaign, ad_sales_minor: 0 }, {}, 'USD');
 		expect(result.applies).toBe(true);
-		expect(result.explanation).toContain('ACOS — against');
+		expect(result.explanation).toContain('ACOS —');
 	});
 
 	it('reports missing inputs instead of guessing', () => {
