@@ -1,0 +1,23 @@
+# Spec §6.2's example rule: stop an ad campaign that has had a fair run and still costs
+# more than the author is willing to pay per sale. Every limit comes from the author's own
+# settings when they've chosen one, so the same rule serves $5 a day and $80 a day.
+id: ad.kill.underperforming
+applies_to: campaign
+version: 1
+as_of: 2026-10-24
+requires: [ad_spend_minor, ad_sales_minor, days_live]
+derive:
+  acos: { ratio: [ad_spend_minor, ad_sales_minor], format: percent }
+thresholds:
+  min_days: { config: min_ad_eval_days, default: 30 }
+  min_spend_minor: { config: min_ad_eval_spend_minor, default: 5000 }
+  acos_ceiling: { config: target_acos, default: 0.7, format: percent }
+when:
+  all:
+    - [days_live, gte, min_days]
+    - [ad_spend_minor, gte, min_spend_minor]
+    - [acos, gt, acos_ceiling]
+verdict: kill
+explain: >
+  Live {days_live} days, {ad_spend_minor} spent, {ad_sales_minor} attributed,
+  ACOS {acos} against your {acos_ceiling} target.
