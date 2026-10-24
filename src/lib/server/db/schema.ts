@@ -5,11 +5,14 @@ import {
 	CAMPAIGN_VERDICTS,
 	TARGETING_KINDS
 } from '$lib/shared/campaigns';
+import { IMPORT_KINDS, IMPORT_STATUSES, METRICS } from '$lib/shared/observations';
 import {
+	bigint,
 	boolean,
 	check,
 	date,
 	foreignKey,
+	index,
 	integer,
 	jsonb,
 	numeric,
@@ -566,5 +569,88 @@ export const campaignReviews = pgTable(
 			'campaign_reviews_narration_has_model',
 			sql`(${t.narration} is null) = (${t.narrationModel} is null)`
 		)
+	]
+);
+
+// ---------------------------------------------------------------- observations (#20)
+
+export const importKind = pgEnum('import_kind', IMPORT_KINDS);
+export const importStatus = pgEnum('import_status', IMPORT_STATUSES);
+export const metric = pgEnum('metric', METRICS);
+
+/** One uploaded report file (C3: reports arrive by upload, never by signing in). */
+export const imports = pgTable(
+	'imports',
+	{
+		id: uuid('id')
+			.primaryKey()
+			.default(sql`uuidv7()`),
+		authorId: authorId(),
+		channelSlug: varchar('channel_slug', { length: 40 })
+			.notNull()
+			.references(() => channels.slug),
+		kind: importKind('kind').notNull(),
+		filename: varchar('filename', { length: 255 }).notNull(),
+		rowCount: integer('row_count').notNull().default(0),
+		status: importStatus('status').notNull().default('pending'),
+		error: varchar('error', { length: 2000 }),
+		parsedAt: timestamp('parsed_at', { withTimezone: true }),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(t) => [
+		tenantPolicy(),
+		unique('imports_author_id_id_key').on(t.authorId, t.id),
+		check('imports_failed_has_error', sql`(${t.status} = 'failed') = (${t.error} is not null)`),
+		check('imports_row_count_nonnegative', sql`${t.rowCount} >= 0`)
+	]
+);
+
+/**
+ * One number from a report: a metric for one store, marketplace, and period, in the
+ * currency the report used (never converted). Linked to the book when the report's
+ * identifier matches one, and always to the import it came from.
+ */
+export const observations = pgTable(
+	'observations',
+	{
+		id: uuid('id')
+			.primaryKey()
+			.default(sql`uuidv7()`),
+		authorId: authorId(),
+		importId: uuid('import_id').notNull(),
+		titleId: uuid('title_id'),
+		/** The report's identifier for the book (ASIN, ISBN), kept for matching later. */
+		externalId: varchar('external_id', { length: 64 }),
+		format: bookFormat('format'),
+		channelSlug: varchar('channel_slug', { length: 40 })
+			.notNull()
+			.references(() => channels.slug),
+		marketplace: varchar('marketplace', { length: 2 }).notNull(),
+		currency: varchar('currency', { length: 3 }).notNull(),
+		metric: metric('metric').notNull(),
+		/** A count, or minor units for `*_minor` metrics. Can be negative (refunds). */
+		value: bigint('value', { mode: 'number' }).notNull(),
+		periodStart: date('period_start').notNull(),
+		periodEnd: date('period_end').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(t) => [
+		tenantPolicy(),
+		// Deleting an import removes what it produced, so a report can be re-imported.
+		foreignKey({
+			name: 'observations_import_fk',
+			columns: [t.authorId, t.importId],
+			foreignColumns: [imports.authorId, imports.id]
+		}).onDelete('cascade'),
+		// Optional, so it has its own key (docs/data-conventions.md).
+		foreignKey({
+			name: 'observations_title_fk',
+			columns: [t.authorId, t.titleId],
+			foreignColumns: [titles.authorId, titles.id]
+		}).onDelete('cascade'),
+		index('observations_title_metric_idx').on(t.authorId, t.titleId, t.metric, t.periodStart),
+		check('observations_marketplace_code', sql`${t.marketplace} ~ '^[A-Z]{2}$'`),
+		check('observations_currency_code', sql`${t.currency} ~ '^[A-Z]{3}$'`),
+		check('observations_period_order', sql`${t.periodEnd} >= ${t.periodStart}`)
 	]
 );
