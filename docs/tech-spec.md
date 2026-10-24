@@ -357,8 +357,11 @@ playbooks.
 
 ## 9. Open questions
 
-1. Does the KU-vs-wide model need per-marketplace KENP rates, or is a single blended
-   rate honest enough for v1?
+1. ~~Does the KU-vs-wide model need per-marketplace KENP rates, or is a single blended
+   rate honest enough for v1?~~
+   **Resolved 2026-10-24: one blended rate per currency for v1** (#24), shown as an
+   editable assumption beside the result. History in other currencies is left out, never
+   converted. Revisit per-marketplace rates if the blend proves misleading.
 2. ~~Which second channel for import in M2 — Kobo Writing Life or Draft2Digital?~~
    **Resolved 2026-09-27: Kobo Writing Life.** It is the most common first step going
    wide, so it is the parser most authors will need first. Draft2Digital aggregates more
