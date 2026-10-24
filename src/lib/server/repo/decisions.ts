@@ -1,4 +1,4 @@
-import { and, desc, eq, isNotNull, isNull } from 'drizzle-orm';
+import { and, desc, eq, isNotNull, isNull, or, sql } from 'drizzle-orm';
 import { channelListings, decisions, titles } from '$lib/server/db/schema';
 import type { Executor } from '$lib/server/db/types';
 
@@ -78,6 +78,77 @@ export function listCurrentListingCommitments(tx: Executor, authorId: string) {
 				eq(decisions.subjectType, 'listing'),
 				isNull(decisions.supersededBy),
 				isNotNull(decisions.commitsUntil)
+			)
+		);
+}
+
+/**
+ * The decision log, newest first, with the book each decision is about: directly
+ * (subject 'title') or through a listing (subject 'listing'). Account-wide decisions
+ * (subject 'author') have no book. Optionally for one book.
+ */
+export function listDecisions(tx: Executor, authorId: string, titleId?: string) {
+	const bookId = sql<
+		string | null
+	>`coalesce(${channelListings.titleId}, case when ${decisions.subjectType} = 'title' then ${decisions.subjectId} end)`;
+	return tx
+		.select({
+			id: decisions.id,
+			kind: decisions.kind,
+			choice: decisions.choice,
+			rationale: decisions.rationale,
+			assumptions: decisions.assumptions,
+			commitsUntil: decisions.commitsUntil,
+			source: decisions.source,
+			decidedAt: decisions.decidedAt,
+			supersededBy: decisions.supersededBy,
+			subjectType: decisions.subjectType,
+			titleId: titles.id,
+			bookTitle: titles.workingTitle,
+			channelSlug: channelListings.channelSlug,
+			format: channelListings.format,
+			marketplace: channelListings.marketplace
+		})
+		.from(decisions)
+		.leftJoin(
+			channelListings,
+			and(eq(decisions.subjectType, 'listing'), eq(channelListings.id, decisions.subjectId))
+		)
+		.leftJoin(titles, eq(titles.id, bookId))
+		.where(
+			titleId
+				? and(eq(decisions.authorId, authorId), eq(titles.id, titleId))
+				: and(
+						eq(decisions.authorId, authorId),
+						// Decisions about a deleted listing or book have no subject left to show.
+						or(eq(decisions.subjectType, 'author'), isNotNull(titles.id))
+					)
+		)
+		.orderBy(desc(decisions.decidedAt), desc(decisions.id));
+}
+
+/**
+ * Current decisions about a book or the whole account with a commitment date (#26),
+ * for reminders. Decisions about a deleted book drop out.
+ */
+export function listCurrentOtherCommitments(tx: Executor, authorId: string) {
+	return tx
+		.select({
+			id: decisions.id,
+			choice: decisions.choice,
+			commitsUntil: decisions.commitsUntil,
+			subjectType: decisions.subjectType,
+			titleId: titles.id,
+			bookTitle: titles.workingTitle
+		})
+		.from(decisions)
+		.leftJoin(titles, and(eq(decisions.subjectType, 'title'), eq(titles.id, decisions.subjectId)))
+		.where(
+			and(
+				eq(decisions.authorId, authorId),
+				isNull(decisions.supersededBy),
+				isNotNull(decisions.commitsUntil),
+				or(eq(decisions.subjectType, 'author'), isNotNull(titles.id))
 			)
 		);
 }

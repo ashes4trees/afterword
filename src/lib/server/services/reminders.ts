@@ -61,6 +61,23 @@ async function commitmentItems(tx: Executor, authorId: string) {
 	});
 }
 
+/** Commitments logged by hand on a book or the whole account (#26). */
+async function otherCommitmentItems(tx: Executor, authorId: string) {
+	const rows = await decisionsRepo.listCurrentOtherCommitments(tx, authorId);
+	return rows.map((c) => ({
+		item: {
+			kind: 'commitment' as const,
+			subject: c.bookTitle ?? 'All your books',
+			date: c.commitsUntil!,
+			label: `Commitment ends: ${c.choice}`,
+			key: `decision:${c.id}`
+		} satisfies DatedItem,
+		link: c.titleId
+			? { kind: 'book_decisions' as const, titleId: c.titleId }
+			: { kind: 'decisions' as const }
+	}));
+}
+
 /** What's coming up for this author today, with the book each item belongs to. */
 export async function comingUpFor(
 	db: Executor,
@@ -76,7 +93,8 @@ export async function comingUpFor(
 		}
 		const sources = [
 			...(await keyDateItems(tx, author.id, packs)),
-			...(await commitmentItems(tx, author.id))
+			...(await commitmentItems(tx, author.id)),
+			...(await otherCommitmentItems(tx, author.id))
 		];
 		const linkFor = new Map(sources.map((s) => [s.item.key, s.link]));
 		const all = comingUp(

@@ -60,7 +60,11 @@
 										channel: item.link.channel,
 										format: item.link.format
 									})
-								: resolve('/books/[id]/timeline', { id: item.link.titleId })}
+								: item.link.kind === 'book_decisions'
+									? resolve('/books/[id]/decisions', { id: item.link.titleId })
+									: item.link.kind === 'decisions'
+										? resolve('/decisions')
+										: resolve('/books/[id]/timeline', { id: item.link.titleId })}
 							class="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 hover:bg-surface-2"
 						>
 							<div class="min-w-0 flex-1">

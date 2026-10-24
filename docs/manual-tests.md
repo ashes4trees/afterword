@@ -95,6 +95,19 @@ At http://localhost:5173/books/new
 
 ---
 
+## Decisions (#26)
+
+From **Decisions** in the sidebar, and each book's **Decisions** tab.
+
+- [ ] Enrolling in KDP Select on a listing shows up in the log, with the book, format, store, and "Committed until"
+- [ ] "+ Log a decision" records a choice, a kind, an optional reason, and an optional commitment date, about one book or "All your books"
+- [ ] Logging another decision of the same kind about the same book replaces the old one: it disappears from view, and "Show replaced decisions" brings it back, faded and marked "Replaced by a later decision"
+- [ ] The Kind filter narrows the list
+- [ ] A book's Decisions tab shows only that book's decisions, including its listings'
+- [ ] A commitment date within your reminder window shows in Coming up as "Commitment ends: …", linking back to the log
+
+---
+
 ## Timeline calendar (#112)
 
 Open a book with a release date, then **Launch timeline → Calendar**.
