@@ -4,6 +4,25 @@ Checklists for testing each screen by hand, newest first. Tick items as you go. 
 anything purely visual on the UI polish checklist (#48), and anything broken in a new
 issue or straight to Claude.
 
+## Your to-do list
+
+What still needs you, not an agent. An agent pass (docs/agent-qa.md) has clicked
+through every section below, so these are the things only a person can judge.
+
+- [ ] **Content**: read the launch timeline, the promo ideas, and the KDP and IngramSpark
+      setup steps as an author. Is the advice right, the timing realistic, anything missing?
+      Merge in your own research where it differs
+- [ ] **Phone** (on your home Wi-Fi): start with `npm run dev -- --host`, open the Network
+      address Vite prints, and try the book form with the keyboard open, the date pickers,
+      scrolling Listings, and the timeline calendar (dragging, then the Move and Add to a
+      week buttons). Restart without `--host` when you're done
+- [ ] **Export**: open the CSV zip from Export your data in your own spreadsheet app
+- [ ] **Look and feel**: anything that bugs you goes on #48
+- [ ] **Sign-off**: once you're happy, say so, and the end-to-end tests (#95) get written
+      around what you approved
+
+---
+
 ## Starting the app
 
 ```sh
