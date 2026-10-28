@@ -96,6 +96,20 @@ At http://localhost:5173/books/new
 
 ---
 
+## Reports: KDP import (#21)
+
+From **Reports** in the sidebar.
+
+- [ ] Upload a KDP royalty report (KDP → Reports, as downloaded). It says how many numbers it imported and the dates covered for royalties, units, and KENP pages
+- [ ] Books whose ASIN or ISBN is a Store ID on one of your KDP listings are listed as matched. Others are listed as "Not matched yet". Adding that ID as the listing's Store ID links them
+- [ ] Upload the same report again: the totals don't double. The older upload says "replaced by a newer upload"
+- [ ] Upload a newer report that overlaps: only the overlapping days are replaced
+- [ ] A file that isn't a KDP report (a CSV, a Kobo export, a random spreadsheet) gets a plain message, and nothing is imported
+- [ ] Delete removes an upload and its numbers
+- [ ] Select or wide on a matched book now shows real history
+
+---
+
 ## Select or wide (#25)
 
 Open a book, then its **Select or wide** tab.

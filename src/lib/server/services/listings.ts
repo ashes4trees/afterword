@@ -1,6 +1,7 @@
 import { withAuthor } from '$lib/server/db/tenant';
 import type { Executor } from '$lib/server/db/types';
 import { getPreferences, updatePreferences, type SessionAuthor } from '$lib/server/repo/authors';
+import * as importsRepo from '$lib/server/repo/imports';
 import * as listings from '$lib/server/repo/listings';
 import * as works from '$lib/server/repo/works';
 import { listingSetup, syncTitleTasks } from './tasks';
@@ -180,6 +181,9 @@ export function saveListing(
 				source: 'author'
 			});
 		}
+		// A store ID entered after an import links that import's rows to this book (#21).
+		if (input.externalId)
+			await importsRepo.linkObservations(tx, author.id, titleId, input.externalId.trim());
 		await syncTitleTasks(tx, author.id, titleId);
 		return true;
 	});
